@@ -11,6 +11,9 @@ from logger import logger
 from .utils import get_qos_name, calculate_averages
 from .experiment import Experiment
 
+import warnings
+warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
+
 class Campaign:
     def __init__(self, data_dir, apconf_path):
         self.data_dir       = data_dir
@@ -139,11 +142,13 @@ class Campaign:
             exp = Experiment(exp_name)
             exp.set_pub_file([file for file in csv_files if "pub_0.csv" in file][0])
             exp.set_sub_files([file for file in csv_files if "sub_" in file])
+
             if not exp.validate_files():
                 incomplete_exp_names.append(exp_name)
                 continue
-            exp.parse_sub_files()
+
             exp.parse_pub_file()
+            exp.parse_sub_files()
 
             if exp.get_subs_df() is None:
                 incomplete_exp_names.append(exp_name)
@@ -154,8 +159,8 @@ class Campaign:
                 continue
 
             qos = exp.get_qos()
-            sub_df = exp.get_subs_df()
             pub_df = exp.get_pub_df()
+            sub_df = exp.get_subs_df()
 
             exp_df = pd.concat([sub_df, pub_df], axis=1)
             exp_df['experiment_name'] = exp_name

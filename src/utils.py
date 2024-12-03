@@ -1,5 +1,7 @@
 import pandas as pd
 
+from logger import logger
+
 from rich.pretty import pprint
 
 def get_qos_name(qos_settings):
@@ -54,6 +56,19 @@ def calculate_averages(df):
 
     for metric in metrics:
         metric_cols = [col for col in df_cols if metric in col]
+
+        for col in metric_cols:
+            try:
+                df[col] = df[col].astype(float, errors='ignore')
+            except ValueError as e:
+                logger.error(f"Error converting {col} to float: {e}")
+                continue
+
+        col_dtypes = [str(item) for item in df[metric_cols].dtypes.to_dict().values()]
+        if "object" in col_dtypes:
+            logger.error(f"Skipping {metric} because it contains non-numeric values")
+            continue
+
         df[f"avg_{metric}"] = df[metric_cols].mean(axis=1)
         desired_cols.append(f"avg_{metric}")
 

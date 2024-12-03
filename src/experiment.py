@@ -168,10 +168,12 @@ class Experiment:
 
     def validate_files(self):
         if not self.pub_file:
-            raise Exception("No pub file")
+            logger.warning(f"{self.name}: No pub file")
+            return False
 
         if not self.sub_files:
-            raise Exception("No sub files")
+            logger.warning(f"{self.name}: No sub files")
+            return False
 
         expected_file_count = self.get_expected_file_count()
         is_valid = True
@@ -233,7 +235,7 @@ class Experiment:
                     break
 
             if end_index == 0:
-                logger.warning("Couldn't get end_index for summary row. File writing might have been interrupted.")
+                # logger.warning("Couldn't get end_index for summary row. File writing might have been interrupted.")
                 end_index = line_count - 1
 
             nrows = end_index - start_index
@@ -262,9 +264,20 @@ class Experiment:
                             col_name = "lost_samples_percent"
 
                         subs_df[f"{sub_name}_{col_name}"] = df[col]
-                        subs_df[f"{sub_name}_{col_name}"] = subs_df[
-                            f"{sub_name}_{col_name}"
-                        ].astype(float, errors="ignore")
+                        try:
+                            subs_df[f"{sub_name}_{col_name}"] = subs_df[
+                                f"{sub_name}_{col_name}"
+                            ].astype(float, errors="ignore")
+                        except ValueError as e:
+                            logger.warning(
+                                "Error converting {}_{} to float in {}: {}".format(
+                                    sub_name, 
+                                    col_name, 
+                                    os.path.basename(sub_file), 
+                                    e
+                                )
+                            )
+                            return None
 
         if subs_df.empty:
             logger.warning("Subscriber data is empty")
@@ -377,10 +390,9 @@ class Experiment:
         lat_df = lat_df.apply(lambda x: x.strip() if isinstance(x, str) else x)
 
         # Set the type to float
-        lat_df = pd.to_numeric(lat_df, errors="coerce")
+        lat_df = pd.to_numeric(lat_df, errors="raise")
 
         lat_df = lat_df.rename("latency_us")
         lat_df = lat_df.dropna()
 
         self.pub_df = lat_df
-
