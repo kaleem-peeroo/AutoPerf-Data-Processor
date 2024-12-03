@@ -8,7 +8,7 @@ from rich.pretty import pprint
 from datetime import datetime
 
 from logger import logger
-from .utils import get_qos_name, calculate_averages
+from .utils import get_qos_name, calculate_averages, get_df_from_csv
 from .experiment import Experiment
 
 import warnings
@@ -119,62 +119,71 @@ class Campaign:
             )
 
             exp_name = os.path.basename(exp_dir)
-            
-            exp_df = pd.DataFrame()
+            if exp_name.endswith(".csv"):
+                exp_df = get_df_from_csv(exp_dir)
+            else:
+                exp_df = pd.DataFrame()
 
-            csv_files = [os.path.join(
-                exp_dir, 
-                file
-            ) for file in os.listdir(exp_dir) if file.endswith(".csv")]
+                csv_files = [os.path.join(
+                    exp_dir, 
+                    file
+                ) for file in os.listdir(exp_dir) if file.endswith(".csv")]
 
-            if len(csv_files) == 0:
-                logger.warning(f"No csv files found in {exp_dir}")
-                incomplete_exp_names.append(os.path.basename(exp_dir))
-                continue
+                if len(csv_files) == 0:
+                    logger.warning(f"No csv files found in {exp_dir}")
+                    incomplete_exp_names.append(os.path.basename(exp_dir))
+                    continue
 
-            csv_filenames = [os.path.basename(file) for file in csv_files]
+                csv_filenames = [os.path.basename(file) for file in csv_files]
 
-            if "pub_0.csv" not in csv_filenames:
-                logger.warning(f"pub_0.csv not found in {exp_dir}")
-                incomplete_exp_names.append(os.path.basename(exp_dir))
-                continue
+                if "pub_0.csv" not in csv_filenames:
+                    logger.warning(f"pub_0.csv not found in {exp_dir}")
+                    incomplete_exp_names.append(os.path.basename(exp_dir))
+                    continue
 
-            exp = Experiment(exp_name)
-            exp.set_pub_file([file for file in csv_files if "pub_0.csv" in file][0])
-            exp.set_sub_files([file for file in csv_files if "sub_" in file])
+                exp = Experiment(exp_name)
+                exp.set_pub_file([file for file in csv_files if "pub_0.csv" in file][0])
+                exp.set_sub_files([file for file in csv_files if "sub_" in file])
 
-            if not exp.validate_files():
-                incomplete_exp_names.append(exp_name)
-                continue
+                if not exp.validate_files():
+                    incomplete_exp_names.append(exp_name)
+                    continue
 
-            exp.parse_pub_file()
-            exp.parse_sub_files()
+                exp.parse_pub_file()
+                exp.parse_sub_files()
 
-            if exp.get_subs_df() is None:
-                incomplete_exp_names.append(exp_name)
-                continue
+                if exp.get_subs_df() is None:
+                    incomplete_exp_names.append(exp_name)
+                    continue
 
-            if exp.get_pub_df() is None:
-                incomplete_exp_names.append(exp_name)
-                continue
+                if exp.get_pub_df() is None:
+                    incomplete_exp_names.append(exp_name)
+                    continue
 
-            qos = exp.get_qos()
-            pub_df = exp.get_pub_df()
-            sub_df = exp.get_subs_df()
+                qos = exp.get_qos()
+                pub_df = exp.get_pub_df()
+                sub_df = exp.get_subs_df()
 
-            exp_df = pd.concat([sub_df, pub_df], axis=1)
-            exp_df['experiment_name'] = exp_name
+                exp_df = pd.concat([sub_df, pub_df], axis=1)
+                exp_df['experiment_name'] = exp_name
 
-            for key in qos.keys():
-                exp_df[key] = qos[key]
+                for key in qos.keys():
+                    exp_df[key] = qos[key]
 
-            exp_df = calculate_averages(exp_df)
+                exp_df = calculate_averages(exp_df)
 
             dataset_df = pd.concat([dataset_df, exp_df], ignore_index=True)
 
             if index % 10 == 0:
                 dataset_df.to_parquet(dataset_path)
                 logger.info(f"Written to {dataset_path}")
+
+        dataset_df.to_parquet(dataset_path)
+        logger.info(f"Dataset written to {dataset_path}")
+
+        # Print how many experiments are in the dataset
+        exp_count = dataset_df['experiment_name'].nunique()
+        logger.info(f"Dataset has {exp_count} experiments")
             
         return incomplete_exp_names
 
