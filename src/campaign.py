@@ -277,12 +277,14 @@ class Campaign:
 
         # Add missing_exps to incomplete_exp_names and remove duplicates
         self.missing_exps = list(set(incomplete_exp_names + self.missing_exps))
+        fixed_exp_names = [exp.replace("PUB_", "P_") for exp in self.missing_exps]
+        fixed_exp_names = [exp.replace("SUB_", "S_") for exp in fixed_exp_names]
 
         if len(self.missing_exps) > 0:
             logger.info(f"Generating missing test config with {len(self.missing_exps)} missing tests.")
 
         new_ap_config = self.config.copy()
-        new_ap_config['experiment_names'] = self.missing_exps
+        new_ap_config['experiment_names'] = fixed_exp_names
         new_ap_config = {'campaigns': [new_ap_config]}
         new_ap_config_path = self.apconf_path.replace(".toml", "_missing.toml")
 
