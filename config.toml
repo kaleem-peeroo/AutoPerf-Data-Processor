@@ -1,0 +1,15 @@
+# exp_folders is a list of paths to folders containing AP .csv files
+# ap_config is the path to the AP config file that generated the campaign data
+# dataset_path is the path to the output folder where the dataset will be saved
+
+[[datasets]]
+name = "5PI ML 71Mbps"
+exp_folders = "/Users/kaleem/PhD/Data/5PI/05_Machine Learning Data Collection 71Mbps/5Pi_Data_Collection_71Mbps"
+ap_config = "/Users/kaleem/PhD/Tools/AutoPerf/config/5pi/data_collection_71mbps.toml"
+dataset_path = "/Users/kaleem/PhD/Datasets/5PI"
+
+[[datasets]]
+name = ""
+exp_folders = ""
+ap_config = ""
+dataset_path = ""

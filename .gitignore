@@ -1,0 +1,4 @@
+logger/
+src/__pycache__/
+pyrightconfig.json
+*.log

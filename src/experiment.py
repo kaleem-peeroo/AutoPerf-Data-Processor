@@ -48,6 +48,7 @@ class Experiment:
             ))
 
         for part in self.name_parts:
+            part = part.upper()
             if part == "":
                 raise ValueError("experiment name part must not be empty")
 
@@ -390,7 +391,12 @@ class Experiment:
         lat_df = lat_df.apply(lambda x: x.strip() if isinstance(x, str) else x)
 
         # Set the type to float
-        lat_df = pd.to_numeric(lat_df, errors="raise")
+        try:
+            lat_df = pd.to_numeric(lat_df, errors="raise")
+
+        except ValueError as e:
+            logger.warning(f"Error converting latency data to numeric: {e}")
+            return None
 
         lat_df = lat_df.rename("latency_us")
         lat_df = lat_df.dropna()

@@ -119,8 +119,10 @@ class Campaign:
             )
 
             exp_name = os.path.basename(exp_dir)
+
             if exp_name.endswith(".csv"):
                 exp_df = get_df_from_csv(exp_dir)
+
             else:
                 exp_df = pd.DataFrame()
 
