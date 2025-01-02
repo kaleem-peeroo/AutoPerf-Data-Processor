@@ -68,22 +68,15 @@ class App:
                 raise Exception("datasets is None after reading config.toml")
 
             for dataset in datasets:
-                if 'name' not in dataset:
-                    logger.error("No name key in dataset")
-                    continue
-
-                if 'exp_folders' not in dataset:
-                    logger.error("No data_dir key in dataset")
-                    continue
-
-                if 'ap_config' not in dataset:
-                    logger.error("No apconf_path key in dataset")
-                    continue
-
-                if 'dataset_path' not in dataset:
-                    logger.error("No output_path key in dataset")
-                    continue
-
+                for key in [
+                    'name', 
+                    'exp_folders', 
+                    'ap_config', 
+                    'dataset_path'
+                ]:
+                    if key not in dataset:
+                        raise Exception(f"{key} not found in dataset")
+                
                 ds_name = dataset['name']
                 data_dir = dataset['exp_folders']
                 apconf_path = dataset['ap_config']
