@@ -1,4 +1,6 @@
+from ctypes import memmove
 import os
+import psutil
 import pandas as pd
 
 from logger import logger
@@ -185,3 +187,25 @@ def get_qos_from_name(name):
     }
 
     return qos
+
+def mem_usage(units="mb"):
+    if units not in ["mb", "gb"]:
+        raise ValueError(f"Invalid units: {units}")
+
+    mem = psutil.virtual_memory().used
+
+    if units == "b":
+        return mem
+
+    elif units == "kb":
+        return mem / 1024
+
+    elif units == "mb":
+        return mem / 1024 / 1024
+
+    elif units == "gb":
+        return mem / 1024 / 1024 / 1024
+
+    else:
+        raise ValueError(f"Invalid units: {units}")
+
