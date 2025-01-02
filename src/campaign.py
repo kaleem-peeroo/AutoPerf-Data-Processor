@@ -176,7 +176,7 @@ class Campaign:
 
             dataset_df = pd.concat([dataset_df, exp_df], ignore_index=True)
 
-            if index % 10 == 0:
+            if index % 10 == 0 and index != 0:
                 dataset_df.to_parquet(dataset_path)
                 logger.info(f"Written to {dataset_path}")
 
