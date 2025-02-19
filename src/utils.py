@@ -32,6 +32,63 @@ def get_qos_name(qos_settings):
         qos_settings['latency_count']
     ) 
 
+def aggregate_across_cols(df, agg_types=["avg", "total"]):
+    if len(agg_types) == 0:
+        raise ValueError("agg_types must not be empty")
+    
+    metrics = [
+        'mbps', 
+        'total_samples', 
+        'lost_samples'
+        'lost_samples_percent', 
+        'samples_per_sec', 
+    ]
+
+    desired_cols = [
+        'experiment_name',
+        'duration_secs',
+        'datalen_bytes',
+        'pub_count',
+        'sub_count',
+        'use_reliable',
+        'use_multicast',
+        'durability',
+        'latency_count',
+        'latency_us'
+    ]
+
+    df_cols = [col for col in df.columns if col != 0]
+    new_df = pd.DataFrame()
+
+    for metric in metrics:
+        metric_cols = [col for col in df_cols if metric in col]
+
+        for col in metric_cols:
+            try:
+                df[col] = df[col].astype(float, errors='ignore')
+            except ValueError as e:
+                logger.error(f"Error converting {col} to float: {e}")
+                continue
+
+        col_dtypes = [str(item) for item in df[metric_cols].dtypes.to_dict().values()]
+        if "object" in col_dtypes:
+            logger.error(f"Skipping {metric} because it contains non-numeric values")
+            continue
+
+        for agg_type in agg_types:
+            if agg_type == "avg":
+                df[f"{agg_type}_{metric}"] = df[metric_cols].mean(axis=1)
+
+            else:
+                df[f"{agg_type}_{metric}"] = df[metric_cols].sum(axis=1)
+
+            desired_cols.append(f"{agg_type}_{metric}")
+
+    for col in desired_cols:
+        new_df[col] = df[col]
+
+    return new_df
+
 def calculate_averages(df):
     metrics = [
         'mbps', 

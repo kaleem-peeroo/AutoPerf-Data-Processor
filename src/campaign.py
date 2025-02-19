@@ -8,7 +8,7 @@ from rich.pretty import pprint
 from datetime import datetime
 
 from logger import logger
-from .utils import get_qos_name, calculate_averages, get_df_from_csv
+from .utils import get_qos_name, calculate_averages, get_df_from_csv, aggregate_across_cols
 from .experiment import Experiment
 
 import warnings
@@ -172,7 +172,8 @@ class Campaign:
                 for key in qos.keys():
                     exp_df[key] = qos[key]
 
-                exp_df = calculate_averages(exp_df)
+                # exp_df = calculate_averages(exp_df)
+                exp_df = aggregate_across_cols(exp_df, ['avg', 'total'])
 
             dataset_df = pd.concat([dataset_df, exp_df], ignore_index=True)
 
