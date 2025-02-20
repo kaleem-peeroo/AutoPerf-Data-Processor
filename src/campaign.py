@@ -52,10 +52,6 @@ class Campaign:
             logger.critical("No data dir provided")
             return False
 
-        if not self.apconf_path:
-            logger.critical("No apconf path provided")
-            return False
-
         if "~" in self.data_dir:
             self.data_dir = os.path.expanduser(self.data_dir)
 
@@ -66,17 +62,18 @@ class Campaign:
             logger.critical(f"Data dir does not exist: {self.data_dir}")
             return False
 
-        if not os.path.exists(self.apconf_path):
-            logger.critical(f"AP config path does not exist: {self.apconf_path}")
-            return False
+        if self.apconf_path != "":
+            if not os.path.exists(self.apconf_path):
+                logger.critical(f"AP config path does not exist: {self.apconf_path}")
+                return False
 
-        if not os.path.isfile(self.apconf_path):
-            logger.critical(f"AP config path is not a file: {self.apconf_path}")
-            return False
+            if not os.path.isfile(self.apconf_path):
+                logger.critical(f"AP config path is not a file: {self.apconf_path}")
+                return False
 
-        if not self.apconf_path.endswith(".toml"):
-            logger.critical(f"AP config path does not end with .toml: {self.apconf_path}")
-            return False
+            if not self.apconf_path.endswith(".toml"):
+                logger.critical(f"AP config path does not end with .toml: {self.apconf_path}")
+                return False
 
         return True
 
@@ -97,6 +94,8 @@ class Campaign:
         exp_dirs = os.listdir(self.data_dir)
         if '.DS_Store' in exp_dirs:
             exp_dirs.remove('.DS_Store')
+
+        exp_dirs = [exp_dir for exp_dir in exp_dirs if os.path.isdir(os.path.join(self.data_dir, exp_dir))]
 
         incomplete_exp_names = []
 
@@ -122,6 +121,7 @@ class Campaign:
 
             if exp_name.endswith(".csv"):
                 exp_df = get_df_from_csv(exp_dir)
+                exp_df['experiment_name'] = exp_name
 
             else:
                 exp_df = pd.DataFrame()
@@ -167,19 +167,25 @@ class Campaign:
                 sub_df = exp.get_subs_df()
 
                 exp_df = pd.concat([sub_df, pub_df], axis=1)
-                exp_df['experiment_name'] = exp_name
 
                 for key in qos.keys():
                     exp_df[key] = qos[key]
 
                 # exp_df = calculate_averages(exp_df)
+                exp_df['experiment_name'] = exp_name
                 exp_df = aggregate_across_cols(exp_df, ['avg', 'total'])
+
 
             dataset_df = pd.concat([dataset_df, exp_df], ignore_index=True)
 
             if index % 10 == 0 and index != 0:
-                dataset_df.to_parquet(dataset_path)
-                logger.info(f"Written to {dataset_path}")
+                if len(dataset_df) > 0:
+                    dataset_df.to_parquet(dataset_path)
+                    logger.info(f"Written to {dataset_path}")
+
+        if len(dataset_df) == 0:
+            logger.error(f"No data found in the dataset")
+            return incomplete_exp_names
 
         dataset_df.to_parquet(dataset_path)
         logger.info(f"Dataset written to {dataset_path}")
