@@ -1,4 +1,6 @@
 import toml
+import click
+import logging
 
 from logger import logger
 from .campaign import Campaign
@@ -57,9 +59,9 @@ class App:
             if not campaign.validate_args():
                 raise Exception("Invalid campaign args")
 
-            campaign.generate_config()
+            # campaign.generate_config()
             incomplete_exp_names = campaign.create_dataset(output_path)
-            campaign.generate_missing_test_config(incomplete_exp_names)            
+            # campaign.generate_missing_test_config(incomplete_exp_names)            
 
         else:
             console.print("Using config.toml.", style="bold green")
@@ -92,6 +94,9 @@ class App:
                 if not campaign.validate_args():
                     raise Exception("Invalid campaign args")
 
-                campaign.generate_config()
+                # campaign.generate_config()
                 incomplete_exp_names = campaign.create_dataset(output_path)
-                campaign.generate_missing_test_config(incomplete_exp_names)            
+                # campaign.generate_missing_test_config(incomplete_exp_names)            
+
+                # print(f"Processed {ds_name}")
+                # click.confirm("Continue to next dataset?", abort=False, default=True)
