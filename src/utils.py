@@ -33,6 +33,18 @@ def get_qos_name(qos_settings):
     ) 
 
 def aggregate_across_cols(df, agg_types=["avg", "total"]):
+    if df is None:
+        raise ValueError("df must not be None")
+
+    if not isinstance(df, pd.DataFrame):
+        raise ValueError(f"df must be a DataFrame: {df}")
+
+    if len(df) == 0:
+        raise ValueError("df must not be empty")
+
+    if not isinstance(agg_types, list):
+        raise ValueError(f"agg_types must be a list: {agg_types}")
+
     if len(agg_types) == 0:
         raise ValueError("agg_types must not be empty")
     
@@ -57,6 +69,13 @@ def aggregate_across_cols(df, agg_types=["avg", "total"]):
         'latency_us'
     ]
 
+    if len(df.columns) == 0:
+        raise ValueError("df must have columns")
+
+    for desired_col in desired_cols:
+        if desired_col not in df.columns:
+            raise ValueError(f"{desired_col} not found in df columns: {df.columns}")
+    
     df_cols = [col for col in df.columns if col != 0]
     new_df = pd.DataFrame()
 
