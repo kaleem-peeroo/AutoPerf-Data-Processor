@@ -6,6 +6,7 @@ import pandas as pd
 
 from rich.pretty import pprint
 from datetime import datetime
+from pathlib import Path
 
 from logger import logger
 from .utils import get_qos_name, calculate_averages, get_df_from_csv, aggregate_across_cols
@@ -77,6 +78,19 @@ class Campaign:
 
         return True
 
+    def get_files_from_pathlib(
+        self, 
+        path: Path = Path('.'),
+    ):
+        ls_fpaths = []
+        for entry in path.iterdir():
+            if entry.is_dir():
+                ls_fpaths.extend(self.get_files_from_pathlib(entry))
+            else:
+                ls_fpaths.append(str(entry))
+
+        return ls_fpaths
+
     def create_dataset(self, dataset_path):
         if not dataset_path.endswith(".parquet"):
             logger.warning(f"{dataset_path} does NOT end with .parquet. Appending .parquet to the end of the path")
@@ -126,17 +140,20 @@ class Campaign:
             else:
                 exp_df = pd.DataFrame()
 
-                csv_files = [os.path.join(
-                    exp_dir, 
-                    file
-                ) for file in os.listdir(exp_dir) if file.endswith(".csv")]
+                ls_fpaths = self.get_files_from_pathlib(Path(exp_dir))
+                ls_csv_fpaths = [fpath for fpath in ls_fpaths if fpath.endswith(".csv")]
 
-                if len(csv_files) == 0:
+                # csv_files = [os.path.join(
+                #     exp_dir, 
+                #     file
+                # ) for file in os.listdir(exp_dir) if file.endswith(".csv")]
+
+                if len(ls_csv_fpaths) == 0:
                     logger.warning(f"No csv files found in {exp_dir}")
                     incomplete_exp_names.append(os.path.basename(exp_dir))
                     continue
 
-                csv_filenames = [os.path.basename(file) for file in csv_files]
+                csv_filenames = [os.path.basename(file) for file in ls_csv_fpaths]
 
                 if "pub_0.csv" not in csv_filenames:
                     logger.warning(f"pub_0.csv not found in {exp_dir}")
@@ -144,8 +161,8 @@ class Campaign:
                     continue
 
                 exp = Experiment(exp_name)
-                exp.set_pub_file([file for file in csv_files if "pub_0.csv" in file][0])
-                exp.set_sub_files([file for file in csv_files if "sub_" in file])
+                exp.set_pub_file([file for file in ls_csv_fpaths if "pub_0.csv" in file][0])
+                exp.set_sub_files([file for file in ls_csv_fpaths if "sub_" in file])
 
                 if not exp.validate_files():
                     incomplete_exp_names.append(exp_name)
