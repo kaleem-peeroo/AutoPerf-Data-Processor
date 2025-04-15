@@ -23,7 +23,7 @@ def main():
 
 def validate_config(
     ld_config: List[ Dict[str, str] ] = []
-) -> bool:
+) -> List[ Dict[str, str] ]:
     if ld_config is None:
         raise ValueError("ld_config must not be None")
 
@@ -81,7 +81,7 @@ def validate_config(
                 f"dataset_path must be a .parquet file: {d_config['dataset_path']}"
             )
 
-    return True
+    return ld_config
     
 if __name__ == "__main__":
     clear_screen()

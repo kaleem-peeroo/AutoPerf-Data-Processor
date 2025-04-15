@@ -6,7 +6,7 @@ class TestMain:
         from main import validate_config
         from tests.configs.normal import LD_DATASETS
 
-        assert validate_config(LD_DATASETS) is True
+        assert validate_config(LD_DATASETS) == LD_DATASETS
 
     def test_validate_config_with_empty_dict(self):
         from main import validate_config
@@ -73,4 +73,9 @@ class TestMain:
             "exp_folders": "./tests/data/test_campaign/",
             "ap_config": "",
             "dataset_path": "./tests/output/test_campaign.parquet"
-        } ] ) is True
+        } ] ) == [ {
+            "name": "test", 
+            "exp_folders": "./tests/data/test_campaign/",
+            "ap_config": "",
+            "dataset_path": "./tests/output/test_campaign.parquet"
+        } ]
