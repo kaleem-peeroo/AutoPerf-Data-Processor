@@ -70,7 +70,7 @@ class TestMain:
 
         assert validate_config( [ {
             "name": "test", 
-            "exp_folders": "./data/test_campaign/",
+            "exp_folders": "./tests/data/test_campaign/",
             "ap_config": "",
-            "dataset_path": "./output/test_campaign.parquet"
+            "dataset_path": "./tests/output/test_campaign.parquet"
         } ] ) is True
