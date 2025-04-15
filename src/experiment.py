@@ -1,9 +1,12 @@
 import os
+import logging
 import pandas as pd
 
 from rich.pretty import pprint
 
-from logger import logger
+# from logger import logger
+
+logger = logging.getLogger(__name__)
 
 class Experiment:
     def __init__(self, name):

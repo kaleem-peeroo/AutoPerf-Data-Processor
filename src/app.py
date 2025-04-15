@@ -1,13 +1,17 @@
 import toml
 import click
 import logging
+import sys
 
-from logger import logger
-from .campaign import Campaign
+# from logger import logger
+from campaign import Campaign
 
 from rich.console import Console
 from rich.pretty import pprint
+from rich.logging import RichHandler
 console = Console()
+
+logger = logging.getLogger(__name__)
 
 class App:
     usage_message = "You should have 3 args. Usage: \n\t{}".format(
@@ -100,3 +104,13 @@ class App:
 
                 # print(f"Processed {ds_name}")
                 # click.confirm("Continue to next dataset?", abort=False, default=True)
+
+if __name__ == 'app':
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(message)s",
+        handlers=[RichHandler()]
+    )
+
+    o_a = App(sys.argv[1:])
+    o_a.run()

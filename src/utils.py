@@ -1,11 +1,17 @@
 from ctypes import memmove
 import os
 import psutil
+import logging
 import pandas as pd
 
-from logger import logger
-
+# from logger import logger
 from rich.pretty import pprint
+
+logger = logging.getLogger(__name__)
+
+def clear_screen():
+    """Clear the console screen."""
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 def get_qos_name(qos_settings):
     if not isinstance(qos_settings, dict):

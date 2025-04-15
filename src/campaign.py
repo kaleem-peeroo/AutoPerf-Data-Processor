@@ -2,18 +2,21 @@ import os
 import toml
 import itertools
 import sys
+import logging
 import pandas as pd
 
 from rich.pretty import pprint
 from datetime import datetime
 from pathlib import Path
 
-from logger import logger
-from .utils import get_qos_name, calculate_averages, get_df_from_csv, aggregate_across_cols
-from .experiment import Experiment
+# from logger import logger
+from utils import get_qos_name, calculate_averages, get_df_from_csv, aggregate_across_cols
+from experiment import Experiment
 
 import warnings
 warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
+
+logger = logging.getLogger(__name__)
 
 class Campaign:
     def __init__(self, data_dir, apconf_path):
@@ -105,11 +108,17 @@ class Campaign:
         if len(os.listdir(self.data_dir)) == 0:
             raise Exception(f"Data dir is empty: {self.data_dir}")
 
+        logger.debug("Creating dataset...")
+
         exp_dirs = os.listdir(self.data_dir)
         if '.DS_Store' in exp_dirs:
             exp_dirs.remove('.DS_Store')
 
-        exp_dirs = [exp_dir for exp_dir in exp_dirs if os.path.isdir(os.path.join(self.data_dir, exp_dir))]
+        exp_dirs = [
+            exp_dir for exp_dir in exp_dirs \
+                    if os.path.isdir(os.path.join(self.data_dir, exp_dir)) or
+                    exp_dir.endswith(".csv")
+        ]
 
         incomplete_exp_names = []
 
@@ -121,6 +130,7 @@ class Campaign:
             logger.warning(f"Dataset already exists at {dataset_path}. Writing to {dataset_path}")
 
         exp_dirs = [os.path.join(self.data_dir, exp_dir) for exp_dir in exp_dirs]
+        logger.debug(f"Found {len(exp_dirs)} experiment directories in {self.data_dir}")
 
         for index, exp_dir in enumerate(exp_dirs):
             logger.info(
