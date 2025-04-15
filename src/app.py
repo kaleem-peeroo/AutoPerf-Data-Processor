@@ -104,13 +104,3 @@ class App:
 
                 # print(f"Processed {ds_name}")
                 # click.confirm("Continue to next dataset?", abort=False, default=True)
-
-if __name__ == 'app':
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(message)s",
-        handlers=[RichHandler()]
-    )
-
-    o_a = App(sys.argv[1:])
-    o_a.run()
