@@ -157,3 +157,36 @@ class TestCampaign:
             assert s_path.endswith('.csv')
 
         
+    def test_recursively_get_fpaths(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        ld_ds_config = LD_DATASETS
+        d_ds = ld_ds_config[0]
+        o_c = Campaign(d_ds)
+
+        # INFO: Normal Case - subdirs
+        ls_fpaths = o_c.recursively_get_fpaths(
+            "./tests/data/test_campaign_with_dirs_small/"
+        )
+        assert isinstance(ls_fpaths, list)
+        assert len(ls_fpaths) == 174
+
+        for s_path in ls_fpaths:
+            assert isinstance(s_path, str)
+            assert os.path.exists(s_path)
+            assert os.path.isfile(s_path)
+
+        # INFO: Normal Case - no subdirs
+        ls_fpaths = o_c.recursively_get_fpaths(
+            "./tests/data/test_campaign_with_csv/"
+        )
+        assert isinstance(ls_fpaths, list)
+        assert len(ls_fpaths) == 5
+
+        # INFO: Normal Case - sub dirs and sub sub dirs
+        ls_fpaths = o_c.recursively_get_fpaths(
+            "./tests/data/test_campaign_with_mix/600s_100B_1P_1S_be_uc_3dur_100lc/"
+        )
+        assert isinstance(ls_fpaths, list)
+        assert len(ls_fpaths) == 84
