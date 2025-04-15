@@ -75,6 +75,24 @@ class Campaign:
 
         ld_exp_names_and_paths = self.get_experiments(s_raw_datadir)
 
+    def get_experiment_name_from_fpath(self, s_exp_entry: str = ""):
+        if s_exp_entry == "":
+            raise Exception("No experiment entry provided")
+
+        s_filename = os.path.basename(s_exp_entry).split(".")[0]
+        s_dirname = os.path.basename(os.path.dirname(s_exp_entry))
+
+        if self.follows_experiment_name_format(s_filename):
+            return s_filename
+
+        elif self.follows_experiment_name_format(s_dirname):
+            return s_dirname
+
+        else:
+            raise ValueError(
+                f"Experiment name does not follow expected format: {s_filename}"
+            )
+            
     def follows_experiment_name_format(self, s_filename: str = "") -> bool:
         """
         Checks if filename follows following format:

@@ -68,14 +68,16 @@ class TestCampaign:
                     assert os.path.getsize(s_path) > 0
                     assert s_path.endswith('.csv')
 
-    def test_get_experiment_name_from_file_with_normal_case(self):
+    def test_get_experiment_name_from_fpath(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
 
         ld_ds_config = LD_DATASETS
         d_ds = ld_ds_config[0]
         o_c = Campaign(d_ds)
-        s_exp_name = o_c.get_experiment_name_from_file(
+
+        # INFO: Name in file
+        s_exp_name = o_c.get_experiment_name_from_fpath(
             "./data/test_campaign_with_csv/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv"
         )
 
