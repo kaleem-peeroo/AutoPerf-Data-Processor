@@ -1,7 +1,3 @@
-logger/
-src/__pycache__/
-./tests/__pycache__/
-__pycache__/
-pyrightconfig.json
+**/__pycache__/
 *.log
 .DS_Store
