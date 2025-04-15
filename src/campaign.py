@@ -191,16 +191,11 @@ class Campaign:
         if not os.path.exists(s_exp_entry):
             raise Exception(f"Experiment entry does not exist: {s_exp_entry}")
 
-        if os.path.isdir(s_exp_entry):
-            ls_exp_paths = [
-                os.path.join(s_exp_entry, item) for item in os.listdir(s_exp_entry)
-            ]
+        ls_fpaths = self.recursively_get_fpaths(s_exp_entry)
+        ls_csvpaths = [fpath for fpath in ls_fpaths if fpath.endswith(".csv")]
 
-        elif os.path.isfile(s_exp_entry):
-            ls_exp_paths = [s_exp_entry]
+        return ls_csvpaths
 
-        else:
-            raise ValueError(f"Experiment entry is not a directory or file: {s_exp_entry}")
 
         return ls_exp_paths
 
