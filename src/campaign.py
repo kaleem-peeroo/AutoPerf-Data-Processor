@@ -19,9 +19,10 @@ warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 logger = logging.getLogger(__name__)
 
 class Campaign:
-    def __init__(self, data_dir, apconf_path):
-        self.data_dir       = data_dir
-        self.apconf_path    = apconf_path
+    def __init__(self, d_config):
+        self.data_dir       = d_config['exp_folders']
+        self.apconf_path    = d_config['ap_config']
+        self.dataset_path   = d_config['dataset_path']
         self.config         = None
         self.qos_settings   = {}
         self.qos_exp_list   = []            # Expected experiment list generated from qos
@@ -42,6 +43,21 @@ class Campaign:
 
     def get_apconf_path(self):
         return self.apconf_path
+
+    def get_dataset_path(self):
+        if not self.dataset_path:
+            raise Exception("No dataset path provided")
+
+        if not isinstance(self.dataset_path, str):
+            raise ValueError(f"Dataset path must be a string: {self.dataset_path}")
+
+        if self.dataset_path == "":
+            raise ValueError("Dataset path must not be empty")
+
+        if "~" in self.dataset_path:
+            self.dataset_path = os.path.expanduser(self.dataset_path)
+
+        return self.dataset_path
 
     def set_data_dir(self, data_dir):
         self.data_dir = data_dir
@@ -94,7 +110,8 @@ class Campaign:
 
         return ls_fpaths
 
-    def create_dataset(self, dataset_path):
+    def create_dataset(self):
+        dataset_path = self.get_dataset_path()
         if not dataset_path.endswith(".parquet"):
             logger.warning(f"{dataset_path} does NOT end with .parquet. Appending .parquet to the end of the path")
             dataset_path = f"{dataset_path}.parquet"

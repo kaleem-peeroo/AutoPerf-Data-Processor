@@ -3,9 +3,11 @@ import sys
 import os
 
 from rich.logging import RichHandler
+from rich.pretty import pprint
 from typing import Dict, List
 
 from app import App
+from campaign import Campaign
 from config import LD_DATASETS
 from utils import clear_screen
 
@@ -15,11 +17,13 @@ def main():
         format="%(message)s",
         handlers=[RichHandler()]
     )
+    lg = logging.getLogger(__name__)
 
     ld_ds_config = validate_config(LD_DATASETS)
 
-    o_a = App(ld_ds_config)
-    o_a.run()
+    for d_ds in ld_ds_config:
+        campaign = Campaign(d_ds)
+        campaign.create_dataset()
 
 def validate_config(
     ld_config: List[ Dict[str, str] ] = []
@@ -56,7 +60,7 @@ def validate_config(
         name: str
         exp_folders: str: valid path to folder that exists
         ap_config: str: optional path to AP config file
-        dataset_path: str: non-existent path to .parquet file to be created
+        dataset_path: str: optional path to .parquet file to be created
         """
         if not isinstance(d_config['name'], str):
             raise ValueError(f"name must be a str: {d_config['name']}")
@@ -72,9 +76,6 @@ def validate_config(
 
         if not os.path.exists(d_config['exp_folders']):
             raise ValueError(f"exp_folders does not exist: {d_config['exp_folders']}")
-
-        if os.path.exists(d_config['dataset_path']):
-            raise ValueError(f"dataset_path already exists: {d_config['dataset_path']}")
 
         if not d_config['dataset_path'].endswith('.parquet'):
             raise ValueError(
