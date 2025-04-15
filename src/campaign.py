@@ -26,18 +26,18 @@ class Campaign:
 
         self.ds_df = None
 
-        self.config         = None
-        self.qos_settings   = {}
+        self.config = None
+        self.qos_variations = {}
 
-        self.qos_exp_list   = []            # Expected experiment list generated from qos
-        self.data_exp_list  = []            # experiment list from the data dir experiment names
-        self.missing_exps   = []            # Missing experiment list
+        self.qos_exp_list   = []    # Expected experiment list generated from qos
+        self.data_exp_list  = []    # experiment list from the data dir experiment names
+        self.missing_exps   = []    # Missing experiment list
 
     def __rich_repr__(self):
         yield "data_dir", self.raw_datadir
         yield "apconf_path", self.apconf_path
         yield "config", self.config
-        yield "qos_settings", self.qos_settings
+        yield "qos_settings", self.qos_variations
         yield "qos_exp_list", self.qos_exp_list
         yield "data_exp_list", self.data_exp_list
         yield "missing_exps", self.missing_exps
