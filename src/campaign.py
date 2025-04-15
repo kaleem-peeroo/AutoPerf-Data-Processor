@@ -16,21 +16,25 @@ from experiment import Experiment
 import warnings
 warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 
-logger = logging.getLogger(__name__)
+lg = logging.getLogger(__name__)
 
 class Campaign:
     def __init__(self, d_config):
-        self.data_dir       = d_config['exp_folders']
-        self.apconf_path    = d_config['ap_config']
-        self.dataset_path   = d_config['dataset_path']
+        self.raw_datadir = d_config['exp_folders']
+        self.apconf_path = d_config['ap_config']
+        self.ds_output_path = d_config['dataset_path']
+
+        self.ds_df = None
+
         self.config         = None
         self.qos_settings   = {}
+
         self.qos_exp_list   = []            # Expected experiment list generated from qos
         self.data_exp_list  = []            # experiment list from the data dir experiment names
         self.missing_exps   = []            # Missing experiment list
 
     def __rich_repr__(self):
-        yield "data_dir", self.data_dir
+        yield "data_dir", self.raw_datadir
         yield "apconf_path", self.apconf_path
         yield "config", self.config
         yield "qos_settings", self.qos_settings
@@ -39,41 +43,41 @@ class Campaign:
         yield "missing_exps", self.missing_exps
 
     def get_data_dir(self):
-        return self.data_dir
+        return self.raw_datadir
 
     def get_apconf_path(self):
         return self.apconf_path
 
     def get_dataset_path(self):
-        if not self.dataset_path:
+        if not self.ds_output_path:
             raise Exception("No dataset path provided")
 
-        if not isinstance(self.dataset_path, str):
-            raise ValueError(f"Dataset path must be a string: {self.dataset_path}")
+        if not isinstance(self.ds_output_path, str):
+            raise ValueError(f"Dataset path must be a string: {self.ds_output_path}")
 
-        if self.dataset_path == "":
+        if self.ds_output_path == "":
             raise ValueError("Dataset path must not be empty")
 
-        if "~" in self.dataset_path:
-            self.dataset_path = os.path.expanduser(self.dataset_path)
+        if "~" in self.ds_output_path:
+            self.ds_output_path = os.path.expanduser(self.ds_output_path)
 
-        return self.dataset_path
+        return self.ds_output_path
 
     def set_data_dir(self, data_dir):
-        self.data_dir = data_dir
+        self.raw_datadir = data_dir
 
     def set_apconf_path(self, apconf_path):
         self.apconf_path = apconf_path
 
     def validate_args(self):
-        logger.info("Validating campaign args...")
+        lg.info("Validating campaign args...")
 
-        if not self.data_dir:
-            logger.critical("No data dir provided")
+        if not self.raw_datadir:
+            lg.critical("No data dir provided")
             return False
 
-        if "~" in self.data_dir:
-            self.data_dir = os.path.expanduser(self.data_dir)
+        if "~" in self.raw_datadir:
+            self.raw_datadir = os.path.expanduser(self.raw_datadir)
 
         if "~" in self.apconf_path:
             self.apconf_path = os.path.expanduser(self.apconf_path)
