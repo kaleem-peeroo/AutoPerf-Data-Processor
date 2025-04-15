@@ -75,6 +75,30 @@ class Campaign:
 
         ld_exp_names_and_paths = self.get_experiments(s_raw_datadir)
 
+    def follows_experiment_name_format(self, s_filename: str = "") -> bool:
+        """
+        Checks if filename follows following format:
+        *{int}SEC_{int}B_{int}P_{int}S_{REL/BE}_{MC/UC}_{int}DUR_{int}LC*
+        """
+
+        if s_filename == "":
+            raise Exception("No filename provided")
+
+        if not isinstance(s_filename, str):
+            raise ValueError(f"Filename must be a string: {s_filename}")
+
+        if s_filename == "":
+            raise ValueError("Filename must not be empty")
+
+        r_exp_name = re.compile(
+            r"^\d+SEC_\d+B_\d+PUB_\d+SUB_(REL|BE)_(MC|UC)_\d+DUR_\d+LC$"
+        )
+        if not r_exp_name.match(s_filename):
+            lg.warning(f"Filename does not match the experiment name format: {s_filename}")
+            return False
+                
+        return True
+        
     def old_create_dataset(self):
         lg.debug("Creating dataset...")
 

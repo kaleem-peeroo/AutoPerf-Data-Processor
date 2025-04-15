@@ -82,3 +82,15 @@ class TestCampaign:
         assert isinstance(s_exp_name, str)
         assert len(s_exp_name) > 0
         assert s_exp_name == "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
+    def test_follows_experiment_name_format_with_normal_case(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        ld_ds_config = LD_DATASETS
+        d_ds = ld_ds_config[0]
+        o_c = Campaign(d_ds)
+        s_exp_name = "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
+        b_follows_format = o_c.follows_experiment_name_format(s_exp_name)
+
+        assert isinstance(b_follows_format, bool)
+        assert b_follows_format is True
