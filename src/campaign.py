@@ -90,13 +90,42 @@ class Campaign:
         if s_filename == "":
             raise ValueError("Filename must not be empty")
 
-        r_exp_name = re.compile(
-            r"^\d+SEC_\d+B_\d+PUB_\d+SUB_(REL|BE)_(MC|UC)_\d+DUR_\d+LC$"
-        )
-        if not r_exp_name.match(s_filename):
-            lg.warning(f"Filename does not match the experiment name format: {s_filename}")
+        # INFO: Regex is hard to debug. Using manual checks.
+        i_underscore_count = s_filename.count("_")
+        if i_underscore_count != 7:
+            lg.warning(f"Filename does not have 7 underscores: {s_filename}")
             return False
-                
+
+        if "." in s_filename:
+            s_filename = s_filename.split(".")[0]
+
+        ls_parts = s_filename.split("_")
+        ld_end_matches = [
+            {"values": ["SEC", "S"]},
+            {"values": ["B"]},
+            {"values": ["P", "PUB"]},
+            {"values": ["S", "SUB"]},
+            {"values": ["REL", "BE"]},
+            {"values": ["MC", "UC"]},
+            {"values": ["DUR"]},
+            {"values": ["LC"]},
+        ]
+
+        for i, part in enumerate(ls_parts):
+            ls_end_matches = ld_end_matches[i]["values"]
+
+            b_match = False
+            for s_end_match in ls_end_matches:
+                if part.endswith(s_end_match):
+                    b_match = True
+                    break
+
+            if not b_match:
+                lg.warning(
+                    f"Filename does not match expected format: {s_filename} ({part})"
+                )
+                return False
+                                        
         return True
         
     def old_create_dataset(self):

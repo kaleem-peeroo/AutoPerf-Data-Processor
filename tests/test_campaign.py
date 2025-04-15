@@ -82,15 +82,52 @@ class TestCampaign:
         assert isinstance(s_exp_name, str)
         assert len(s_exp_name) > 0
         assert s_exp_name == "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
-    def test_follows_experiment_name_format_with_normal_case(self):
+
+        # INFO: Name in directory
+        s_exp_name = o_c.get_experiment_name_from_fpath(
+            "./test_campaign_with_csv/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC/pub_0.csv"
+        )
+
+        assert isinstance(s_exp_name, str)
+        assert len(s_exp_name) > 0
+        assert s_exp_name == "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
+
+        # INFO: No name
+        with pytest.raises(ValueError):
+            s_exp_name = o_c.get_experiment_name_from_fpath(
+                "./test_campaign_with_csv/pub_0.csv"
+            )
+            
+    def test_follows_experiment_name_format(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
 
         ld_ds_config = LD_DATASETS
         d_ds = ld_ds_config[0]
         o_c = Campaign(d_ds)
-        s_exp_name = "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
-        b_follows_format = o_c.follows_experiment_name_format(s_exp_name)
 
-        assert isinstance(b_follows_format, bool)
-        assert b_follows_format is True
+        ls_normal_cases = [
+            # INFO: Normal case - most up to date format
+            "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC",
+            # INFO: P as PUB
+            "600SEC_100B_15P_15SUB_BE_MC_3DUR_100LC",
+            # INFO: S as SUB
+            "600SEC_100B_15PUB_15S_BE_MC_3DUR_100LC",
+            # INFO: P as PUB and S as SUB
+            "600S_100B_15P_15S_BE_MC_3DUR_100LC",
+            # INFO: REL instead of BE
+            "600SEC_100B_15PUB_15SUB_REL_MC_3DUR_100LC",
+            # INFO: UC instead of MC
+            "600SEC_100B_15PUB_15SUB_BE_UC_3DUR_100LC",
+            # INFO: 0DUR instead of 3DUR
+            "600SEC_100B_15PUB_15SUB_BE_MC_0DUR_100LC",
+            # INFO: With .csv at end
+            "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv",
+        ]
+
+        for s_exp_name in ls_normal_cases:
+            b_follows_format = o_c.follows_experiment_name_format(
+                s_exp_name
+            )
+            assert isinstance(b_follows_format, bool)
+            assert b_follows_format is True
