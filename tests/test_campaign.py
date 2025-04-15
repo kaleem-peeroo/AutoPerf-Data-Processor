@@ -133,3 +133,6 @@ class TestCampaign:
             )
             assert isinstance(b_follows_format, bool)
             assert b_follows_format is True
+
+    def test_get_experiment_paths_from_fpath(self):
+        raise NotImplementedError("Test not implemented yet")
