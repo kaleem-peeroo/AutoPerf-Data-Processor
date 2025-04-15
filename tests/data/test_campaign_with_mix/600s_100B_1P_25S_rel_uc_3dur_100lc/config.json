@@ -1,0 +1,54 @@
+{
+    "combination": {
+        "duration_s": 600,
+        "datalen_bytes": 100,
+        "pub_count": 1,
+        "sub_count": 25,
+        "reliability": true,
+        "use_multicast": false,
+        "durability": 3,
+        "latency_count": 100
+    },
+    "machines": [
+        {
+            "name": "k2",
+            "host": "169.254.251.21",
+            "ssh_key": "/home/acwh025/.ssh/id_rsa",
+            "username": "acwh025",
+            "home_dir": "/home/acwh025/",
+            "perftest": "/home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher",
+            "participant_allocation": "pub",
+            "scripts": "source ~/.bashrc; /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -pub -outputFile /home/acwh025/pub_0.csv -numSubscribers 25 -executionTime 600 -latencyCount 100 -batchSize 0 -transport UDPv4;"
+        },
+        {
+            "name": "k3",
+            "host": "169.254.251.22",
+            "ssh_key": "/home/acwh025/.ssh/id_rsa",
+            "username": "acwh025",
+            "home_dir": "/home/acwh025/",
+            "perftest": "/home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher",
+            "participant_allocation": "pub",
+            "scripts": "source ~/.bashrc;"
+        },
+        {
+            "name": "k4",
+            "host": "169.254.251.23",
+            "ssh_key": "/home/acwh025/.ssh/id_rsa",
+            "username": "acwh025",
+            "home_dir": "/home/acwh025/",
+            "perftest": "/home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher",
+            "participant_allocation": "sub",
+            "scripts": "source ~/.bashrc; /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 0 -outputFile /home/acwh025/sub_0.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 2 -outputFile /home/acwh025/sub_2.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 4 -outputFile /home/acwh025/sub_4.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 6 -outputFile /home/acwh025/sub_6.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 8 -outputFile /home/acwh025/sub_8.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 10 -outputFile /home/acwh025/sub_10.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 12 -outputFile /home/acwh025/sub_12.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 14 -outputFile /home/acwh025/sub_14.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 16 -outputFile /home/acwh025/sub_16.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 18 -outputFile /home/acwh025/sub_18.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 20 -outputFile /home/acwh025/sub_20.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 22 -outputFile /home/acwh025/sub_22.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 24 -outputFile /home/acwh025/sub_24.csv -numPublishers 1 -transport UDPv4;"
+        },
+        {
+            "name": "k5",
+            "host": "169.254.251.24",
+            "ssh_key": "/home/acwh025/.ssh/id_rsa",
+            "username": "acwh025",
+            "home_dir": "/home/acwh025/",
+            "perftest": "/home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher",
+            "participant_allocation": "sub",
+            "scripts": "source ~/.bashrc; /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 1 -outputFile /home/acwh025/sub_1.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 3 -outputFile /home/acwh025/sub_3.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 5 -outputFile /home/acwh025/sub_5.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 7 -outputFile /home/acwh025/sub_7.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 9 -outputFile /home/acwh025/sub_9.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 11 -outputFile /home/acwh025/sub_11.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 13 -outputFile /home/acwh025/sub_13.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 15 -outputFile /home/acwh025/sub_15.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 17 -outputFile /home/acwh025/sub_17.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 19 -outputFile /home/acwh025/sub_19.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 21 -outputFile /home/acwh025/sub_21.csv -numPublishers 1 -transport UDPv4 & /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -durability 3 -sub -sidMultiSubTest 23 -outputFile /home/acwh025/sub_23.csv -numPublishers 1 -transport UDPv4;"
+        }
+    ]
+}

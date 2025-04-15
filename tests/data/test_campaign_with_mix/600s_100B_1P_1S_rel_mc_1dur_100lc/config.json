@@ -1,0 +1,54 @@
+{
+    "combination": {
+        "duration_s": 600,
+        "datalen_bytes": 100,
+        "pub_count": 1,
+        "sub_count": 1,
+        "reliability": true,
+        "use_multicast": true,
+        "durability": 1,
+        "latency_count": 100
+    },
+    "machines": [
+        {
+            "name": "k2",
+            "host": "169.254.251.21",
+            "ssh_key": "/home/acwh025/.ssh/id_rsa",
+            "username": "acwh025",
+            "home_dir": "/home/acwh025/",
+            "perftest": "/home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher",
+            "participant_allocation": "pub",
+            "scripts": "source ~/.bashrc; /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -multicast -durability 1 -pub -outputFile /home/acwh025/pub_0.csv -numSubscribers 1 -executionTime 600 -latencyCount 100 -batchSize 0 -transport UDPv4;"
+        },
+        {
+            "name": "k3",
+            "host": "169.254.251.22",
+            "ssh_key": "/home/acwh025/.ssh/id_rsa",
+            "username": "acwh025",
+            "home_dir": "/home/acwh025/",
+            "perftest": "/home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher",
+            "participant_allocation": "pub",
+            "scripts": "source ~/.bashrc;"
+        },
+        {
+            "name": "k4",
+            "host": "169.254.251.23",
+            "ssh_key": "/home/acwh025/.ssh/id_rsa",
+            "username": "acwh025",
+            "home_dir": "/home/acwh025/",
+            "perftest": "/home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher",
+            "participant_allocation": "sub",
+            "scripts": "source ~/.bashrc; /home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher -dataLen 100 -multicast -durability 1 -sub -outputFile /home/acwh025/sub_0.csv -numPublishers 1 -transport UDPv4;"
+        },
+        {
+            "name": "k5",
+            "host": "169.254.251.24",
+            "ssh_key": "/home/acwh025/.ssh/id_rsa",
+            "username": "acwh025",
+            "home_dir": "/home/acwh025/",
+            "perftest": "/home/acwh025/Documents/rtiperftest/srcCpp/objs/armv7Linux4gcc7.5.0/perftest_publisher",
+            "participant_allocation": "sub",
+            "scripts": "source ~/.bashrc;"
+        }
+    ]
+}
