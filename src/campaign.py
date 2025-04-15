@@ -3,11 +3,13 @@ import toml
 import itertools
 import sys
 import logging
+import re
 import pandas as pd
 
 from rich.pretty import pprint
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, List
 
 # from logger import logger
 from utils import get_qos_name, calculate_averages, get_df_from_csv, aggregate_across_cols
@@ -74,6 +76,38 @@ class Campaign:
         s_raw_datadir = self.get_raw_datadir()
 
         ld_exp_names_and_paths = self.get_experiments(s_raw_datadir)
+
+    def get_experiments(self, s_raw_datadir: str = ""):
+        """
+        Gather a list of experiments.
+        In the format of {name: str, paths: list}.
+        Name is experiment name.
+        Paths is a list of all files for that experiment.
+            This could be a single file or multiple files.
+        """
+        if s_raw_datadir == "":
+            raise Exception("No raw data directory provided")
+
+        if not os.path.exists(s_raw_datadir):
+            raise Exception(f"Raw data directory does not exist: {s_raw_datadir}")
+
+        if not os.path.isdir(s_raw_datadir):
+            raise Exception(f"Raw data directory is not a directory: {s_raw_datadir}")
+
+        ld_exp_names_and_paths = []
+        ls_exp_entries = os.listdir(s_raw_datadir)
+        ls_exp_entries = [
+            os.path.join(s_raw_datadir, item) for item in ls_exp_entries
+        ]
+
+        for s_exp_entry in ls_exp_entries:
+            s_exp_name = self.get_experiment_name_from_fpath(s_exp_entry)
+            ls_exp_paths = self.get_experiment_paths_from_fpath(s_exp_entry)
+            ld_exp_names_and_paths.append(
+                {"name": s_exp_name, "paths": ls_exp_paths}
+            )
+
+        return ld_exp_names_and_paths
 
     def get_experiment_name_from_fpath(self, s_exp_entry: str = ""):
         if s_exp_entry == "":
@@ -146,6 +180,30 @@ class Campaign:
                                         
         return True
         
+    def get_experiment_paths_from_fpath(self, s_exp_entry: str = "") -> List[str]:
+        """
+        Get all files in the experiment directory.
+        If the entry is a file, return that file.
+        """
+        if s_exp_entry == "":
+            raise Exception("No experiment entry provided")
+
+        if not os.path.exists(s_exp_entry):
+            raise Exception(f"Experiment entry does not exist: {s_exp_entry}")
+
+        if os.path.isdir(s_exp_entry):
+            ls_exp_paths = [
+                os.path.join(s_exp_entry, item) for item in os.listdir(s_exp_entry)
+            ]
+
+        elif os.path.isfile(s_exp_entry):
+            ls_exp_paths = [s_exp_entry]
+
+        else:
+            raise ValueError(f"Experiment entry is not a directory or file: {s_exp_entry}")
+
+        return ls_exp_paths
+
     def old_create_dataset(self):
         lg.debug("Creating dataset...")
 
