@@ -70,12 +70,12 @@ class TestMain:
 
         assert validate_config( [ {
             "name": "test", 
-            "exp_folders": "./tests/data/test_campaign/",
+            "exp_folders": "./tests/data/test_campaign_with_csv/",
             "ap_config": "",
             "dataset_path": "./tests/output/test_campaign.parquet"
         } ] ) == [ {
             "name": "test", 
-            "exp_folders": "./tests/data/test_campaign/",
+            "exp_folders": "./tests/data/test_campaign_with_csv/",
             "ap_config": "",
             "dataset_path": "./tests/output/test_campaign.parquet"
         } ]
@@ -85,12 +85,12 @@ class TestMain:
 
         assert validate_config( [ {
             "name": "test", 
-            "exp_folders": "./tests/data/test_campaign/",
+            "exp_folders": "./tests/data/test_campaign_with_csv",
             "ap_config": "",
             "dataset_path": "./tests/output/existing_test_campaign.parquet"
         } ] ) == [ {
             "name": "test", 
-            "exp_folders": "./tests/data/test_campaign/",
+            "exp_folders": "./tests/data/test_campaign_with_csv",
             "ap_config": "",
             "dataset_path": "./tests/output/existing_test_campaign.parquet"
         } ]
