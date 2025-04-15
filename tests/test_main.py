@@ -79,3 +79,18 @@ class TestMain:
             "ap_config": "",
             "dataset_path": "./tests/output/test_campaign.parquet"
         } ]
+
+    def test_validate_config_with_existing_dataset_path(self):
+        from main import validate_config
+
+        assert validate_config( [ {
+            "name": "test", 
+            "exp_folders": "./tests/data/test_campaign/",
+            "ap_config": "",
+            "dataset_path": "./tests/output/existing_test_campaign.parquet"
+        } ] ) == [ {
+            "name": "test", 
+            "exp_folders": "./tests/data/test_campaign/",
+            "ap_config": "",
+            "dataset_path": "./tests/output/existing_test_campaign.parquet"
+        } ]
