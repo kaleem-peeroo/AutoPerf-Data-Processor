@@ -103,36 +103,6 @@ class Experiment:
 
         return qos
         
-    def get_qos(self):
-        return self.qos
-    
-    def get_name(self):
-        return self.name
-
-    def get_dirpath(self):
-        return self.dirpath
-
-    def get_sub_files(self):
-        return self.sub_files
-
-    def get_subs_df(self):
-        return self.subs_df
-
-    def get_pub_file(self):
-        return self.pub_file
-
-    def get_pub_df(self):
-        return self.pub_df
-
-    def set_qos(self, qos):
-        self.qos = qos
-
-    def set_name(self, name):
-        self.name = name
-
-    def set_dirpath(self, dirpath):
-        self.dirpath = dirpath
-
     def set_sub_files(self, sub_files):
         if not isinstance(sub_files, list):
             raise Exception("sub_files must be a list")
