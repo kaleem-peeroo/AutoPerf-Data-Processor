@@ -135,4 +135,25 @@ class TestCampaign:
             assert b_follows_format is True
 
     def test_get_experiment_paths_from_fpath(self):
-        raise NotImplementedError("Test not implemented yet")
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        ld_ds_config = LD_DATASETS
+        d_ds = ld_ds_config[0]
+        o_c = Campaign(d_ds)
+
+        # INFO: Normal Case
+        ls_exp_paths = o_c.get_experiment_paths_from_fpath(
+            "./tests/data/test_campaign_with_dirs_small/"
+        )
+        assert isinstance(ls_exp_paths, list)
+        assert len(ls_exp_paths) == 14
+
+        for s_path in ls_exp_paths:
+            assert isinstance(s_path, str)
+            assert os.path.exists(s_path)
+            assert os.path.isfile(s_path)
+            assert os.path.getsize(s_path) > 0
+            assert s_path.endswith('.csv')
+
+        
