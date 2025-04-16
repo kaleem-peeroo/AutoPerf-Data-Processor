@@ -169,8 +169,30 @@ class TestCampaign:
         assert df['latency_us'].dtype == 'float64'
 
     def test_is_raw_exp_file(self):
-        raise NotImplementedError("test_is_raw_exp_file not implemented")
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+        o_c = Campaign(LD_DATASETS[0])
 
+        # INFO: Normal Case - pub file
+        assert o_c.is_raw_exp_file(
+            "./path/to/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
+        ) is True
+
+        # INFO: Normal Case - sub file
+        assert o_c.is_raw_exp_file(
+            "./path/to/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/sub_0.csv"
+        ) is True
+
+        # INFO: Normal Case - not raw file
+        assert o_c.is_raw_exp_file(
+            "./path/to/300SEC_1B_1P_3S_BE_MC_0DUR_100LC.csv"
+        ) is False
+
+        # INFO: Error Case - some random csv file
+        with pytest.raises(ValueError):
+            o_c.is_raw_exp_file(
+                "./path/to/idk_what_this_file_is.csv"
+            )
 
     def test_process_file(self):
         raise NotImplementedError("test_process_file not implemented")
