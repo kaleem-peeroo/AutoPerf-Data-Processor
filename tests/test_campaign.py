@@ -115,6 +115,14 @@ class TestCampaign:
             "latency_us",
             'avg_mbps',
             'total_mbps',
+
+            'duration_secs',
+            'datalen_bytes',
+            'pub_count',
+            'sub_count',
+            'reliability',
+            'multicast',
+            'durability'
         ]
         for s_col in ls_wanted_cols:
             assert s_col in df.columns
