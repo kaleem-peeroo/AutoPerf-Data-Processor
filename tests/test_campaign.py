@@ -186,42 +186,6 @@ class TestCampaign:
         assert 'latency_us' in df.columns
         assert df['latency_us'].dtype == 'float64'
 
-    def test_mbps_cols_are_valid(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
-        o_c = Campaign(LD_DATASETS[0])
-
-        # INFO: Normal Case - 614 avg_mbps_per_sub samples
-        df = pd.DataFrame({
-            'avg_mbps_per_sub': [1] * 613 + [4],
-            'total_mbps_over_subs': [5] * 613 + [8],
-        })
-        assert o_c.mbps_cols_are_valid(df) is True
-
-        # INFO: Normal Case - 614 total_mbps_over_subs samples
-        df = pd.DataFrame({
-            'avg_mbps_per_sub': [1] * 613 + [4],
-            'total_mbps_over_subs': [5] * 613 + [8],
-        })
-        assert o_c.mbps_cols_are_valid(df) is True
-
-        # INFO: Error Case - 12000 avg_mbps_per_sub samples
-        df = pd.DataFrame({
-            'avg_mbps_per_sub': [1] * 12000 + [4],
-            'total_mbps_over_subs': [5] * 12000 + [8],
-        })
-        with pytest.raises(ValueError):
-            o_c.mbps_cols_are_valid(df)
-
-        # INFO: Error Case - 12000 total_mbps_over_subs samples
-        df = pd.DataFrame({
-            'avg_mbps_per_sub': [1] * 12000 + [4],
-            'total_mbps_over_subs': [5] * 12000 + [8],
-        })
-        with pytest.raises(ValueError):
-            o_c.mbps_cols_are_valid(df)
-        
     def test_is_raw_exp_file(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS

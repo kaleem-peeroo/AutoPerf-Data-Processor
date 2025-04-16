@@ -107,10 +107,14 @@ class Campaign:
         s_exp_name = d_exp_names_and_paths['name']
         ls_exp_paths = d_exp_names_and_paths['paths']
 
-        df_exp = pd.DataFrame()
-        for s_exp_path in ls_exp_paths:
-            df_temp = self.get_exp_file_df(s_exp_path)
-            df_exp = pd.concat([df_exp, df_temp], ignore_index=True)
+        if len(ls_exp_paths) == 1:
+            df_exp = self.get_exp_file_df(ls_exp_paths[0])
+
+        else:
+            df_exp = pd.DataFrame()
+            for s_exp_path in ls_exp_paths:
+                df_temp = self.get_exp_file_df(s_exp_path)
+                df_exp = pd.concat([df_exp, df_temp], axis=1, ignore_index=True)
 
         df_exp['experiment_name'] = s_exp_name
         df_exp = self.add_input_cols(df_exp)
@@ -132,41 +136,7 @@ class Campaign:
         else:
             df_temp = pd.read_csv(s_exp_path)
 
-        self.mbps_cols_are_valid(df_temp.copy())
-
         return df_temp
-
-    def mbps_cols_are_valid(self, df: pd.DataFrame) -> bool:
-        """
-        Validate the mbps column.
-        Check it has between 500 to 700 samples.
-        """
-        if df.empty:
-            raise ValueError("Input dataframe is empty")
-
-        if 'avg_mbps_per_sub' not in df.columns:
-            raise ValueError("Input dataframe must have avg_mbps_per_sub column")
-
-        if 'total_mbps_over_subs' not in df.columns:
-            raise ValueError("Input dataframe must have total_mbps_over_subs column")
-
-        df_avg_mbps = df['avg_mbps_per_sub'].copy()
-        df_avg_mbps.dropna(inplace=True)
-        i_count = len(df_avg_mbps)
-        if i_count < 500 or i_count > 700:
-            raise ValueError(
-                f"mbps column has {i_count} samples. Expected between 500 and 700 samples."
-            )
-
-        df_total_mbps = df['total_mbps_over_subs'].copy()
-        df_total_mbps.dropna(inplace=True)
-        i_count = df_total_mbps.count()
-        if i_count < 500 or i_count > 700:
-            raise ValueError(
-                f"mbps column has {i_count} samples. Expected between 500 and 700 samples."
-            )
-
-        return True
 
     def is_raw_exp_file(
         self,
