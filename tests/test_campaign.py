@@ -194,7 +194,7 @@ class TestCampaign:
                 "./path/to/idk_what_this_file_is.csv"
             )
 
-    def test_process_file(self):
+    def test_process_file_df(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
         o_c = Campaign(LD_DATASETS[0])
