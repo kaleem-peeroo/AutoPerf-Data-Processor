@@ -72,9 +72,19 @@ class Campaign:
         3. Add the experiment name
         4. Add the qos settings to the dataframe
         5. Add to a big ds df
+        6. Write the ds df to a parquet file
+
+        The dataset should have the following columns:
+            - experiment_name
+            - latency_us
+            - avg_mbps
+            - total_mbps
+
+        For any experiment, there should be:
+            - around 600 avg_mbps samples
+            - around 600 total_mbps samples
         """
         s_raw_datadir = self.get_raw_datadir()
-
         ld_exp_names_and_paths = self.get_experiments(s_raw_datadir)
 
     def get_experiments(self, s_raw_datadir: str = ""):
