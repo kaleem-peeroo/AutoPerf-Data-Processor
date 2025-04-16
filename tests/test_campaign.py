@@ -187,6 +187,13 @@ class TestCampaign:
         df_total_tp = df[['total_mbps_over_subs']].copy().dropna()
         assert len(df_total_tp) == 5284
 
+    def test_calculate_averages_for_avg_mbps_per_sub(self):
+        raise NotImplementedError("Test not implemented yet")
+
+    def test_calculate_averages_for_total_mbps_over_subs(self):
+        raise NotImplementedError("Test not implemented yet")
+
+
     def test_get_exp_file_df(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS

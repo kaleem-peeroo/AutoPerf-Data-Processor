@@ -95,6 +95,15 @@ class Campaign:
         self, 
         d_exp_names_and_paths: Dict[str, List[str]] = {}
     ) -> pd.DataFrame:
+        """
+        Generates a single df for the experiment.
+        The df should have the following columns:
+            - experiment_name
+            - latency_us
+            - avg_mbps_per_sub
+            - total_mbps_over_subs
+            - all input cols
+        """
         if not d_exp_names_and_paths:
             raise Exception("No experiment names and paths provided")
 
@@ -114,12 +123,30 @@ class Campaign:
             df_exp = pd.DataFrame()
             for s_exp_path in ls_exp_paths:
                 df_temp = self.get_exp_file_df(s_exp_path)
-                df_exp = pd.concat([df_exp, df_temp], axis=1, ignore_index=True)
+
+                if df_exp.empty:
+                    df_exp = df_temp
+                else:
+                    df_exp = pd.concat([df_exp, df_temp], axis=1)
 
         df_exp['experiment_name'] = s_exp_name
         df_exp = self.add_input_cols(df_exp)
+        df_exp = self.calculate_averages_for_avg_mbps_per_sub(df_exp)
+        df_exp = self.calculate_averages_for_total_mbps_over_subs(df_exp)
 
         return df_exp
+
+    def calculate_averages_for_avg_mbps_per_sub(
+        self,
+        df: pd.DataFrame = pd.DataFrame()
+    ) -> pd.DataFrame:
+        raise NotImplementedError("calculate_averages_for_avg_mbps_per_sub not implemented")
+    
+    def calculate_averages_for_total_mbps_over_subs(
+        self,
+        df: pd.DataFrame = pd.DataFrame()
+    ) -> pd.DataFrame:
+        raise NotImplementedError("calculate_averages_for_total_mbps_over_subs not implemented")
 
     def get_exp_file_df(
         self,
@@ -173,9 +200,6 @@ class Campaign:
         
         if s_exp_path == "":
             raise Exception("No experiment path provided")
-
-        if not isinstance(s_exp_path, str):
-            raise ValueError(f"Experiment path must be a string: {s_exp_path}")
 
         if not os.path.exists(s_exp_path):
             raise Exception(f"Experiment path does not exist: {s_exp_path}")
