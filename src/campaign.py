@@ -151,7 +151,7 @@ class Campaign:
         s_exp_path: str = ""
     ) -> pd.DataFrame:
         """
-        Checks if the file is a raw file or processed.
+        Read the file manually and get the necessary columns.
         """
         raise NotImplementedError("process_file_df not implemented")
 
