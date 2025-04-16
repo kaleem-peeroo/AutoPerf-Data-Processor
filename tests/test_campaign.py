@@ -90,7 +90,46 @@ class TestCampaign:
                 assert len(df_exp_total_mbps) > 400
                 assert len(df_exp_total_mbps) < 800
 
-            
+    def test_process_exp_df_with_exp_name_as_csv(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        d_ds_config = LD_DATASETS[0]
+        o_c = Campaign(d_ds_config)
+
+        d_test_exp_names_and_paths = {
+            'name': "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC",
+            'paths': [
+                './tests/data/test_campaign_with_csv/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv' 
+            ]
+        }
+
+        df = o_c.process_exp_df(d_test_exp_names_and_paths)
+        assert df is not None
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) > 0
+        assert len(df.columns) > 0
+
+        ls_wanted_cols = [
+            'experiment_name',
+            "latency_us",
+            'avg_mbps',
+            'total_mbps',
+        ]
+        for s_col in ls_wanted_cols:
+            assert s_col in df.columns
+
+        df_lat = df[['latency_us']].copy().dropna()
+        assert len(df_lat) == 5284
+
+        df_avg_tp = df[['avg_mbps']].copy().dropna()
+        assert len(df_avg_tp) == 612
+
+        df_total_tp = df[['total_mbps']].copy().dropna()
+        # TODO: Find out what the actual number is. 612 is just a guess.
+        assert len(df_total_tp) == 612
+
+
     def test_get_experiments_with_normal_case(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS

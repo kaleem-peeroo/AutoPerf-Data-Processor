@@ -87,6 +87,16 @@ class Campaign:
         s_raw_datadir = self.get_raw_datadir()
         ld_exp_names_and_paths = self.get_experiments(s_raw_datadir)
 
+        df_ds = pd.DataFrame()
+        for d_exp_names_and_paths in ld_exp_names_and_paths:
+            df_exp = self.process_exp_df(d_exp_names_and_paths)
+
+    def process_exp_df(
+        self, 
+        d_exp_names_and_paths: Dict[str, List[str]] = {}
+    ) -> pd.DataFrame:
+        raise NotImplementedError("process_exp_df not implemented")
+
     def get_experiments(self, s_raw_datadir: str = ""):
         """
         Gather a list of experiments.
