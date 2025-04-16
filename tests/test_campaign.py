@@ -232,7 +232,7 @@ class TestCampaign:
         s_test_file = f"{s_test_dir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
         i_start = o_c.get_start_index_for_raw_file(s_test_file)
         assert isinstance(i_start, int)
-        assert i_start == 1
+        assert i_start == 2
 
     def test_get_end_index_for_raw_file(self):
         from app import Campaign

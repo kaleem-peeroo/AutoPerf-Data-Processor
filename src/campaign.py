@@ -162,8 +162,6 @@ class Campaign:
                 f"Experiment path does not follow expected format: {s_exp_path}"
             )
 
-        return False
-
     def process_file_df(
         self,
         s_exp_path: str = ""
@@ -171,7 +169,118 @@ class Campaign:
         """
         Read the file manually and get the necessary columns.
         """
-        raise NotImplementedError("process_file_df not implemented")
+        
+        if s_exp_path == "":
+            raise Exception("No experiment path provided")
+
+        if not isinstance(s_exp_path, str):
+            raise ValueError(f"Experiment path must be a string: {s_exp_path}")
+
+        if not os.path.exists(s_exp_path):
+            raise Exception(f"Experiment path does not exist: {s_exp_path}")
+
+        if not os.path.isfile(s_exp_path):
+            raise Exception(f"Experiment path is not a file: {s_exp_path}")
+
+        if not s_exp_path.endswith(".csv"):
+            raise Exception(f"Experiment path is not a csv file: {s_exp_path}")
+
+        i_start = self.get_start_index_for_raw_file(s_exp_path)
+        i_end = self.get_end_index_for_raw_file(s_exp_path)
+
+        df = pd.read_csv(
+            s_exp_path,
+            skiprows=i_start,
+            nrows=i_end - i_start,
+            on_bad_lines="skip",
+        )
+
+        pprint(df)
+        
+        return df
+
+    def get_start_index_for_raw_file(
+        self,
+        s_exp_path: str = ""
+    ) -> int:
+        """
+        Looks for where the column titles start and returns the row index.
+        """
+        if s_exp_path == "":
+            raise Exception("No experiment path provided")
+
+        if not isinstance(s_exp_path, str):
+            raise ValueError(f"Experiment path must be a string: {s_exp_path}")
+
+        if not os.path.exists(s_exp_path):
+            raise Exception(f"Experiment path does not exist: {s_exp_path}")
+
+        if not os.path.isfile(s_exp_path):
+            raise Exception(f"Experiment path is not a file: {s_exp_path}")
+
+        if not s_exp_path.endswith(".csv"):
+            raise Exception(f"Experiment path is not a csv file: {s_exp_path}")
+
+        with open(s_exp_path, "r") as o_file:
+            ls_first_5_lines = []
+            for i in range(5):
+                line = o_file.readline()
+                if not line:
+                    break
+                ls_first_5_lines.append(line)
+
+        start_index = 0
+        for i, line in enumerate(ls_first_5_lines):
+            if "Ave" in line and "Length (Bytes)" in line:
+                start_index = i
+                break
+
+        if start_index == 0:
+            raise ValueError(f"Could not find start index for raw file: {s_exp_path}")
+
+        return start_index
+
+    def get_end_index_for_raw_file(
+        self,
+        s_exp_path: str = ""
+    ) -> int:
+        if s_exp_path == "":
+            raise Exception("No experiment path provided")
+
+        if not isinstance(s_exp_path, str):
+            raise ValueError(f"Experiment path must be a string: {s_exp_path}")
+
+        if not os.path.exists(s_exp_path):
+            raise Exception(f"Experiment path does not exist: {s_exp_path}")
+
+        if not os.path.isfile(s_exp_path):
+            raise Exception(f"Experiment path is not a file: {s_exp_path}")
+
+        if not s_exp_path.endswith(".csv"):
+            raise Exception(f"Experiment path is not a csv file: {s_exp_path}")
+
+        with open(s_exp_path, "r") as o_file:
+            ls_file_contents = o_file.readlines()
+
+        ls_last_5_lines = ls_file_contents[-5:]
+        line_count = len(ls_file_contents)
+
+        end_index = 0
+        for i, line in enumerate(ls_last_5_lines):
+            if "summary" in line.lower():
+                end_index = line_count - 5 + i - 2
+                break
+
+        if end_index == 0:
+            end_index = line_count - 1
+
+        if end_index <= 0:
+            raise ValueError(f"Could not find end index for raw file: {s_exp_path}")
+
+        if end_index >= line_count:
+            raise ValueError(f"End index is greater than file length: {s_exp_path}")
+
+        return end_index
 
     def add_input_cols(self, df: pd.DataFrame) -> pd.DataFrame:
         if df is None:
