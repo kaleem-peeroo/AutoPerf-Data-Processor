@@ -144,7 +144,25 @@ class Campaign:
         """
         Checks if the file is raw (pub_0.csv or sub_n.csv) or processed.
         """
-        raise NotImplementedError("is_raw_exp_file not implemented")
+        if s_exp_path == "":
+            raise Exception("No experiment path provided")
+
+        if not isinstance(s_exp_path, str):
+            raise ValueError(f"Experiment path must be a string: {s_exp_path}")
+
+        s_filename = os.path.basename(s_exp_path)
+        if s_filename.startswith("pub_0") or re.match(r"^sub_\d+\.csv$", s_filename):
+            return True
+
+        elif self.follows_experiment_name_format(s_filename):
+            return False
+
+        else:
+            raise ValueError(
+                f"Experiment path does not follow expected format: {s_exp_path}"
+            )
+
+        return False
 
     def process_file_df(
         self,
