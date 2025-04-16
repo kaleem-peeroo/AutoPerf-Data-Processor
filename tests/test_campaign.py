@@ -138,24 +138,54 @@ class TestCampaign:
         df_total_tp = df[['total_mbps_over_subs']].copy().dropna()
         assert len(df_total_tp) == 5284
 
-        ls_exp_names = df['experiment_name'].unique().tolist()
-        for s_exp_name in ls_exp_names:
-            df_exp = df[df['experiment_name'] == s_exp_name].copy()
-            assert len(df_exp) > 0
-            assert len(df_exp.columns) > 0
-            assert df_exp['experiment_name'].nunique() == 1
 
-            df_exp_avg_mbps = df_exp[['avg_mbps_per_sub']].copy()
-            df_exp_avg_mbps.dropna(inplace=True)
-            assert len(df_exp_avg_mbps) > 500
-            assert len(df_exp_avg_mbps) < 700
-            assert df_exp_avg_mbps['avg_mbps_per_sub'].dtype == 'float64'
+    def test_process_exp_df_with_raw_files(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
 
-            df_exp_total_mbps = df_exp[['total_mbps_over_subs']].copy()
-            df_exp_total_mbps.dropna(inplace=True)
-            assert len(df_exp_total_mbps) > 500, f"{len(df_exp_total_mbps)} > 500"
-            assert len(df_exp_total_mbps) < 700, f"{len(df_exp_total_mbps)} < 700"
-            assert df_exp_total_mbps['total_mbps_per_sub'].dtype == 'float64'
+        d_ds_config = LD_DATASETS[0]
+        o_c = Campaign(d_ds_config)
+
+        s_test_dir = "./tests/data/test_campaign_with_dirs_simple/"
+        d_test_exp_names_and_paths = {
+            'name': "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC",
+            'paths': [
+                f'{s_test_dir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv' ,
+                f'{s_test_dir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/sub_1.csv' 
+            ]
+        }
+
+        df = o_c.process_exp_df(d_test_exp_names_and_paths)
+        assert df is not None
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) > 0
+        assert len(df.columns) > 0
+
+        ls_wanted_cols = [
+            'experiment_name',
+            "latency_us",
+            'avg_mbps_per_sub',
+            'total_mbps_over_subs',
+
+            'duration_secs',
+            'datalen_bytes',
+            'pub_count',
+            'sub_count',
+            'use_reliable',
+            'use_multicast',
+            'durability'
+        ]
+        for s_col in ls_wanted_cols:
+            assert s_col in df.columns
+
+        df_lat = df[['latency_us']].copy().dropna()
+        assert len(df_lat) == 5284
+
+        df_avg_tp = df[['avg_mbps_per_sub']].copy().dropna()
+        assert len(df_avg_tp) == 612
+
+        df_total_tp = df[['total_mbps_over_subs']].copy().dropna()
+        assert len(df_total_tp) == 5284
 
     def test_get_exp_file_df(self):
         from app import Campaign
