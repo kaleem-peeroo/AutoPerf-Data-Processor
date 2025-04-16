@@ -223,6 +223,28 @@ class TestCampaign:
         assert df_sub["mbps"].dtype == "float64"
         assert len(df_sub) == 299
 
+    def test_get_start_index_for_raw_file(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        o_c = Campaign(LD_DATASETS[0])
+        s_test_dir = "./tests/data/test_campaign_with_dirs_simple/"
+        s_test_file = f"{s_test_dir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
+        i_start = o_c.get_start_index_for_raw_file(s_test_file)
+        assert isinstance(i_start, int)
+        assert i_start == 1
+
+    def test_get_end_index_for_raw_file(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        o_c = Campaign(LD_DATASETS[0])
+        s_test_dir = "./tests/data/test_campaign_with_dirs_simple/"
+        s_test_file = f"{s_test_dir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
+        i_end = o_c.get_end_index_for_raw_file(s_test_file)
+        assert isinstance(i_end, int)
+        assert i_end == 13
+
     def test_add_input_cols(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
