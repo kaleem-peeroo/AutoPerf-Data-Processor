@@ -112,13 +112,48 @@ class Campaign:
 
         df_exp = pd.DataFrame()
         for s_exp_path in ls_exp_paths:
-            df_path = pd.read_csv(s_exp_path)
-            df_exp = pd.concat([df_exp, df_path], ignore_index=True)
+            df_temp = self.get_exp_file_df(s_exp_path)
+            df_exp = pd.concat([df_exp, df_temp], ignore_index=True)
 
         df_exp['experiment_name'] = s_exp_name
         df_exp = self.add_input_cols(df_exp)
             
         return df_exp
+
+    def get_exp_file_df(
+        self,
+        s_exp_path: str = ""
+    ) -> pd.DataFrame:
+        """
+        Get the experiment file dataframe.
+        If its a raw file, process it.
+        Otherwise, just read the csv file.
+        """
+        if self.is_raw_exp_file(s_exp_path):
+            df_temp = self.process_file_df(s_exp_path)
+
+        else:
+            df_temp = pd.read_csv(s_exp_path)
+
+        return df_temp
+
+    def is_raw_exp_file(
+        self,
+        s_exp_path: str = ""
+    ) -> bool:
+        """
+        Checks if the file is raw (pub_0.csv or sub_n.csv) or processed.
+        """
+        raise NotImplementedError("is_raw_exp_file not implemented")
+
+    def process_file_df(
+        self,
+        s_exp_path: str = ""
+    ) -> pd.DataFrame:
+        """
+        Checks if the file is a raw file or processed.
+        """
+        raise NotImplementedError("process_file_df not implemented")
 
     def add_input_cols(self, df: pd.DataFrame) -> pd.DataFrame:
         if df is None:
@@ -135,7 +170,6 @@ class Campaign:
 
         if df['experiment_name'].nunique() != 1:
             raise ValueError("Input dataframe must have only one experiment name")
-
 
         s_exp_name = df['experiment_name'].iloc[0]
         d_qos = self.get_qos_from_exp_name(s_exp_name)
