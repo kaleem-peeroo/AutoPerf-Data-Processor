@@ -204,12 +204,21 @@ class Campaign:
         s_metric_col = self.get_metric_col_from_df(df, s_metric)
         df = df[[s_metric_col]]
 
+        if s_metric == "latency":
+            s_metric = "latency_us"
+
+        else:
+            s_metric = f"{os.path.basename(s_exp_path).split(".")[0]}_mbps"
+
         df = self.rename_df_col(
             df=df,
             s_old_colname=s_metric_col,
             s_new_colname=s_metric,
         )
-        
+
+        for col in df.columns:
+            df[col] = df[col].astype('float64')
+                    
         return df
 
     def rename_df_col(
@@ -251,14 +260,8 @@ class Campaign:
         if df.empty:
             raise ValueError("Dataframe is empty")
 
-        if not isinstance(df, pd.DataFrame):
-            raise ValueError(f"Input must be a dataframe: {df}")
-
         if s_metric == "":
             raise ValueError("No metric provided")
-
-        if not isinstance(s_metric, str):
-            raise ValueError(f"Metric must be a string: {s_metric}")
 
         ls_cols = df.columns.tolist()
         s_colname = ""
@@ -268,7 +271,7 @@ class Campaign:
                 break
 
         if s_colname == "":
-            raise ValueError(f"Could not find metric column in dataframe: {s_metric}")
+            raise ValueError(f"Could not find metric column in df: {s_metric}, {ls_cols}")
 
         if s_colname not in df.columns:
             raise ValueError(f"Metric column not found in dataframe: {s_colname}")

@@ -219,9 +219,9 @@ class TestCampaign:
         assert df_sub is not None
         assert isinstance(df_sub, pd.DataFrame)
         assert len(df_sub) > 0
-        assert "mbps" in df_sub.columns
-        assert df_sub["mbps"].dtype == "float64"
-        assert len(df_sub) == 299
+        assert "sub_1_mbps" in df_sub.columns
+        assert df_sub["sub_1_mbps"].dtype == "float64"
+        assert len(df_sub) == 298
 
     def test_get_metric_col_from_df(self):
         from app import Campaign
