@@ -206,6 +206,28 @@ class TestCampaign:
                 'total_mbps': [7, 8, 9],
             })
 
+    def test_get_qos_from_exp_name(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        d_ds_config = LD_DATASETS[0]
+        o_c = Campaign(d_ds_config)
+
+        # INFO: Normal case
+        s_exp_name = "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
+        d_qos = o_c.get_qos_from_exp_name(s_exp_name)
+        assert d_qos is not None
+        assert isinstance(d_qos, dict)
+        assert d_qos == {
+            'duration_secs': 600,
+            'datalen_bytes': 100,
+            'pub_count': 15,
+            'sub_count': 15,
+            'reliability': 0,
+            'multicast': 1,
+            'durability': 3,
+        }
+
     def test_get_experiments_with_normal_case(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
