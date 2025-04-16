@@ -206,16 +206,16 @@ class TestCampaign:
                 'total_mbps': [7, 8, 9],
             })
 
-    def test_get_qos_from_exp_name(self):
+    def test_get_qos_from_exp_name_with_normal_case(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
 
-        d_ds_config = LD_DATASETS[0]
-        o_c = Campaign(d_ds_config)
+        o_c = Campaign(LD_DATASETS[0])
 
-        # INFO: Normal case
-        s_exp_name = "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
-        d_qos = o_c.get_qos_from_exp_name(s_exp_name)
+        d_qos = o_c.get_qos_from_exp_name(
+            "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
+        )
+
         assert d_qos is not None
         assert isinstance(d_qos, dict)
         assert d_qos == {
@@ -227,6 +227,26 @@ class TestCampaign:
             'multicast': 1,
             'durability': 3,
         }
+
+    def test_get_qos_from_exp_name_with_invalid_cases(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        o_c = Campaign(LD_DATASETS[0])
+
+        ls_invalid_exp_names = [
+            "100B_15PUB_15SUB_BE_MC_3DUR_100LC",
+            "600SEC_15PUB_15SUB_BE_MC_3DUR_100LC",
+            "600SEC_100B_15SUB_BE_MC_3DUR_100LC",
+            "600SEC_100B_15PUB_BE_MC_3DUR_100LC",
+            "600SEC_100B_15PUB_15SUB_MC_3DUR_100LC",
+            "600SEC_100B_15PUB_15SUB_BE_3DUR_100LC",
+            "600SEC_100B_15PUB_15SUB_BE_MC_100LC",
+        ]
+
+        for s_exp_name in ls_invalid_exp_names:
+            with pytest.raises(ValueError):
+                o_c.get_qos_from_exp_name(s_exp_name)
 
     def test_get_experiments_with_normal_case(self):
         from app import Campaign
