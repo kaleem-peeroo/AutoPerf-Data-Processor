@@ -139,6 +139,42 @@ class TestCampaign:
         # TODO: Find out what the actual number is. 612 is just a guess.
         assert len(df_total_tp) == 612
 
+    def test_get_exp_file_df(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        d_ds_config = LD_DATASETS[0]
+        o_c = Campaign(d_ds_config)
+
+        # INFO: Normal Case - raw sub file
+        s_raw_file = "./tests/data/test_campaign_with_dirs_small/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/sub_2.csv"
+        df = o_c.get_exp_file_df(s_raw_file)
+        assert df is not None
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) > 0
+        ls_expected_cols = [
+            'sub_2_avg_mbps',
+            'sub_2_mbps',
+        ]
+        for s_col in ls_expected_cols:
+            assert s_col in df.columns
+            assert df[s_col].dtype == 'float64'
+
+        # INFO: Normal Case - raw pub file
+        s_raw_file = "./tests/data/test_campaign_with_dirs_small/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
+        assert df is not None
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) > 0
+        assert 'latency_us' in df.columns
+        assert df['latency_us'].dtype == 'float64'
+
+    def test_is_raw_exp_file(self):
+        raise NotImplementedError("test_is_raw_exp_file not implemented")
+
+
+    def test_process_file(self):
+        raise NotImplementedError("test_process_file not implemented")
+
     def test_add_input_cols(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
