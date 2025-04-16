@@ -195,9 +195,40 @@ class Campaign:
             on_bad_lines="skip",
         )
 
+        if self.raw_file_is_pub(s_exp_path):
+            s_metric = "latency"
+
+        else:
+            s_metric = "mbps"
+
         pprint(df)
         
         return df
+
+    def raw_file_is_pub(
+        self,
+        s_exp_path: str = ""
+    ) -> bool:
+        """
+        Checks if the raw file is a pub or sub file.
+        """
+        if s_exp_path == "":
+            raise Exception("No experiment path provided")
+
+        if not isinstance(s_exp_path, str):
+            raise ValueError(f"Experiment path must be a string: {s_exp_path}")
+
+        s_filename = os.path.basename(s_exp_path)
+        if s_filename.startswith("pub_0"):
+            return True
+
+        elif re.match(r"^sub_\d+\.csv$", s_filename):
+            return False
+
+        else:
+            raise ValueError(
+                f"Experiment path does not follow expected format: {s_exp_path}"
+            )
 
     def get_start_index_for_raw_file(
         self,

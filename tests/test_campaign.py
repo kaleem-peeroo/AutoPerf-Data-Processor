@@ -223,6 +223,28 @@ class TestCampaign:
         assert df_sub["mbps"].dtype == "float64"
         assert len(df_sub) == 299
 
+    def test_raw_file_is_pub(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - pub file
+        assert o_c.raw_file_is_pub(
+            "./path/to/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
+        ) is True
+
+        # INFO: Normal Case - sub file
+        assert o_c.raw_file_is_pub(
+            "./path/to/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/sub_1.csv"
+        ) is False
+
+        # INFO: Error case - neither pub or sub
+        with pytest.raises(ValueError):
+            o_c.raw_file_is_pub(
+                "./path/to/300SEC_1B_1P_3S_BE_MC_0DUR_100LC.csv"
+            )
+
     def test_get_start_index_for_raw_file(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
