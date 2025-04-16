@@ -195,7 +195,33 @@ class TestCampaign:
             )
 
     def test_process_file(self):
-        raise NotImplementedError("test_process_file not implemented")
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+        o_c = Campaign(LD_DATASETS[0])
+
+        s_test_datadir = "./tests/data/test_campaign_with_dirs_simple/"
+
+        # INFO: Normal Case - pub file
+        df_pub = o_c.process_file_df(
+            f"{s_test_datadir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
+        )
+        assert df_pub is not None
+        assert isinstance(df_pub, pd.DataFrame)
+        assert len(df_pub) > 0
+        assert "latency_us" in df_pub.columns
+        assert df_pub["latency_us"].dtype == "float64"
+        assert len(df_pub) == 11
+
+        # INFO: Normal Case - sub file
+        df_sub = o_c.process_file_df(
+            f"{s_test_datadir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/sub_1.csv"
+        )
+        assert df_sub is not None
+        assert isinstance(df_sub, pd.DataFrame)
+        assert len(df_sub) > 0
+        assert "mbps" in df_sub.columns
+        assert df_sub["mbps"].dtype == "float64"
+        assert len(df_sub) == 299
 
     def test_add_input_cols(self):
         from app import Campaign
