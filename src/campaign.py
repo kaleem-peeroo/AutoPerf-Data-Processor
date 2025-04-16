@@ -98,9 +98,6 @@ class Campaign:
         if not d_exp_names_and_paths:
             raise Exception("No experiment names and paths provided")
 
-        if not isinstance(d_exp_names_and_paths, dict):
-            raise ValueError(f"Experiment names and paths must be a dict: {d_exp_names_and_paths}")
-
         if 'name' not in d_exp_names_and_paths:
             raise ValueError("Experiment names and paths must have a name key")
 
@@ -117,7 +114,7 @@ class Campaign:
 
         df_exp['experiment_name'] = s_exp_name
         df_exp = self.add_input_cols(df_exp)
-            
+
         return df_exp
 
     def get_exp_file_df(
@@ -135,7 +132,41 @@ class Campaign:
         else:
             df_temp = pd.read_csv(s_exp_path)
 
+        self.mbps_cols_are_valid(df_temp.copy())
+
         return df_temp
+
+    def mbps_cols_are_valid(self, df: pd.DataFrame) -> bool:
+        """
+        Validate the mbps column.
+        Check it has between 500 to 700 samples.
+        """
+        if df.empty:
+            raise ValueError("Input dataframe is empty")
+
+        if 'avg_mbps_per_sub' not in df.columns:
+            raise ValueError("Input dataframe must have avg_mbps_per_sub column")
+
+        if 'total_mbps_over_subs' not in df.columns:
+            raise ValueError("Input dataframe must have total_mbps_over_subs column")
+
+        df_avg_mbps = df['avg_mbps_per_sub'].copy()
+        df_avg_mbps.dropna(inplace=True)
+        i_count = len(df_avg_mbps)
+        if i_count < 500 or i_count > 700:
+            raise ValueError(
+                f"mbps column has {i_count} samples. Expected between 500 and 700 samples."
+            )
+
+        df_total_mbps = df['total_mbps_over_subs'].copy()
+        df_total_mbps.dropna(inplace=True)
+        i_count = df_total_mbps.count()
+        if i_count < 500 or i_count > 700:
+            raise ValueError(
+                f"mbps column has {i_count} samples. Expected between 500 and 700 samples."
+            )
+
+        return True
 
     def is_raw_exp_file(
         self,

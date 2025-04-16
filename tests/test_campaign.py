@@ -115,15 +115,15 @@ class TestCampaign:
         ls_wanted_cols = [
             'experiment_name',
             "latency_us",
-            'avg_mbps',
-            'total_mbps',
+            'avg_mbps_per_sub',
+            'total_mbps_over_subs',
 
             'duration_secs',
             'datalen_bytes',
             'pub_count',
             'sub_count',
-            'reliability',
-            'multicast',
+            'use_reliable',
+            'use_multicast',
             'durability'
         ]
         for s_col in ls_wanted_cols:
@@ -132,12 +132,30 @@ class TestCampaign:
         df_lat = df[['latency_us']].copy().dropna()
         assert len(df_lat) == 5284
 
-        df_avg_tp = df[['avg_mbps']].copy().dropna()
+        df_avg_tp = df[['avg_mbps_per_sub']].copy().dropna()
         assert len(df_avg_tp) == 612
 
-        df_total_tp = df[['total_mbps']].copy().dropna()
-        # TODO: Find out what the actual number is. 612 is just a guess.
-        assert len(df_total_tp) == 612
+        df_total_tp = df[['total_mbps_over_subs']].copy().dropna()
+        assert len(df_total_tp) == 5284
+
+        ls_exp_names = df['experiment_name'].unique().tolist()
+        for s_exp_name in ls_exp_names:
+            df_exp = df[df['experiment_name'] == s_exp_name].copy()
+            assert len(df_exp) > 0
+            assert len(df_exp.columns) > 0
+            assert df_exp['experiment_name'].nunique() == 1
+
+            df_exp_avg_mbps = df_exp[['avg_mbps_per_sub']].copy()
+            df_exp_avg_mbps.dropna(inplace=True)
+            assert len(df_exp_avg_mbps) > 500
+            assert len(df_exp_avg_mbps) < 700
+            assert df_exp_avg_mbps['avg_mbps_per_sub'].dtype == 'float64'
+
+            df_exp_total_mbps = df_exp[['total_mbps_over_subs']].copy()
+            df_exp_total_mbps.dropna(inplace=True)
+            assert len(df_exp_total_mbps) > 500, f"{len(df_exp_total_mbps)} > 500"
+            assert len(df_exp_total_mbps) < 700, f"{len(df_exp_total_mbps)} < 700"
+            assert df_exp_total_mbps['total_mbps_per_sub'].dtype == 'float64'
 
     def test_get_exp_file_df(self):
         from app import Campaign
@@ -168,6 +186,42 @@ class TestCampaign:
         assert 'latency_us' in df.columns
         assert df['latency_us'].dtype == 'float64'
 
+    def test_mbps_cols_are_valid(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - 614 avg_mbps_per_sub samples
+        df = pd.DataFrame({
+            'avg_mbps_per_sub': [1] * 613 + [4],
+            'total_mbps_over_subs': [5] * 613 + [8],
+        })
+        assert o_c.mbps_cols_are_valid(df) is True
+
+        # INFO: Normal Case - 614 total_mbps_over_subs samples
+        df = pd.DataFrame({
+            'avg_mbps_per_sub': [1] * 613 + [4],
+            'total_mbps_over_subs': [5] * 613 + [8],
+        })
+        assert o_c.mbps_cols_are_valid(df) is True
+
+        # INFO: Error Case - 12000 avg_mbps_per_sub samples
+        df = pd.DataFrame({
+            'avg_mbps_per_sub': [1] * 12000 + [4],
+            'total_mbps_over_subs': [5] * 12000 + [8],
+        })
+        with pytest.raises(ValueError):
+            o_c.mbps_cols_are_valid(df)
+
+        # INFO: Error Case - 12000 total_mbps_over_subs samples
+        df = pd.DataFrame({
+            'avg_mbps_per_sub': [1] * 12000 + [4],
+            'total_mbps_over_subs': [5] * 12000 + [8],
+        })
+        with pytest.raises(ValueError):
+            o_c.mbps_cols_are_valid(df)
+        
     def test_is_raw_exp_file(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
