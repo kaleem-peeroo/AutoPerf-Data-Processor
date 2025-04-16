@@ -2,6 +2,8 @@ import pytest
 import os
 import pandas as pd
 
+from rich.pretty import pprint
+
 class TestCampaign:
     def test_init_with_normal_case(self):
         from app import Campaign
@@ -137,6 +139,59 @@ class TestCampaign:
         # TODO: Find out what the actual number is. 612 is just a guess.
         assert len(df_total_tp) == 612
 
+    def test_add_input_cols(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        d_ds_config = LD_DATASETS[0]
+        o_c = Campaign(d_ds_config)
+
+        ls_input_cols = [
+            'duration_secs',
+            'datalen_bytes',
+            'pub_count',
+            'sub_count',
+            'reliability',
+            'multicast',
+            'durability'
+        ]
+
+        # INFO: Normal Case
+        df_before = pd.DataFrame({
+            'experiment_name': ["600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"] * 3,
+            'latency_us': [1, 2, 3],
+            'avg_mbps': [4, 5, 6],
+            'total_mbps': [7, 8, 9],
+        })
+        df_after = o_c.add_input_cols(df_before)
+
+        assert df_after is not None
+        assert isinstance(df_after, pd.DataFrame)
+        assert len(df_after) == 3
+        assert len(df_after.columns) == len(df_before.columns) + len(ls_input_cols)
+        assert df_after['experiment_name'].nunique() == 1
+
+        for s_col in ls_input_cols:
+            assert s_col in df_after.columns
+            assert df_after[s_col].dtype == 'float64'
+            assert df_after[s_col].nunique() == 1
+
+        assert df_after['duration_secs'].iloc[0] == 600
+        assert df_after['datalen_bytes'].iloc[0] == 100
+        assert df_after['pub_count'].iloc[0] == 15
+        assert df_after['sub_count'].iloc[0] == 15
+        assert df_after['reliability'].iloc[0] == 0
+        assert df_after['multicast'].iloc[0] == 1
+        assert df_after['durability'].iloc[0] == 3
+
+        # INFO: Error Case - No experiment name col
+        with pytest.raises(ValueError):
+            df_before = pd.DataFrame({
+                'latency_us': [1, 2, 3],
+                'avg_mbps': [4, 5, 6],
+                'total_mbps': [7, 8, 9],
+            })
+            df_after = o_c.add_input_cols(df_before)
 
     def test_get_experiments_with_normal_case(self):
         from app import Campaign

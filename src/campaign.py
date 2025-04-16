@@ -95,7 +95,33 @@ class Campaign:
         self, 
         d_exp_names_and_paths: Dict[str, List[str]] = {}
     ) -> pd.DataFrame:
-        raise NotImplementedError("process_exp_df not implemented")
+        if not d_exp_names_and_paths:
+            raise Exception("No experiment names and paths provided")
+
+        if not isinstance(d_exp_names_and_paths, dict):
+            raise ValueError(f"Experiment names and paths must be a dict: {d_exp_names_and_paths}")
+
+        if 'name' not in d_exp_names_and_paths:
+            raise ValueError("Experiment names and paths must have a name key")
+
+        if 'paths' not in d_exp_names_and_paths:
+            raise ValueError("Experiment names and paths must have a paths key")
+
+        s_exp_name = d_exp_names_and_paths['name']
+        ls_exp_paths = d_exp_names_and_paths['paths']
+
+        df_exp = pd.DataFrame()
+        for s_exp_path in ls_exp_paths:
+            df_path = pd.read_csv(s_exp_path)
+            df_exp = pd.concat([df_exp, df_path], ignore_index=True)
+
+        df_exp['experiment_name'] = s_exp_name
+        df_exp = self.add_input_cols(df_exp)
+            
+        return df_exp
+
+    def add_input_cols(self, df: pd.DataFrame) -> pd.DataFrame:
+        raise NotImplementedError("add_input_cols not implemented")
 
     def get_experiments(self, s_raw_datadir: str = ""):
         """
