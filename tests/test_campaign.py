@@ -151,9 +151,10 @@ class TestCampaign:
             'datalen_bytes',
             'pub_count',
             'sub_count',
-            'reliability',
-            'multicast',
-            'durability'
+            'use_reliable',
+            'use_multicast',
+            'durability',
+            'latency_count'
         ]
 
         # INFO: Normal Case
@@ -163,7 +164,7 @@ class TestCampaign:
             'avg_mbps': [4, 5, 6],
             'total_mbps': [7, 8, 9],
         })
-        df_after = o_c.add_input_cols(df_before)
+        df_after = o_c.add_input_cols(df_before.copy())
 
         assert df_after is not None
         assert isinstance(df_after, pd.DataFrame)
@@ -192,7 +193,7 @@ class TestCampaign:
                 'avg_mbps': [4, 5, 6],
                 'total_mbps': [7, 8, 9],
             })
-            df_after = o_c.add_input_cols(df_before)
+            df_after = o_c.add_input_cols(df_before.copy())
 
         # INFO: Error Case - Diff experiment names
         with pytest.raises(ValueError):
@@ -206,6 +207,7 @@ class TestCampaign:
                 'avg_mbps': [4, 5, 6],
                 'total_mbps': [7, 8, 9],
             })
+            df_after = o_c.add_input_cols(df_before.copy())
 
     def test_get_qos_from_exp_name_with_normal_case(self):
         from app import Campaign

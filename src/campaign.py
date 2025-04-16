@@ -136,12 +136,14 @@ class Campaign:
         if df['experiment_name'].nunique() != 1:
             raise ValueError("Input dataframe must have only one experiment name")
 
+
         s_exp_name = df['experiment_name'].iloc[0]
         d_qos = self.get_qos_from_exp_name(s_exp_name)
 
-        for key in d_qos.keys():
+        for key, value in d_qos.items():
             if key not in df.columns:
-                df[key] = d_qos[key]
+                df[key] = value
+                df[key] = df[key].astype('float64')
 
         return df
 
