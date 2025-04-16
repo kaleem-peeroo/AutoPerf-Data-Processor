@@ -202,9 +202,45 @@ class Campaign:
             s_metric = "mbps"
 
         s_metric_col = self.get_metric_col_from_df(df, s_metric)
+        df = df[[s_metric_col]]
 
-        pprint(df)
+        df = self.rename_df_col(
+            df=df,
+            s_old_colname=s_metric_col,
+            s_new_colname=s_metric,
+        )
         
+        return df
+
+    def rename_df_col(
+        self,
+        df: pd.DataFrame = pd.DataFrame(),
+        s_old_colname: str = "",
+        s_new_colname: str = ""
+    ) -> pd.DataFrame:
+        if df.empty:
+            raise ValueError("Dataframe is empty")
+
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError(f"Input must be a dataframe: {df}")
+
+        if s_old_colname == "":
+            raise ValueError("No old column name provided")
+
+        if s_new_colname == "":
+            raise ValueError("No new column name provided")
+
+        if not isinstance(s_old_colname, str):
+            raise ValueError(f"Old column name must be a string: {s_old_colname}")
+
+        if not isinstance(s_new_colname, str):
+            raise ValueError(f"New column name must be a string: {s_new_colname}")
+
+        if s_old_colname not in df.columns:
+            raise ValueError(f"Old column name not found in dataframe: {s_old_colname}")
+
+        df.rename(columns={s_old_colname: s_new_colname}, inplace=True)
+
         return df
 
     def get_metric_col_from_df(

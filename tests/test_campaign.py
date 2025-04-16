@@ -249,6 +249,37 @@ class TestCampaign:
             'mbps'
         ) == "mbps"
 
+    def test_rename_df_col(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - Latency (us)
+        df_before = pd.DataFrame({
+            'Latency (us)': [1, 2, 3],
+            'avg_mbps': [4, 5, 6],
+            'total_mbps': [7, 8, 9],
+        })
+        df_after = o_c.rename_df_col(
+            df_before.copy(),
+            'Latency (us)',
+            'latency_us'
+        )
+        assert df_after is not None
+        assert isinstance(df_after, pd.DataFrame)
+        assert len(df_after) == 3
+        assert len(df_after.columns) == 3
+        assert 'latency_us' in df_after.columns
+
+        # INFO: Error Case - col not found
+        with pytest.raises(ValueError):
+            df_after = o_c.rename_df_col(
+                df_before.copy(),
+                'invalid_col',
+                'latency_us'
+            )
+
     def test_raw_file_is_pub(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
