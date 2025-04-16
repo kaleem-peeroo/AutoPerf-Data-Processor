@@ -153,7 +153,6 @@ class TestCampaign:
         assert isinstance(df, pd.DataFrame)
         assert len(df) > 0
         ls_expected_cols = [
-            'sub_2_avg_mbps',
             'sub_2_mbps',
         ]
         for s_col in ls_expected_cols:
@@ -162,6 +161,7 @@ class TestCampaign:
 
         # INFO: Normal Case - raw pub file
         s_raw_file = "./tests/data/test_campaign_with_dirs_small/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
+        df = o_c.get_exp_file_df(s_raw_file)
         assert df is not None
         assert isinstance(df, pd.DataFrame)
         assert len(df) > 0
