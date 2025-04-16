@@ -201,9 +201,18 @@ class Campaign:
         else:
             s_metric = "mbps"
 
+        s_metric_col = self.get_metric_col_from_df(df, s_metric)
+
         pprint(df)
         
         return df
+
+    def get_metric_col_from_df(
+        self,
+        df: pd.DataFrame = pd.DataFrame(),
+        s_metric: str = ""
+    ) -> str:
+        raise NotImplementedError("get_metric_col_from_df not implemented")
 
     def raw_file_is_pub(
         self,

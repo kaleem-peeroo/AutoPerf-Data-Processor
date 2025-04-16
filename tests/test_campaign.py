@@ -223,6 +223,32 @@ class TestCampaign:
         assert df_sub["mbps"].dtype == "float64"
         assert len(df_sub) == 299
 
+    def test_get_metric_col_from_df(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - Latency (us)
+        assert o_c.get_metric_col_from_df(
+            pd.DataFrame({
+                'Latency (us)': [1, 2, 3],
+                'avg_mbps': [4, 5, 6],
+                'total_mbps': [7, 8, 9],
+            }),
+            'latency'
+        ) == "Latency (us)"
+
+        # INFO: Normal Case - Mbps
+        assert o_c.get_metric_col_from_df(
+            pd.DataFrame({
+                'Latency (us)': [1, 2, 3],
+                'avg_mbps': [4, 5, 6],
+                'mbps': [7, 8, 9],
+            }),
+            'mbps'
+        ) == "mbps"
+
     def test_raw_file_is_pub(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
