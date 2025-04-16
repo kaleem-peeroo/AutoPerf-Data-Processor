@@ -193,6 +193,19 @@ class TestCampaign:
             })
             df_after = o_c.add_input_cols(df_before)
 
+        # INFO: Error Case - Diff experiment names
+        with pytest.raises(ValueError):
+            df_before = pd.DataFrame({
+                'experiment_name': [
+                    "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC",
+                    "600SEC_100B_10PUB_15SUB_BE_MC_3DUR_100LC",
+                    "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC",
+                ],
+                'latency_us': [1, 2, 3],
+                'avg_mbps': [4, 5, 6],
+                'total_mbps': [7, 8, 9],
+            })
+
     def test_get_experiments_with_normal_case(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
