@@ -121,7 +121,29 @@ class Campaign:
         return df_exp
 
     def add_input_cols(self, df: pd.DataFrame) -> pd.DataFrame:
-        raise NotImplementedError("add_input_cols not implemented")
+        if df is None:
+            raise Exception("No dataframe provided")
+
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError(f"Input must be a dataframe: {df}")
+
+        if df.empty:
+            raise ValueError("Input dataframe is empty")
+
+        if 'experiment_name' not in df.columns:
+            raise ValueError("Input dataframe must have experiment_name column")
+
+        if df['experiment_name'].nunique() != 1:
+            raise ValueError("Input dataframe must have only one experiment name")
+
+        s_exp_name = df['experiment_name'].iloc[0]
+        d_qos = self.get_qos_from_exp_name(s_exp_name)
+
+        for key in d_qos.keys():
+            if key not in df.columns:
+                df[key] = d_qos[key]
+
+        return df
 
     def get_experiments(self, s_raw_datadir: str = ""):
         """
