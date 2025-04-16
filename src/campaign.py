@@ -212,8 +212,33 @@ class Campaign:
         df: pd.DataFrame = pd.DataFrame(),
         s_metric: str = ""
     ) -> str:
-        raise NotImplementedError("get_metric_col_from_df not implemented")
+        if df.empty:
+            raise ValueError("Dataframe is empty")
 
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError(f"Input must be a dataframe: {df}")
+
+        if s_metric == "":
+            raise ValueError("No metric provided")
+
+        if not isinstance(s_metric, str):
+            raise ValueError(f"Metric must be a string: {s_metric}")
+
+        ls_cols = df.columns.tolist()
+        s_colname = ""
+        for s_col in ls_cols:
+            if s_metric in s_col.lower() and "avg" not in s_col.lower():
+                s_colname = s_col
+                break
+
+        if s_colname == "":
+            raise ValueError(f"Could not find metric column in dataframe: {s_metric}")
+
+        if s_colname not in df.columns:
+            raise ValueError(f"Metric column not found in dataframe: {s_colname}")
+
+        return s_colname
+        
     def raw_file_is_pub(
         self,
         s_exp_path: str = ""
