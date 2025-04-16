@@ -1,5 +1,6 @@
 import pytest
 import os
+import pandas as pd
 
 class TestCampaign:
     def test_init_with_normal_case(self):
@@ -23,6 +24,73 @@ class TestCampaign:
             assert o_c.data_exp_list == []
             assert o_c.missing_exps == []
 
+    def test_create_dataset(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+
+        ld_ds_config = LD_DATASETS
+
+        for d_ds in ld_ds_config:
+            o_c = Campaign(d_ds)
+            s_raw_datadir = o_c.get_raw_datadir()
+            ld_exp_names_and_paths = o_c.get_experiments(s_raw_datadir)
+
+            # INFO: Normal case - should create dataset
+            o_c.create_dataset()
+
+            assert os.path.exists(o_c.ds_output_path)
+            assert os.path.isfile(o_c.ds_output_path)
+            assert os.path.getsize(o_c.ds_output_path) > 0
+            assert o_c.ds_df is not None
+            assert isinstance(o_c.ds_df, pd.DataFrame)
+            assert len(o_c.ds_df) > 0
+            assert len(o_c.ds_df.columns) > 0
+
+            ls_wanted_cols = [
+                'experiment_name',
+                "latency_us",
+                'avg_mbps',
+                'total_mbps',
+            ]
+            for s_col in ls_wanted_cols:
+                assert s_col in o_c.ds_df.columns
+                assert o_c.ds_df[s_col].dtype == 'float64'
+
+            df = o_c.get_ds_df()
+            ls_exp_names = df['experiment_name'].unique().tolist()
+
+            for d_exp in ld_exp_names_and_paths:
+                s_exp_name = d_exp['name']
+                assert s_exp_name in ls_exp_names
+
+                df_exp = df[df['experiment_name'] == s_exp_name].copy()
+                assert len(df_exp) > 0
+                assert len(df_exp.columns) > 0
+                assert df_exp['experiment_name'].nunique() == 1
+                assert df_exp['experiment_name'].iloc[0] == s_exp_name
+
+                # INFO: Check latency_us
+                df_exp_lat = df_exp[['latency_us']].copy()
+                df_exp_lat.dropna(inplace=True)
+                assert len(df_exp_lat) > 0
+
+                # INFO: Check avg_mbps
+                df_exp_avg_mbps = df_exp[['avg_mbps']].copy()
+                df_exp_avg_mbps.dropna(inplace=True)
+                # INFO: Check there are around 400 to 800 samples
+                # This covers the expected 600 samples range
+                assert len(df_exp_avg_mbps) > 400
+                assert len(df_exp_avg_mbps) < 800
+
+                # INFO: Check total_mbps
+                df_exp_total_mbps = df_exp[['total_mbps']].copy()
+                df_exp_total_mbps.dropna(inplace=True)
+                # INFO: Check there are around 400 to 800 samples
+                # This covers the expected 600 samples range
+                assert len(df_exp_total_mbps) > 400
+                assert len(df_exp_total_mbps) < 800
+
+            
     def test_get_experiments_with_normal_case(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
@@ -155,7 +223,6 @@ class TestCampaign:
             assert os.path.isfile(s_path)
             assert os.path.getsize(s_path) > 0
             assert s_path.endswith('.csv')
-
         
     def test_recursively_get_fpaths(self):
         from app import Campaign
