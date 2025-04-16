@@ -180,9 +180,10 @@ class TestCampaign:
         assert df_after['datalen_bytes'].iloc[0] == 100
         assert df_after['pub_count'].iloc[0] == 15
         assert df_after['sub_count'].iloc[0] == 15
-        assert df_after['reliability'].iloc[0] == 0
-        assert df_after['multicast'].iloc[0] == 1
+        assert df_after['use_reliable'].iloc[0] == 0
+        assert df_after['use_multicast'].iloc[0] == 1
         assert df_after['durability'].iloc[0] == 3
+        assert df_after['latency_count'].iloc[0] == 100
 
         # INFO: Error Case - No experiment name col
         with pytest.raises(ValueError):
@@ -223,9 +224,10 @@ class TestCampaign:
             'datalen_bytes': 100,
             'pub_count': 15,
             'sub_count': 15,
-            'reliability': 0,
-            'multicast': 1,
+            'use_reliable': 0,
+            'use_multicast': 1,
             'durability': 3,
+            'latency_count': 100,
         }
 
     def test_get_qos_from_exp_name_with_invalid_cases(self):
