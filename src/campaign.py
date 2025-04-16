@@ -145,6 +145,40 @@ class Campaign:
 
         return df
 
+    def get_qos_from_exp_name(
+        self, 
+        s_exp_name: str = ""
+    ) -> Dict[str, str]:
+        if s_exp_name == "":
+            raise Exception("No experiment name provided")
+
+        if not isinstance(s_exp_name, str):
+            raise ValueError(f"Experiment name must be a string: {s_exp_name}")
+
+        if "_" not in s_exp_name:
+            raise ValueError(f"Experiment name must have underscores: {s_exp_name}")
+
+        if not self.follows_experiment_name_format(s_exp_name):
+            raise ValueError(f"Experiment name does not follow expected format: {s_exp_name}")
+
+        ls_parts = s_exp_name.split("_")
+        d_qos = {
+            "duration_secs": ls_parts[0].split("SEC")[0],
+            "datalen_bytes": ls_parts[1].split("B")[0],
+            "pub_count": ls_parts[2].split("P")[0],
+            "sub_count": ls_parts[3].split("S")[0],
+            "use_reliable": 1 if "REL" in ls_parts[4] else 0,
+            "use_multicast": 1 if "MC" in ls_parts[5] else 0,
+            "durability": ls_parts[6].split("DUR")[0],
+            "latency_count": ls_parts[7].split("LC")[0]
+        }
+
+        # Convert to int
+        for key in d_qos.keys():
+            d_qos[key] = int(d_qos[key])
+
+        return d_qos
+
     def get_experiments(self, s_raw_datadir: str = ""):
         """
         Gather a list of experiments.
