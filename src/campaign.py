@@ -204,15 +204,14 @@ class Campaign:
             raise Exception(f"Experiment entry does not exist: {s_exp_entry}")
 
         if os.path.isfile(s_exp_entry):
-            raise Exception(f"Experiment entry is a file: {s_exp_entry}")
+            lg.warning("Experiment entry is a file. Returning that file.")
+            return [s_exp_entry]
 
         if not os.path.isdir(s_exp_entry):
             raise Exception(f"Experiment entry is not a directory: {s_exp_entry}")
 
         ls_fpaths = list(Path(s_exp_entry).rglob("*.*"))
         ls_fpaths = [str(fpath) for fpath in ls_fpaths]
-
-        pprint(ls_fpaths)
 
         return ls_fpaths
 
