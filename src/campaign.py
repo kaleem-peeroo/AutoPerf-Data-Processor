@@ -231,7 +231,7 @@ class Campaign:
 
         start_index = 0
         for i, line in enumerate(ls_first_5_lines):
-            if "Ave" in line and "Length (Bytes)" in line:
+            if "Length (Bytes)" in line:
                 start_index = i
                 break
 
