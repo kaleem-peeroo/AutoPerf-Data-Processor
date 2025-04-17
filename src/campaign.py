@@ -625,7 +625,7 @@ class Campaign:
                 {"name": s_exp_name, "paths": ls_exp_paths}
             )
 
-        self.check_for_expected_files(ld_exp_names_and_paths)
+        ld_exp_names_and_paths = self.check_for_expected_files(ld_exp_names_and_paths)
 
         return ld_exp_names_and_paths
 
