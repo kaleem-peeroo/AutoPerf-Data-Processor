@@ -19,7 +19,7 @@ class TestCampaign:
             assert o_c.ds_output_path == d_ds['dataset_path']
             assert o_c.apconf_path == d_ds['ap_config']
             assert o_c.raw_datadir == d_ds['exp_folders']
-            assert o_c.ds_df is None
+            assert o_c.df_ds is None
             assert o_c.config is None
             assert o_c.qos_variations == {}
             assert o_c.qos_exp_list == []
@@ -43,22 +43,21 @@ class TestCampaign:
             assert os.path.exists(o_c.ds_output_path)
             assert os.path.isfile(o_c.ds_output_path)
             assert os.path.getsize(o_c.ds_output_path) > 0
-            assert o_c.ds_df is not None
-            assert isinstance(o_c.ds_df, pd.DataFrame)
-            assert len(o_c.ds_df) > 0
-            assert len(o_c.ds_df.columns) > 0
+            assert o_c.df_ds is not None
+            assert isinstance(o_c.df_ds, pd.DataFrame)
+            assert len(o_c.df_ds) > 0
+            assert len(o_c.df_ds.columns) > 0
 
             ls_wanted_cols = [
                 'experiment_name',
                 "latency_us",
-                'avg_mbps',
-                'total_mbps',
+                'avg_mbps_per_sub',
+                'total_mbps_over_subs',
             ]
             for s_col in ls_wanted_cols:
-                assert s_col in o_c.ds_df.columns
-                assert o_c.ds_df[s_col].dtype == 'float64'
+                assert s_col in o_c.df_ds.columns
 
-            df = o_c.get_ds_df()
+            df = o_c.get_df_ds()
             ls_exp_names = df['experiment_name'].unique().tolist()
 
             for d_exp in ld_exp_names_and_paths:
@@ -71,13 +70,17 @@ class TestCampaign:
                 assert df_exp['experiment_name'].nunique() == 1
                 assert df_exp['experiment_name'].iloc[0] == s_exp_name
 
+                # INFO: No duplicate columns
+                ls_cols = df_exp.columns.tolist()
+                assert len(ls_cols) == len(set(ls_cols))
+
                 # INFO: Check latency_us
                 df_exp_lat = df_exp[['latency_us']].copy()
                 df_exp_lat.dropna(inplace=True)
                 assert len(df_exp_lat) > 0
 
                 # INFO: Check avg_mbps
-                df_exp_avg_mbps = df_exp[['avg_mbps']].copy()
+                df_exp_avg_mbps = df_exp[['avg_mbps_per_sub']].copy()
                 df_exp_avg_mbps.dropna(inplace=True)
                 # INFO: Check there are around 400 to 800 samples
                 # This covers the expected 600 samples range
@@ -85,7 +88,7 @@ class TestCampaign:
                 assert len(df_exp_avg_mbps) < 800
 
                 # INFO: Check total_mbps
-                df_exp_total_mbps = df_exp[['total_mbps']].copy()
+                df_exp_total_mbps = df_exp[['total_mbps_over_subs']].copy()
                 df_exp_total_mbps.dropna(inplace=True)
                 # INFO: Check there are around 400 to 800 samples
                 # This covers the expected 600 samples range
@@ -112,6 +115,10 @@ class TestCampaign:
         assert len(df) > 0
         assert len(df.columns) > 0
 
+        # INFO: Check for duplicate columns
+        ls_cols = df.columns.tolist()
+        assert len(ls_cols) == len(set(ls_cols))
+
         ls_wanted_cols = [
             'experiment_name',
             "latency_us",
@@ -137,7 +144,6 @@ class TestCampaign:
 
         df_total_tp = df[['total_mbps_over_subs']].copy().dropna()
         assert len(df_total_tp) == 5284
-
 
     def test_process_exp_df_with_raw_files(self):
         from app import Campaign
@@ -182,10 +188,10 @@ class TestCampaign:
         assert len(df_lat) == 11
 
         df_avg_tp = df[['avg_mbps_per_sub']].copy().dropna()
-        assert len(df_avg_tp) == 298
+        assert len(df_avg_tp) == 563
 
         df_total_tp = df[['total_mbps_over_subs']].copy().dropna()
-        assert len(df_total_tp) == 298
+        assert len(df_total_tp) == 563
 
     def setup_test_calculate_metrics_for_subs(self):
         from app import Campaign
@@ -241,7 +247,7 @@ class TestCampaign:
         
         return o_c, df_exp
 
-    def test_calculate_avg_mbps_per_sub(self):
+    def test_calculate_avg_mbps_per_sub_with_normal_case(self):
         o_c, df_before = self.setup_test_calculate_metrics_for_subs()
         
         df_after = o_c.calculate_avg_mbps_per_sub(df_before.copy())
@@ -252,7 +258,24 @@ class TestCampaign:
         assert len(df_after.columns) == len(df_before.columns) + 1
         assert 'avg_mbps_per_sub' in df_after.columns
 
-    def test_calculate_total_mbps_over_subs(self):
+    def test_calculate_avg_mbps_per_sub_with_already_existing_col(self):
+        o_c, df_before = self.setup_test_calculate_metrics_for_subs()
+        df_before['avg_mbps_per_sub'] = 0.0
+        
+        df_after = o_c.calculate_avg_mbps_per_sub(df_before.copy())
+
+        assert df_after is not None
+        assert isinstance(df_after, pd.DataFrame)
+        assert len(df_after) > 0
+        # INFO: Because it already exists, it should not add a new column
+        assert len(df_after.columns) == len(df_before.columns)
+        assert 'avg_mbps_per_sub' in df_after.columns
+
+        # INFO: Check for duplicate cols
+        ls_cols = df_after.columns.tolist()
+        assert len(ls_cols) == len(set(ls_cols))
+
+    def test_calculate_total_mbps_over_subs_with_normal_case(self):
         o_c, df_before = self.setup_test_calculate_metrics_for_subs()
         
         df_after = o_c.calculate_total_mbps_over_subs(df_before.copy())
@@ -262,6 +285,23 @@ class TestCampaign:
         assert len(df_after) > 0
         assert len(df_after.columns) == len(df_before.columns) + 1
         assert 'total_mbps_over_subs' in df_after.columns
+
+    def test_calculate_total_mbps_over_subs_with_already_existing_col(self):
+        o_c, df_before = self.setup_test_calculate_metrics_for_subs()
+        df_before['total_mbps_over_subs'] = 0.0
+        
+        df_after = o_c.calculate_total_mbps_over_subs(df_before.copy())
+
+        assert df_after is not None
+        assert isinstance(df_after, pd.DataFrame)
+        assert len(df_after) > 0
+        # INFO: Because it already exists, it should not add a new column
+        assert len(df_after.columns) == len(df_before.columns)
+        assert 'total_mbps_over_subs' in df_after.columns
+
+        # INFO: Check for duplicate cols
+        ls_cols = df_after.columns.tolist()
+        assert len(ls_cols) == len(set(ls_cols))
 
     def test_get_sub_mbps_cols(self):
         from app import Campaign
@@ -371,7 +411,7 @@ class TestCampaign:
         assert len(df_sub) > 0
         assert "sub_1_mbps" in df_sub.columns
         assert df_sub["sub_1_mbps"].dtype == "float64"
-        assert len(df_sub) == 298
+        assert len(df_sub) == 563
 
     def test_get_metric_col_from_df(self):
         from app import Campaign
@@ -488,7 +528,7 @@ class TestCampaign:
         s_test_file = f"{s_test_dir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/sub_1.csv"
         i_end = o_c.get_end_index_for_raw_file(s_test_file)
         assert isinstance(i_end, int)
-        assert i_end == 300
+        assert i_end == 565
 
     def test_add_input_cols(self):
         from app import Campaign

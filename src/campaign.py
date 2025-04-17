@@ -90,6 +90,19 @@ class Campaign:
         df_ds = pd.DataFrame()
         for d_exp_names_and_paths in ld_exp_names_and_paths:
             df_exp = self.process_exp_df(d_exp_names_and_paths)
+            
+            df_ds = pd.concat([df_ds, df_exp], axis=0)
+            df_ds.reset_index(drop=True, inplace=True)
+
+        if df_ds.empty:
+            raise Exception("No data found in the dataset")
+
+        self.df_ds = df_ds
+
+        ds_output = self.get_dataset_path()
+        os.makedirs(os.path.dirname(ds_output), exist_ok=True)
+        df_ds.to_parquet(ds_output, index=False)
+        lg.info(f"Dataset written to {ds_output}")
 
     def process_exp_df(
         self, 
@@ -123,11 +136,7 @@ class Campaign:
             df_exp = pd.DataFrame()
             for s_exp_path in ls_exp_paths:
                 df_temp = self.get_exp_file_df(s_exp_path)
-
-                if df_exp.empty:
-                    df_exp = df_temp
-                else:
-                    df_exp = pd.concat([df_exp, df_temp], axis=1)
+                df_exp = pd.concat([df_exp, df_temp], axis=1)
 
         df_exp['experiment_name'] = s_exp_name
 
@@ -151,6 +160,9 @@ class Campaign:
 
         if len(df.columns) == 0:
             raise ValueError("Dataframe has no columns")
+
+        if "avg_mbps_per_sub" in df.columns:
+            df.drop(columns=["avg_mbps_per_sub"], inplace=True)
 
         ls_sub_mbps_cols = self.get_sub_mbps_cols(df)
         if len(ls_sub_mbps_cols) == 0:
@@ -193,6 +205,9 @@ class Campaign:
 
         if len(df.columns) == 0:
             raise ValueError("Dataframe has no columns")
+
+        if "total_mbps_over_subs" in df.columns:
+            df.drop(columns=["total_mbps_over_subs"], inplace=True)
 
         ls_sub_mbps_cols = self.get_sub_mbps_cols(df)
         if len(ls_sub_mbps_cols) == 0:
