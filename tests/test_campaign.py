@@ -822,6 +822,45 @@ class TestCampaign:
             s_exp_name = o_c.get_experiment_name_from_fpath(
                 "./test_campaign_with_csv/pub_0.csv"
             )
+
+    def test_try_format_experiment_name(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - most up to date format
+        s_exp_name = o_c.try_format_experiment_name(
+            "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
+        )
+        assert isinstance(s_exp_name, str)
+        assert s_exp_name == "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
+
+        # INFO: Normal Case - with .csv at end
+        s_exp_name = o_c.try_format_experiment_name(
+            "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv"
+        )
+        assert isinstance(s_exp_name, str)
+        assert s_exp_name == "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
+
+        # INFO: Normal Case - old format with p and s
+        s_exp_name = o_c.try_format_experiment_name(
+            "600s_32000B_5P_1S_rel_mc_2dur_100lc"
+        )
+        assert isinstance(s_exp_name, str)
+        assert s_exp_name.lower() == "600sec_32000b_5pub_1sub_rel_mc_2dur_100lc"
+
+        # INFO: Normal Case - old format with p and s with file extension
+        s_exp_name = o_c.try_format_experiment_name(
+            "600s_32000B_5P_1S_rel_mc_2dur_100lc.csv"
+        )
+        assert isinstance(s_exp_name, str)
+        assert s_exp_name.lower() == "600sec_32000b_5pub_1sub_rel_mc_2dur_100lc"
+
+        # INFO: Error Case - invalid name
+        with pytest.raises(ValueError):
+            s_exp_name = o_c.try_format_experiment_name(
+                "invalid_experiment_name"
+            )
             
     def test_follows_experiment_name_format(self):
         from app import Campaign

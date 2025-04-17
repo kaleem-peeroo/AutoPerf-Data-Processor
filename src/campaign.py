@@ -616,10 +616,49 @@ class Campaign:
             return s_dirname
 
         else:
-            raise ValueError(
-                f"Experiment name does not follow expected format: {s_filename}"
-            )
-            
+            # Try to convert and try again
+            s_exp_entry = self.try_format_experiment_name(s_exp_entry)
+            s_filename = os.path.basename(s_exp_entry).split(".")[0]
+            s_dirname = os.path.basename(os.path.dirname(s_exp_entry))
+
+            if self.follows_experiment_name_format(s_filename):
+                return s_filename
+            elif self.follows_experiment_name_format(s_dirname):
+                return s_dirname
+            else:
+                raise ValueError(
+                    f"Tried to format but Experiment entry does not follow expected format: {s_exp_entry}"
+                )
+
+    def try_format_experiment_name(self, s_exp_entry: str = "") -> str:
+        """
+        Try to format the experiment name.
+        This is a workaround for the experiment name format.
+        """
+        if s_exp_entry == "":
+            raise Exception("No experiment entry provided")
+
+        if "." in s_exp_entry:
+            s_exp_entry = s_exp_entry.split(".")[0]
+
+        s_exp_entry = s_exp_entry.upper()
+        ls_sections = s_exp_entry.split("_")
+        if len(ls_sections) != 8:
+            raise ValueError(f"Experiment entry does not have 8 sections: {s_exp_entry}")
+
+        if not ls_sections[0].endswith("SEC"):
+            ls_sections[0] = ls_sections[0].replace("S", "SEC")
+
+        if not ls_sections[2].endswith("PUB"):
+            ls_sections[2] = ls_sections[2].replace("P", "PUB")
+
+        if not ls_sections[3].endswith("SUB"):
+            ls_sections[3] = ls_sections[3].replace("S", "SUB")
+
+        s_exp_entry = "_".join(ls_sections)
+
+        return s_exp_entry
+                        
     def follows_experiment_name_format(self, s_filename: str = "") -> bool:
         """
         Checks if filename follows following format:
