@@ -471,7 +471,10 @@ class Campaign:
 
         return d_qos
 
-    def get_experiments(self, s_raw_datadir: str = ""):
+    def get_experiments(
+        self, 
+        s_raw_datadir: str = ""
+    ) -> List[Dict[str, List[str]]]:
         """
         Gather a list of experiments.
         In the format of {name: str, paths: list}.
