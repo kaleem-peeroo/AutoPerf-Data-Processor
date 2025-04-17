@@ -508,12 +508,6 @@ class Campaign:
         return end_index
 
     def add_input_cols(self, df: pd.DataFrame) -> pd.DataFrame:
-        if df is None:
-            raise Exception("No dataframe provided")
-
-        if not isinstance(df, pd.DataFrame):
-            raise ValueError(f"Input must be a dataframe: {df}")
-
         if df.empty:
             raise ValueError("Input dataframe is empty")
 
@@ -524,6 +518,11 @@ class Campaign:
             raise ValueError("Input dataframe must have only one experiment name")
 
         s_exp_name = df['experiment_name'].iloc[0]
+        if not self.follows_experiment_name_format(s_exp_name):
+            s_exp_name = self.try_format_experiment_name(s_exp_name)
+            if not self.follows_experiment_name_format(s_exp_name):
+                raise ValueError(f"Experiment name does not follow expected format: {s_exp_name}")
+
         d_qos = self.get_qos_from_exp_name(s_exp_name)
 
         for key, value in d_qos.items():
@@ -540,14 +539,20 @@ class Campaign:
         if s_exp_name == "":
             raise Exception("No experiment name provided")
 
-        if not isinstance(s_exp_name, str):
-            raise ValueError(f"Experiment name must be a string: {s_exp_name}")
-
         if "_" not in s_exp_name:
             raise ValueError(f"Experiment name must have underscores: {s_exp_name}")
 
         if not self.follows_experiment_name_format(s_exp_name):
-            raise ValueError(f"Experiment name does not follow expected format: {s_exp_name}")
+            raise ValueError(
+                f"Experiment name does not follow expected format: {s_exp_name}"
+            )
+
+        if not self.follows_experiment_name_format(s_exp_name):
+            s_exp_name = self.try_format_experiment_name(s_exp_name)
+            if not self.follows_experiment_name_format(s_exp_name):
+                raise ValueError(
+                    f"Experiment name does not follow expected format: {s_exp_name}"
+                )
 
         ls_parts = s_exp_name.split("_")
         d_qos = {
@@ -563,7 +568,8 @@ class Campaign:
 
         # Convert to int
         for key in d_qos.keys():
-            d_qos[key] = int(d_qos[key])
+            # Use regex to remove non-numeric characters
+            d_qos[key] = re.sub(r'\D', '', str(d_qos[key]))
 
         return d_qos
 
@@ -594,6 +600,9 @@ class Campaign:
         ]
 
         for s_exp_entry in ls_exp_entries:
+            if ".ds_store" in s_exp_entry.lower():
+                continue
+
             s_exp_name = self.get_experiment_name_from_fpath(s_exp_entry)
             ls_exp_paths = self.get_experiment_paths_from_fpath(s_exp_entry)
             ld_exp_names_and_paths.append(
@@ -617,14 +626,11 @@ class Campaign:
 
         else:
             # Try to convert and try again
-            s_exp_entry = self.try_format_experiment_name(s_exp_entry)
-            s_filename = os.path.basename(s_exp_entry).split(".")[0]
-            s_dirname = os.path.basename(os.path.dirname(s_exp_entry))
+            s_exp_name = self.try_format_experiment_name(s_exp_entry)
 
-            if self.follows_experiment_name_format(s_filename):
-                return s_filename
-            elif self.follows_experiment_name_format(s_dirname):
-                return s_dirname
+            if self.follows_experiment_name_format(s_exp_name):
+                return s_exp_name
+
             else:
                 raise ValueError(
                     f"Tried to format but Experiment entry does not follow expected format: {s_exp_entry}"
@@ -638,13 +644,22 @@ class Campaign:
         if s_exp_entry == "":
             raise Exception("No experiment entry provided")
 
+        s_filename = os.path.basename(s_exp_entry)
+        s_dirname = os.path.basename(os.path.dirname(s_exp_entry))
+        if len(s_filename.split("_")) != 8 and len(s_dirname.split("_")) != 8:
+            raise ValueError(f"Experiment entry does not have 8 sections: {s_exp_entry}")
+
         if "." in s_exp_entry:
             s_exp_entry = s_exp_entry.split(".")[0]
 
+        if len(s_filename.split("_")) == 8:
+            s_exp_entry = s_filename.split(".")[0]
+
+        else:
+            s_exp_entry = s_dirname
+
         s_exp_entry = s_exp_entry.upper()
         ls_sections = s_exp_entry.split("_")
-        if len(ls_sections) != 8:
-            raise ValueError(f"Experiment entry does not have 8 sections: {s_exp_entry}")
 
         if not ls_sections[0].endswith("SEC"):
             ls_sections[0] = ls_sections[0].replace("S", "SEC")
@@ -668,22 +683,21 @@ class Campaign:
         if s_filename == "":
             raise Exception("No filename provided")
 
-        if not isinstance(s_filename, str):
-            raise ValueError(f"Filename must be a string: {s_filename}")
-
         if s_filename == "":
             raise ValueError("Filename must not be empty")
 
         # INFO: Regex is hard to debug. Using manual checks.
         i_underscore_count = s_filename.count("_")
-        if i_underscore_count != 7:
-            lg.warning(f"Filename does not have 7 underscores: {s_filename}")
+        if i_underscore_count != 7 and i_underscore_count != 8:
+            lg.warning(
+                f"Filename does not have 7 or 8 underscores: {s_filename}. It has {i_underscore_count}."
+            )
             return False
 
         if "." in s_filename:
             s_filename = s_filename.split(".")[0]
 
-        ls_parts = s_filename.split("_")
+        ls_parts = s_filename.upper().split("_")
         ld_end_matches = [
             {"values": ["SEC", "S"]},
             {"values": ["B"]},

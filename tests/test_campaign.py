@@ -856,6 +856,14 @@ class TestCampaign:
         assert isinstance(s_exp_name, str)
         assert s_exp_name.lower() == "600sec_32000b_5pub_1sub_rel_mc_2dur_100lc"
 
+        # INFO: Normal Case - entire path with dirs
+        s_exp_name = o_c.try_format_experiment_name(
+            "path/to/600s_32000B_5P_1S_rel_mc_2dur_100lc/pub_0.csv"
+        )
+        assert isinstance(s_exp_name, str)
+        assert s_exp_name.lower() == "600sec_32000b_5pub_1sub_rel_mc_2dur_100lc"
+
+
         # INFO: Error Case - invalid name
         with pytest.raises(ValueError):
             s_exp_name = o_c.try_format_experiment_name(
