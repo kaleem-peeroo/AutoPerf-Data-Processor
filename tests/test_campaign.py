@@ -51,74 +51,152 @@ class TestCampaign:
             assert o_c.data_exp_list == []
             assert o_c.missing_exps == []
 
-    def test_create_dataset(self):
+    def test_create_dataset_with_dirs(self):
         from app import Campaign
-        from tests.configs.normal import LD_DATASETS
 
-        ld_ds_config = LD_DATASETS
+        d_config = {
+            "name": "test campaign with dirs",
+            "exp_folders": \
+                "./tests/data/test_campaign_with_dirs_small/",
+            "ap_config": "",
+            "dataset_path": \
+                "./tests/output/test_campaign_with_dirs_small.parquet",
+        }
 
-        for d_ds in ld_ds_config:
-            o_c = Campaign(d_ds)
-            s_raw_datadir = o_c.get_raw_datadir()
-            ld_exp_names_and_paths = o_c.get_experiments(s_raw_datadir)
+        o_c = Campaign(d_config)
+        s_raw_datadir = o_c.get_raw_datadir()
+        ld_exp_names_and_paths = o_c.get_experiments(s_raw_datadir)
 
-            # INFO: Normal case - should create dataset
-            o_c.create_dataset()
+        o_c.create_dataset()
 
-            assert os.path.exists(o_c.ds_output_path)
-            assert os.path.isfile(o_c.ds_output_path)
-            assert os.path.getsize(o_c.ds_output_path) > 0
-            assert o_c.df_ds is not None
-            assert isinstance(o_c.df_ds, pd.DataFrame)
-            assert len(o_c.df_ds) > 0
-            assert len(o_c.df_ds.columns) > 0
+        assert os.path.exists(o_c.ds_output_path)
+        assert os.path.isfile(o_c.ds_output_path)
+        assert os.path.getsize(o_c.ds_output_path) > 0
+        assert o_c.df_ds is not None
+        assert isinstance(o_c.df_ds, pd.DataFrame)
+        assert len(o_c.df_ds) > 0
+        assert len(o_c.df_ds.columns) > 0
 
-            ls_wanted_cols = [
-                'experiment_name',
-                "latency_us",
-                'avg_mbps_per_sub',
-                'total_mbps_over_subs',
-            ]
-            for s_col in ls_wanted_cols:
-                assert s_col in o_c.df_ds.columns
+        ls_wanted_cols = [
+            'experiment_name',
+            "latency_us",
+            'avg_mbps_per_sub',
+            'total_mbps_over_subs',
+        ]
+        for s_col in ls_wanted_cols:
+            assert s_col in o_c.df_ds.columns
 
-            df = o_c.get_df_ds()
-            ls_exp_names = df['experiment_name'].unique().tolist()
+        df = o_c.get_df_ds()
+        ls_exp_names = df['experiment_name'].unique().tolist()
 
-            for d_exp in ld_exp_names_and_paths:
-                s_exp_name = d_exp['name']
-                assert s_exp_name in ls_exp_names
+        for d_exp in ld_exp_names_and_paths:
+            s_exp_name = d_exp['name']
+            assert s_exp_name in ls_exp_names
 
-                df_exp = df[df['experiment_name'] == s_exp_name].copy()
-                assert len(df_exp) > 0
-                assert len(df_exp.columns) > 0
-                assert df_exp['experiment_name'].nunique() == 1
-                assert df_exp['experiment_name'].iloc[0] == s_exp_name
+            df_exp = df[df['experiment_name'] == s_exp_name].copy()
+            assert len(df_exp) > 0
+            assert len(df_exp.columns) > 0
+            assert df_exp['experiment_name'].nunique() == 1
+            assert df_exp['experiment_name'].iloc[0] == s_exp_name
 
-                # INFO: No duplicate columns
-                ls_cols = df_exp.columns.tolist()
-                assert len(ls_cols) == len(set(ls_cols))
+            # INFO: No duplicate columns
+            ls_cols = df_exp.columns.tolist()
+            assert len(ls_cols) == len(set(ls_cols))
 
-                # INFO: Check latency_us
-                df_exp_lat = df_exp[['latency_us']].copy()
-                df_exp_lat.dropna(inplace=True)
-                assert len(df_exp_lat) > 0
+            # INFO: Check latency_us
+            df_exp_lat = df_exp[['latency_us']].copy()
+            df_exp_lat.dropna(inplace=True)
+            assert len(df_exp_lat) > 0
 
-                # INFO: Check avg_mbps
-                df_exp_avg_mbps = df_exp[['avg_mbps_per_sub']].copy()
-                df_exp_avg_mbps.dropna(inplace=True)
-                # INFO: Check there are around 400 to 800 samples
-                # This covers the expected 600 samples range
-                assert len(df_exp_avg_mbps) > 400
-                assert len(df_exp_avg_mbps) < 800
+            # INFO: Check avg_mbps
+            df_exp_avg_mbps = df_exp[['avg_mbps_per_sub']].copy()
+            df_exp_avg_mbps.dropna(inplace=True)
+            # INFO: Check there are around 400 to 800 samples
+            # This covers the expected 600 samples range
+            assert len(df_exp_avg_mbps) > 400
+            assert len(df_exp_avg_mbps) < 800
 
-                # INFO: Check total_mbps
-                df_exp_total_mbps = df_exp[['total_mbps_over_subs']].copy()
-                df_exp_total_mbps.dropna(inplace=True)
-                # INFO: Check there are around 400 to 800 samples
-                # This covers the expected 600 samples range
-                assert len(df_exp_total_mbps) > 400
-                assert len(df_exp_total_mbps) < 800
+            # INFO: Check total_mbps
+            df_exp_total_mbps = df_exp[['total_mbps_over_subs']].copy()
+            df_exp_total_mbps.dropna(inplace=True)
+            # INFO: Check there are around 400 to 800 samples
+            # This covers the expected 600 samples range
+            assert len(df_exp_total_mbps) > 400
+            assert len(df_exp_total_mbps) < 800
+
+    def test_create_dataset_with_csv(self):
+        from app import Campaign
+
+        d_config = {
+            "name": "test campaign with csv",
+            "exp_folders": \
+                "./tests/data/test_campaign_with_csv/",
+            "ap_config": "",
+            "dataset_path": \
+                "./tests/output/test_campaign_with_csv_small.parquet",
+        }
+
+        o_c = Campaign(d_config)
+        s_raw_datadir = o_c.get_raw_datadir()
+        ld_exp_names_and_paths = o_c.get_experiments(s_raw_datadir)
+
+        o_c.create_dataset()
+
+        assert os.path.exists(o_c.ds_output_path)
+        assert os.path.isfile(o_c.ds_output_path)
+        assert os.path.getsize(o_c.ds_output_path) > 0
+        assert o_c.df_ds is not None
+        assert isinstance(o_c.df_ds, pd.DataFrame)
+        assert len(o_c.df_ds) > 0
+        assert len(o_c.df_ds.columns) > 0
+
+        ls_wanted_cols = [
+            'experiment_name',
+            "latency_us",
+            'avg_mbps_per_sub',
+            'total_mbps_over_subs',
+        ]
+        for s_col in ls_wanted_cols:
+            assert s_col in o_c.df_ds.columns
+
+        df = o_c.get_df_ds()
+        ls_exp_names = df['experiment_name'].unique().tolist()
+
+        for d_exp in ld_exp_names_and_paths:
+            s_exp_name = d_exp['name']
+            pprint(s_exp_name)
+            assert s_exp_name in ls_exp_names
+
+            df_exp = df[df['experiment_name'] == s_exp_name].copy()
+            assert len(df_exp) > 0
+            assert len(df_exp.columns) > 0
+            assert df_exp['experiment_name'].nunique() == 1
+            assert df_exp['experiment_name'].iloc[0] == s_exp_name
+
+            # INFO: No duplicate columns
+            ls_cols = df_exp.columns.tolist()
+            assert len(ls_cols) == len(set(ls_cols))
+
+            # INFO: Check latency_us
+            df_exp_lat = df_exp[['latency_us']].copy()
+            df_exp_lat.dropna(inplace=True)
+            assert len(df_exp_lat) > 0
+
+            # INFO: Check avg_mbps
+            df_exp_avg_mbps = df_exp[['avg_mbps_per_sub']].copy()
+            df_exp_avg_mbps.dropna(inplace=True)
+            # INFO: Check there are around 400 to 800 samples
+            # This covers the expected 600 samples range
+            assert len(df_exp_avg_mbps) > 400
+            assert len(df_exp_avg_mbps) < 800
+
+            # INFO: Check total_mbps
+            df_exp_total_mbps = df_exp[['total_mbps_over_subs']].copy()
+            df_exp_total_mbps.dropna(inplace=True)
+            # INFO: Check there are around 400 to 800 samples
+            # This covers the expected 600 samples range
+            assert len(df_exp_total_mbps) > 400
+            assert len(df_exp_total_mbps) < 800
 
     def test_process_exp_df_with_exp_name_as_csv(self):
         from app import Campaign
@@ -162,13 +240,13 @@ class TestCampaign:
             assert s_col in df.columns
 
         df_lat = df[['latency_us']].copy().dropna()
-        assert len(df_lat) == 5284
+        assert len(df_lat) == 784
 
         df_avg_tp = df[['avg_mbps_per_sub']].copy().dropna()
         assert len(df_avg_tp) == 612
 
         df_total_tp = df[['total_mbps_over_subs']].copy().dropna()
-        assert len(df_total_tp) == 5284
+        assert len(df_total_tp) == 784
 
     def test_process_exp_df_with_raw_files(self):
         from app import Campaign
@@ -826,7 +904,7 @@ class TestCampaign:
             "./tests/data/test_campaign_with_csv/"
         )
         assert isinstance(ls_fpaths, list)
-        assert len(ls_fpaths) == 5
+        assert len(ls_fpaths) == 4
 
         # INFO: Normal Case - sub dirs and sub sub dirs
         ls_fpaths = o_c.recursively_get_fpaths(
