@@ -114,7 +114,8 @@ class Campaign:
             df_exp = self.process_exp_df(d_exp_names_and_paths)
             
             df_ds = pd.concat([df_ds, df_exp], axis=0)
-            df_ds.reset_index(drop=True, inplace=True)
+
+        df_ds.reset_index(drop=True, inplace=True)
 
         if df_ds.empty:
             raise Exception("No data found in the dataset")
@@ -151,17 +152,20 @@ class Campaign:
         s_exp_name = d_exp_names_and_paths['name']
         ls_exp_paths = d_exp_names_and_paths['paths']
 
-        if len(ls_exp_paths) == 1:
-            df_exp = self.get_exp_file_df(ls_exp_paths[0])
-            if df_exp.empty:
-                raise ValueError(f"Experiment dataframe is empty: {s_exp_name}")
+        df_exp = pd.DataFrame()
 
-        else:
-            df_exp = pd.DataFrame()
-            for s_exp_path in ls_exp_paths:
-                df_temp = self.get_exp_file_df(s_exp_path)
-                df_exp = pd.concat([df_exp, df_temp], axis=1)
-            df_exp.reset_index(drop=True, inplace=True)
+        for i_exp_path, s_exp_path in enumerate(ls_exp_paths):
+            lg.debug(
+                "[{}/{}] Processing {}".format(
+                    i_exp_path + 1,
+                    len(ls_exp_paths),
+                    os.path.basename(s_exp_path)
+                )
+            )
+            df_temp = self.get_exp_file_df(s_exp_path)
+            df_exp = pd.concat([df_exp, df_temp], axis=1)
+
+        df_exp.reset_index(drop=True, inplace=True)
 
         if df_exp.empty:
             raise ValueError(f"Experiment dataframe is empty: {s_exp_name}")
@@ -263,6 +267,9 @@ class Campaign:
         If its a raw file, process it.
         Otherwise, just read the csv file.
         """
+        if os.path.getsize(s_exp_path) == 0:
+            raise ValueError(f"Experiment file is empty: {s_exp_path}")
+
         if self.is_raw_exp_file(s_exp_path):
             df_temp = self.process_file_df(s_exp_path)
 
@@ -348,7 +355,10 @@ class Campaign:
         )
 
         for col in df.columns:
-            df[col] = df[col].astype('float64')
+            try:
+                df[col] = df[col].astype('float64')
+            except ValueError:
+                lg.error(f"Could not convert column {col} to float64: {df[col]}")
                     
         return df
 
@@ -573,7 +583,7 @@ class Campaign:
         # Convert to int
         for key in d_qos.keys():
             # Use regex to remove non-numeric characters
-            d_qos[key] = re.sub(r'\D', '', str(d_qos[key]))
+            d_qos[key] = int(d_qos[key])
 
         return d_qos
 
