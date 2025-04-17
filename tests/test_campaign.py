@@ -187,7 +187,7 @@ class TestCampaign:
         df_total_tp = df[['total_mbps_over_subs']].copy().dropna()
         assert len(df_total_tp) == 5284
 
-    def setup_test_calculate_averages(self):
+    def setup_test_calculate_metrics_for_subs(self):
         from app import Campaign
 
         d_conf = {
@@ -241,10 +241,10 @@ class TestCampaign:
         
         return o_c, df_exp
 
-    def test_calculate_averages_for_avg_mbps_per_sub(self):
-        o_c, df_before = self.setup_test_calculate_averages()
+    def test_calculate_avg_mbps_per_sub(self):
+        o_c, df_before = self.setup_test_calculate_metrics_for_subs()
         
-        df_after = o_c.calculate_averages_for_avg_mbps_per_sub(df_before.copy())
+        df_after = o_c.calculate_avg_mbps_per_sub(df_before.copy())
 
         assert df_after is not None
         assert isinstance(df_after, pd.DataFrame)
@@ -252,8 +252,16 @@ class TestCampaign:
         assert len(df_after.columns) == len(df_before.columns) + 1
         assert 'avg_mbps_per_sub' in df_after.columns
 
-    def test_calculate_averages_for_total_mbps_over_subs(self):
-        raise NotImplementedError("Test not implemented yet")
+    def test_calculate_total_mbps_over_subs(self):
+        o_c, df_before = self.setup_test_calculate_metrics_for_subs()
+        
+        df_after = o_c.calculate_total_mbps_over_subs(df_before.copy())
+
+        assert df_after is not None
+        assert isinstance(df_after, pd.DataFrame)
+        assert len(df_after) > 0
+        assert len(df_after.columns) == len(df_before.columns) + 1
+        assert 'total_mbps_over_subs' in df_after.columns
 
     def test_get_exp_file_df(self):
         from app import Campaign

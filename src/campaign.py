@@ -136,16 +136,24 @@ class Campaign:
 
         return df_exp
 
-    def calculate_averages_for_avg_mbps_per_sub(
+    def calculate_avg_mbps_per_sub(
         self,
         df: pd.DataFrame = pd.DataFrame()
     ) -> pd.DataFrame:
+        """
+        Gets all sub_n_mbps columns and calculates the average horizontally.
+        Adds a new column called avg_mbps_per_sub.
+        """
         raise NotImplementedError("calculate_averages_for_avg_mbps_per_sub not implemented")
     
-    def calculate_averages_for_total_mbps_over_subs(
+    def calculate_total_mbps_over_subs(
         self,
         df: pd.DataFrame = pd.DataFrame()
     ) -> pd.DataFrame:
+        """
+        Gets all sub_n_mbps columns and calculates the total horizontally.
+        Adds a new column called total_mbps_over_subs.
+        """
         raise NotImplementedError("calculate_averages_for_total_mbps_over_subs not implemented")
 
     def get_exp_file_df(
