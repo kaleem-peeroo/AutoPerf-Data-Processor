@@ -144,7 +144,39 @@ class Campaign:
         Gets all sub_n_mbps columns and calculates the average horizontally.
         Adds a new column called avg_mbps_per_sub.
         """
-        raise NotImplementedError("calculate_averages_for_avg_mbps_per_sub not implemented")
+        if df.empty:
+            raise ValueError("Dataframe is empty")
+
+        if len(df.columns) == 0:
+            raise ValueError("Dataframe has no columns")
+
+        ls_sub_mbps_cols = self.get_sub_mbps_cols(df)
+        if len(ls_sub_mbps_cols) == 0:
+            raise ValueError("No sub_n_mbps columns found in dataframe")
+
+        df_sub_mbps = df[ls_sub_mbps_cols]
+        df_avg_mbps = df_sub_mbps.mean(axis=1)
+        df_avg_mbps.name = "avg_mbps_per_sub"
+        df = pd.concat([df, df_avg_mbps], axis=1)
+
+        return df
+
+    def get_sub_mbps_cols(self, df: pd.DataFrame = pd.DataFrame()) -> List[str]:
+        """
+        Gets all sub_n_mbps columns from the dataframe.
+        """
+        if df.empty:
+            raise ValueError("Dataframe is empty")
+
+        if len(df.columns) == 0:
+            raise ValueError("Dataframe has no columns")
+
+        ls_sub_mbps_cols = []
+        for col in df.columns:
+            if "sub_" in col and "_mbps" in col:
+                ls_sub_mbps_cols.append(col)
+
+        return ls_sub_mbps_cols
     
     def calculate_total_mbps_over_subs(
         self,
@@ -154,7 +186,22 @@ class Campaign:
         Gets all sub_n_mbps columns and calculates the total horizontally.
         Adds a new column called total_mbps_over_subs.
         """
-        raise NotImplementedError("calculate_averages_for_total_mbps_over_subs not implemented")
+        if df.empty:
+            raise ValueError("Dataframe is empty")
+
+        if len(df.columns) == 0:
+            raise ValueError("Dataframe has no columns")
+
+        ls_sub_mbps_cols = self.get_sub_mbps_cols(df)
+        if len(ls_sub_mbps_cols) == 0:
+            raise ValueError("No sub_n_mbps columns found in dataframe")
+
+        df_sub_mbps = df[ls_sub_mbps_cols]
+        df_total_mbps = df_sub_mbps.sum(axis=1)
+        df_total_mbps.name = "total_mbps_over_subs"
+        df = pd.concat([df, df_total_mbps], axis=1)
+        
+        return df
 
     def get_exp_file_df(
         self,
