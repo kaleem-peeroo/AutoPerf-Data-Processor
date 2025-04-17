@@ -1,9 +1,0 @@
-# exp_folders is a list of paths to folders containing AP .csv files
-# ap_config is the path to the AP config file that generated the campaign data
-# dataset_path is the path to the output folder where the dataset will be saved
-
-[[datasets]]
-name = "Rel Impact"
-exp_folders = "/Users/kaleem/PhD/Data/5PI/01_Participant Threshold/Participant_Threshold/"
-ap_config = ""
-dataset_path = "/Users/kaleem/PhD/Datasets/5PI/participant_threshold.parquet"
