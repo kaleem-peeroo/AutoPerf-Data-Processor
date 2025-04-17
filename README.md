@@ -1,20 +1,12 @@
 Processes data from AutoPerf (AP).
 
-Inputs:
-- path to folders containing AP .csv files
-- path to output folder where the dataset will be saved
-- path to the AP config file that generated the campaign data
+# How to use
+1. Populate `src/config.py` with list of campaigns.
+2. Run `python src/main.py` to process the data.
 
-Outputs:
-- new AP config file with a list of missing tests
-- dataset as a .parquet
-
-Usage:
-```python
-python run.py <exp_folders> <ap_config> <dataset_path>
-```
-
-Where:
-- `<exp_folders>` is a list of paths to folders containing AP .csv files
-- `<ap_config>` is the path to the AP config file that generated the campaign data
-- `<dataset_path>` is the path to the output folder where the dataset will be saved
+# How the config works
+Each campaign must be a dictionary with the following keys:
+- name: required name of campaign
+- exp_folders: required path to folder containing experiments
+- ap_config: optional path to AutoPerf config file used to generate the experiments
+- dataset_path: required path to dataset file to make (must end with .parquet)
