@@ -625,20 +625,18 @@ class Campaign:
                 {"name": s_exp_name, "paths": ls_exp_paths}
             )
 
-        if not self.check_for_expected_files(ld_exp_names_and_paths):
-            raise ValueError(
-                f"Mismatch in file count: {ld_exp_names_and_paths}"
-            )
+        self.check_for_expected_files(ld_exp_names_and_paths)
 
         return ld_exp_names_and_paths
 
     def check_for_expected_files(
         self,
         ld_exp_names_and_paths: List[Dict[str, List[str]]] = []
-    ) -> bool:
+    ) -> List[Dict[str, List[str]]]:
         """
         Checks if there are the right number of pub and sub files according to 
         the experiment name.
+        If it doesn't - it removes it from the list.
         """
 
         if len(ld_exp_names_and_paths) == 0:
@@ -669,13 +667,20 @@ class Campaign:
 
             if i_actual_file_count == 1:
                 if s_exp_name not in ls_exp_paths[0]:
-                    return False
+                    ld_exp_names_and_paths.remove(d_exp_names_and_paths)
 
             else:
                 if i_actual_file_count != i_expected_file_count:
-                    return False
+                    lg.warning(
+                        "{} has {} files. Expected {}".format(
+                            s_exp_name,
+                            i_actual_file_count,
+                            i_expected_file_count
+                        )
+                    )
+                    ld_exp_names_and_paths.remove(d_exp_names_and_paths)
 
-        return True
+        return ld_exp_names_and_paths
                 
     def get_expected_file_count(
         self,

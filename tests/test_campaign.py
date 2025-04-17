@@ -799,7 +799,9 @@ class TestCampaign:
                 "sub_1.csv",
             ]
         }]
-        assert o_c.check_for_expected_files(ld_exp_names_and_paths) is True
+        assert o_c.check_for_expected_files(
+            ld_exp_names_and_paths
+        ) == ld_exp_names_and_paths
 
         # INFO: Normal Case - old format with p and s
         ld_exp_names_and_paths = [{
@@ -810,7 +812,9 @@ class TestCampaign:
                 "sub_1.csv",
             ]
         }]
-        assert o_c.check_for_expected_files(ld_exp_names_and_paths) is True
+        assert o_c.check_for_expected_files(
+            ld_exp_names_and_paths
+        ) == ld_exp_names_and_paths
 
         # INFO: Normal Case - 1 experiment csv
         ld_exp_names_and_paths = [{
@@ -819,7 +823,9 @@ class TestCampaign:
                 "600SEC_100B_1PUB_2SUB_BE_MC_3DUR_100LC.csv",
             ]
         }]
-        assert o_c.check_for_expected_files(ld_exp_names_and_paths) is True
+        assert o_c.check_for_expected_files(
+            ld_exp_names_and_paths
+        ) == ld_exp_names_and_paths
 
         # INFO: Error Case - missing sub files
         ld_exp_names_and_paths = [{
@@ -829,7 +835,7 @@ class TestCampaign:
                 "sub_0.csv",
             ]
         }]
-        assert o_c.check_for_expected_files(ld_exp_names_and_paths) is False
+        assert o_c.check_for_expected_files(ld_exp_names_and_paths) == []
 
         # INFO: Error Case - missing pub file
         ld_exp_names_and_paths = [{
@@ -839,7 +845,7 @@ class TestCampaign:
                 "sub_1.csv",
             ]
         }]
-        assert o_c.check_for_expected_files(ld_exp_names_and_paths) is False
+        assert o_c.check_for_expected_files(ld_exp_names_and_paths) == []
 
     def test_get_expected_file_count(self):
         from app import Campaign
