@@ -26,7 +26,7 @@ class Campaign:
         self.apconf_path = d_config['ap_config']
         self.ds_output_path = d_config['dataset_path']
 
-        self.ds_df = None
+        self.df_ds = None
 
         self.config = None
         self.qos_variations = {}
@@ -64,6 +64,18 @@ class Campaign:
             self.ds_output_path = os.path.expanduser(self.ds_output_path)
 
         return self.ds_output_path
+
+    def get_df_ds(self):
+        if self.df_ds is None:
+            raise Exception("No dataset created yet")
+
+        if not isinstance(self.df_ds, pd.DataFrame):
+            raise ValueError(f"Dataset is not a dataframe: {self.df_ds}")
+
+        if self.df_ds.empty:
+            raise ValueError("Dataset is empty")
+
+        return self.df_ds
 
     def create_dataset(self):
         """

@@ -5,6 +5,31 @@ import pandas as pd
 from rich.pretty import pprint
 
 class TestCampaign:
+    @pytest.fixture
+    def setup_method(self, method):
+        """
+        Fixture to set up the test method.
+        This will be called before each test method.
+        """
+        print(f"\nSetting up for test: {method.__name__}")
+
+        # Remove everything in ./tests/output except for existing_test_campaign.parquet
+        s_output_dir = "./tests/output/"
+
+        if os.path.exists(s_output_dir):
+
+            for s_file in os.listdir(s_output_dir):
+                s_file_path = os.path.join(s_output_dir, s_file)
+
+                if s_file == "existing_test_campaign.parquet":
+                    continue
+
+                if os.path.isfile(s_file_path):
+                    os.remove(s_file_path)
+
+                elif os.path.isdir(s_file_path):
+                    os.rmdir(s_file_path)
+
     def test_init_with_normal_case(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
