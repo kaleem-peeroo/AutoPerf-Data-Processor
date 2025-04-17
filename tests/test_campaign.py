@@ -848,6 +848,27 @@ class TestCampaign:
         }]
         with pytest.raises(ValueError):
             o_c.check_for_expected_files(ld_exp_names_and_paths)
+
+    def test_get_expected_file_count(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - latest name format
+        assert o_c.get_expected_file_count(
+            "600SEC_100B_1PUB_2SUB_BE_MC_3DUR_100LC"
+        ) == 3
+
+        # INFO: Normal Case - old name format
+        assert o_c.get_expected_file_count(
+            "600SEC_100B_1p_2s_BE_MC_3DUR_100LC"
+        ) == 3
+
+        # INFO: Error Case - invalid name
+        with pytest.raises(ValueError):
+            o_c.get_expected_file_count(
+                "invalid_experiment_name"
+            )
     
     def test_get_experiment_name_from_fpath(self):
         from app import Campaign

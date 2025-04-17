@@ -627,6 +627,32 @@ class Campaign:
 
         return ld_exp_names_and_paths
 
+    def get_expected_file_count(
+        self,
+        s_exp_name: str = ""
+    ) -> int:
+        """
+        Get the expected file count for the experiment.
+        Basically get the sub count and add 1.
+        """
+        if s_exp_name == "":
+            raise Exception("No experiment name provided")
+
+        if not self.follows_experiment_name_format(s_exp_name):
+            raise ValueError(
+                f"Experiment name does not follow expected format: {s_exp_name}"
+            )
+
+        ls_parts = s_exp_name.split("_")
+        if len(ls_parts) != 8:
+            raise ValueError(f"Experiment name does not have 8 parts: {s_exp_name}")
+
+        # Remove all non-numeric characters from ls_parts[3]
+        i_sub_count = re.sub(r"[^0-9]", "", ls_parts[3])
+        i_sub_count = int(i_sub_count)
+        
+        return i_sub_count + 1
+                    
     def get_experiment_name_from_fpath(self, s_exp_entry: str = ""):
         if s_exp_entry == "":
             raise Exception("No experiment entry provided")
