@@ -263,6 +263,32 @@ class TestCampaign:
         assert len(df_after.columns) == len(df_before.columns) + 1
         assert 'total_mbps_over_subs' in df_after.columns
 
+    def test_get_sub_mbps_cols(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - with 1 sub mbps col
+        df = pd.DataFrame({
+            'sub_0_mbps': [1, 2, 3],
+            'latency_us': [7, 8, 9],
+        })
+        assert o_c.get_sub_mbps_cols(df) == ['sub_0_mbps']
+
+        # INFO: Normal Case - with 2 sub mbps cols
+        df = pd.DataFrame({
+            'sub_0_mbps': [1, 2, 3],
+            'sub_1_mbps': [4, 5, 6],
+            'latency_us': [7, 8, 9],
+        })
+        assert o_c.get_sub_mbps_cols(df) == ['sub_0_mbps', 'sub_1_mbps']
+
+        # INFO: Empty Case - no sub mbps cols
+        df = pd.DataFrame({
+            'latency_us': [7, 8, 9],
+        })
+        assert o_c.get_sub_mbps_cols(df) == []
+        
     def test_get_exp_file_df(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
