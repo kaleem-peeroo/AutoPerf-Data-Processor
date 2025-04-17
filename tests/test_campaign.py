@@ -791,6 +791,64 @@ class TestCampaign:
                     assert os.path.getsize(s_path) > 0
                     assert s_path.endswith('.csv')
 
+    def test_check_for_expected_files(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - with expected files
+        ld_exp_names_and_paths = [{
+            'name': "600SEC_100B_1PUB_2SUB_BE_MC_3DUR_100LC",
+            'paths': [
+                "pub_0.csv",
+                "sub_0.csv",
+                "sub_1.csv",
+            ]
+        }]
+        assert o_c.check_for_expected_files(ld_exp_names_and_paths) is True
+
+        # INFO: Normal Case - old format with p and s
+        ld_exp_names_and_paths = [{
+            'name': "600SEC_100B_1P_2S_BE_MC_3DUR_100LC",
+            'paths': [
+                "pub_0.csv",
+                "sub_0.csv",
+                "sub_1.csv",
+            ]
+        }]
+        assert o_c.check_for_expected_files(ld_exp_names_and_paths) is True
+
+        # INFO: Normal Case - 1 experiment csv
+        ld_exp_names_and_paths = [{
+            'name': "600SEC_100B_1PUB_2SUB_BE_MC_3DUR_100LC",
+            'paths': [
+                "600SEC_100B_1PUB_2SUB_BE_MC_3DUR_100LC.csv",
+            ]
+        }]
+        assert o_c.check_for_expected_files(ld_exp_names_and_paths) is True
+
+        # INFO: Error Case - missing sub files
+        ld_exp_names_and_paths = [{
+            'name': "600SEC_100B_1PUB_2SUB_BE_MC_3DUR_100LC",
+            'paths': [
+                "pub_0.csv",
+                "sub_0.csv",
+            ]
+        }]
+        with pytest.raises(ValueError):
+            o_c.check_for_expected_files(ld_exp_names_and_paths)
+
+        # INFO: Error Case - missing pub file
+        ld_exp_names_and_paths = [{
+            'name': "600SEC_100B_1PUB_2SUB_BE_MC_3DUR_100LC",
+            'paths': [
+                "sub_0.csv",
+                "sub_1.csv",
+            ]
+        }]
+        with pytest.raises(ValueError):
+            o_c.check_for_expected_files(ld_exp_names_and_paths)
+    
     def test_get_experiment_name_from_fpath(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
