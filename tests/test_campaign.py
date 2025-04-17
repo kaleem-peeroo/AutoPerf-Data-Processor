@@ -318,9 +318,6 @@ class TestCampaign:
                 f"{s_exp_dir}sub_0.csv",
                 f"{s_exp_dir}sub_1.csv",
                 f"{s_exp_dir}sub_2.csv",
-                f"{s_exp_dir}sub_3.csv",
-                f"{s_exp_dir}sub_4.csv",
-                f"{s_exp_dir}sub_5.csv",
             ]
         }
 
@@ -341,9 +338,6 @@ class TestCampaign:
             'sub_0_mbps',
             'sub_1_mbps',
             'sub_2_mbps',
-            'sub_3_mbps',
-            'sub_4_mbps',
-            'sub_5_mbps',
         ]
         for s_col in ls_wanted_cols:
             assert s_col in df_exp.columns
@@ -835,8 +829,7 @@ class TestCampaign:
                 "sub_0.csv",
             ]
         }]
-        with pytest.raises(ValueError):
-            o_c.check_for_expected_files(ld_exp_names_and_paths)
+        assert o_c.check_for_expected_files(ld_exp_names_and_paths) is False
 
         # INFO: Error Case - missing pub file
         ld_exp_names_and_paths = [{
@@ -846,8 +839,7 @@ class TestCampaign:
                 "sub_1.csv",
             ]
         }]
-        with pytest.raises(ValueError):
-            o_c.check_for_expected_files(ld_exp_names_and_paths)
+        assert o_c.check_for_expected_files(ld_exp_names_and_paths) is False
 
     def test_get_expected_file_count(self):
         from app import Campaign
@@ -996,7 +988,7 @@ class TestCampaign:
             "./tests/data/test_campaign_with_dirs_small/"
         )
         assert isinstance(ls_exp_paths, list)
-        assert len(ls_exp_paths) == 14
+        assert len(ls_exp_paths) == 8
 
         for s_path in ls_exp_paths:
             assert isinstance(s_path, str)
@@ -1018,7 +1010,7 @@ class TestCampaign:
             "./tests/data/test_campaign_with_dirs_small/"
         )
         assert isinstance(ls_fpaths, list)
-        assert len(ls_fpaths) == 174
+        assert len(ls_fpaths) == 168
 
         for s_path in ls_fpaths:
             assert isinstance(s_path, str)

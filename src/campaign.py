@@ -625,8 +625,58 @@ class Campaign:
                 {"name": s_exp_name, "paths": ls_exp_paths}
             )
 
+        if not self.check_for_expected_files(ld_exp_names_and_paths):
+            raise ValueError(
+                f"Mismatch in file count: {ld_exp_names_and_paths}"
+            )
+
         return ld_exp_names_and_paths
 
+    def check_for_expected_files(
+        self,
+        ld_exp_names_and_paths: List[Dict[str, List[str]]] = []
+    ) -> bool:
+        """
+        Checks if there are the right number of pub and sub files according to 
+        the experiment name.
+        """
+
+        if len(ld_exp_names_and_paths) == 0:
+            raise ValueError("No experiment names and paths provided")
+
+        for d_exp_names_and_paths in ld_exp_names_and_paths:
+            if 'name' not in d_exp_names_and_paths:
+                raise ValueError("Experiment names and paths must have a name key")
+
+            if 'paths' not in d_exp_names_and_paths:
+                raise ValueError("Experiment names and paths must have a paths key")
+
+            s_exp_name = d_exp_names_and_paths['name']
+            ls_exp_paths = d_exp_names_and_paths['paths']
+
+            if not self.follows_experiment_name_format(s_exp_name):
+                s_exp_name = self.try_format_experiment_name(s_exp_name)
+                if not self.follows_experiment_name_format(s_exp_name):
+                    raise ValueError(
+                        f"Experiment name does not follow expected format: {s_exp_name}"
+                    )
+
+            if len(ls_exp_paths) == 0:
+                raise ValueError(f"No experiment paths found for {s_exp_name}")
+
+            i_expected_file_count = self.get_expected_file_count(s_exp_name)
+            i_actual_file_count = len(ls_exp_paths)
+
+            if i_actual_file_count == 1:
+                if s_exp_name not in ls_exp_paths[0]:
+                    return False
+
+            else:
+                if i_actual_file_count != i_expected_file_count:
+                    return False
+
+        return True
+                
     def get_expected_file_count(
         self,
         s_exp_name: str = ""
