@@ -143,6 +143,8 @@ class Campaign:
 
         if len(ls_exp_paths) == 1:
             df_exp = self.get_exp_file_df(ls_exp_paths[0])
+            if df_exp.empty:
+                raise ValueError(f"Experiment dataframe is empty: {s_exp_name}")
 
         else:
             df_exp = pd.DataFrame()
