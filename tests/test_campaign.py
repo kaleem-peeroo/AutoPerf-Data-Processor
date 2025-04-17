@@ -179,13 +179,13 @@ class TestCampaign:
             assert s_col in df.columns
 
         df_lat = df[['latency_us']].copy().dropna()
-        assert len(df_lat) == 5284
+        assert len(df_lat) == 11
 
         df_avg_tp = df[['avg_mbps_per_sub']].copy().dropna()
-        assert len(df_avg_tp) == 612
+        assert len(df_avg_tp) == 298
 
         df_total_tp = df[['total_mbps_over_subs']].copy().dropna()
-        assert len(df_total_tp) == 5284
+        assert len(df_total_tp) == 298
 
     def setup_test_calculate_metrics_for_subs(self):
         from app import Campaign

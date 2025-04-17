@@ -130,9 +130,11 @@ class Campaign:
                     df_exp = pd.concat([df_exp, df_temp], axis=1)
 
         df_exp['experiment_name'] = s_exp_name
+
         df_exp = self.add_input_cols(df_exp)
-        df_exp = self.calculate_averages_for_avg_mbps_per_sub(df_exp)
-        df_exp = self.calculate_averages_for_total_mbps_over_subs(df_exp)
+
+        df_exp = self.calculate_avg_mbps_per_sub(df_exp)
+        df_exp = self.calculate_total_mbps_over_subs(df_exp)
 
         return df_exp
 
