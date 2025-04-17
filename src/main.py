@@ -13,9 +13,12 @@ from utils import clear_screen
 
 def main():
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         format="%(message)s",
-        handlers=[RichHandler()]
+        handlers = [
+            logging.FileHandler("debug.log"),
+            RichHandler()
+        ]
     )
     lg = logging.getLogger(__name__)
 

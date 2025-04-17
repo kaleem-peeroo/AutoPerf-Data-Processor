@@ -573,7 +573,6 @@ class Campaign:
                 )
 
         ls_parts = s_exp_name.split("_")
-        pprint(ls_parts)
 
         d_qos = {
             "duration_secs": ls_parts[0].split("SEC")[0],
