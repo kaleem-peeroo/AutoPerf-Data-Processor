@@ -149,6 +149,16 @@ class Campaign:
             for s_exp_path in ls_exp_paths:
                 df_temp = self.get_exp_file_df(s_exp_path)
                 df_exp = pd.concat([df_exp, df_temp], axis=1)
+            df_exp.reset_index(drop=True, inplace=True)
+
+        if df_exp.empty:
+            raise ValueError(f"Experiment dataframe is empty: {s_exp_name}")
+
+        if len(df_exp.columns) == 0:
+            raise ValueError(f"Experiment dataframe has no columns: {s_exp_name}")
+
+        if 'experiment_name' in df_exp.columns:
+            df_exp.drop(columns=['experiment_name'], inplace=True)
 
         df_exp['experiment_name'] = s_exp_name
 
