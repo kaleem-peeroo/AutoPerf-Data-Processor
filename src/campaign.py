@@ -96,11 +96,21 @@ class Campaign:
             - around 600 avg_mbps samples
             - around 600 total_mbps samples
         """
+
+        lg.debug("Creating dataset...")
+
         s_raw_datadir = self.get_raw_datadir()
         ld_exp_names_and_paths = self.get_experiments(s_raw_datadir)
 
         df_ds = pd.DataFrame()
-        for d_exp_names_and_paths in ld_exp_names_and_paths:
+        for i_exp, d_exp_names_and_paths in enumerate(ld_exp_names_and_paths):
+            lg.info(
+                "[{}/{}] Processing exp df for {}".format(
+                    i_exp + 1,
+                    len(ld_exp_names_and_paths),
+                    d_exp_names_and_paths['name']
+                )
+            )
             df_exp = self.process_exp_df(d_exp_names_and_paths)
             
             df_ds = pd.concat([df_ds, df_exp], axis=0)
@@ -409,9 +419,6 @@ class Campaign:
         if s_exp_path == "":
             raise Exception("No experiment path provided")
 
-        if not isinstance(s_exp_path, str):
-            raise ValueError(f"Experiment path must be a string: {s_exp_path}")
-
         s_filename = os.path.basename(s_exp_path)
         if s_filename.startswith("pub_0"):
             return True
@@ -433,9 +440,6 @@ class Campaign:
         """
         if s_exp_path == "":
             raise Exception("No experiment path provided")
-
-        if not isinstance(s_exp_path, str):
-            raise ValueError(f"Experiment path must be a string: {s_exp_path}")
 
         if not os.path.exists(s_exp_path):
             raise Exception(f"Experiment path does not exist: {s_exp_path}")
@@ -584,6 +588,8 @@ class Campaign:
         Paths is a list of all files for that experiment.
             This could be a single file or multiple files.
         """
+        lg.debug("Gathering experiments...")
+
         if s_raw_datadir == "":
             raise Exception("No raw data directory provided")
 
