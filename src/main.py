@@ -21,7 +21,10 @@ def main():
 
     ld_ds_config = validate_config(LD_DATASETS)
 
-    for d_ds in ld_ds_config:
+    for i_ds, d_ds in enumerate(ld_ds_config):
+        lg.info("[{}/{}] Processing {}".format(
+            i_ds + 1, len(ld_ds_config), d_ds['name']
+        ))
         campaign = Campaign(d_ds)
         campaign.create_dataset()
 
