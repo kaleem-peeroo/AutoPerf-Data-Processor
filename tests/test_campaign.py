@@ -187,12 +187,73 @@ class TestCampaign:
         df_total_tp = df[['total_mbps_over_subs']].copy().dropna()
         assert len(df_total_tp) == 5284
 
+    def setup_test_calculate_averages(self):
+        from app import Campaign
+
+        d_conf = {
+            "name": "test campaign with dirs",
+            "exp_folders": \
+                "./tests/data/test_campaign_with_dirs_small/",
+            "ap_config": "",
+            "dataset_path": \
+                "./tests/output/test_campaign_with_dirs_small.parquet",
+        }
+        o_c = Campaign(d_conf)
+
+        s_camp_dir = "./tests/data/test_campaign_with_dirs_small/"
+        s_exp_dir = f"{s_camp_dir}300SEC_1B_1P_3S_BE_MC_0DUR_100LC/"
+        d_exp_names_and_paths = {
+            "name": "300SEC_1B_1P_3S_BE_MC_0DUR_100LC",
+            "paths": [
+                f"{s_exp_dir}pub_0.csv",
+                f"{s_exp_dir}sub_0.csv",
+                f"{s_exp_dir}sub_1.csv",
+                f"{s_exp_dir}sub_2.csv",
+                f"{s_exp_dir}sub_3.csv",
+                f"{s_exp_dir}sub_4.csv",
+                f"{s_exp_dir}sub_5.csv",
+            ]
+        }
+
+        df_exp = pd.DataFrame()
+        for s_exp_path in d_exp_names_and_paths['paths']:
+            assert os.path.exists(s_exp_path)
+            df_temp = o_c.get_exp_file_df(s_exp_path)
+
+            if df_exp.empty:
+                df_exp = df_temp
+            else:
+                df_exp = pd.concat([df_exp, df_temp], axis=1)
+
+        df_exp['experiment_name'] = d_exp_names_and_paths['name']
+        df_exp = o_c.add_input_cols(df_exp)
+
+        ls_wanted_cols = [
+            'sub_0_mbps',
+            'sub_1_mbps',
+            'sub_2_mbps',
+            'sub_3_mbps',
+            'sub_4_mbps',
+            'sub_5_mbps',
+        ]
+        for s_col in ls_wanted_cols:
+            assert s_col in df_exp.columns
+        
+        return o_c, df_exp
+
     def test_calculate_averages_for_avg_mbps_per_sub(self):
-        raise NotImplementedError("Test not implemented yet")
+        o_c, df_before = self.setup_test_calculate_averages()
+        
+        df_after = o_c.calculate_averages_for_avg_mbps_per_sub(df_before.copy())
+
+        assert df_after is not None
+        assert isinstance(df_after, pd.DataFrame)
+        assert len(df_after) > 0
+        assert len(df_after.columns) == len(df_before.columns) + 1
+        assert 'avg_mbps_per_sub' in df_after.columns
 
     def test_calculate_averages_for_total_mbps_over_subs(self):
         raise NotImplementedError("Test not implemented yet")
-
 
     def test_get_exp_file_df(self):
         from app import Campaign

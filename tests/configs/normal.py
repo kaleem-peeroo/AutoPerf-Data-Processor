@@ -1,4 +1,9 @@
 LD_DATASETS = [ 
+   {
+        "name": "test campaign with dirs",
+        "exp_folders": \
+            "/Users/kaleem/PhD/Tools/AutoPerfDataProcessor/tests/data/test_campaign_with_dirs_simple/",
+   },
     {
         "name": "Rel Impact",
         "exp_folders": \
