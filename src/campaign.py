@@ -299,10 +299,14 @@ class Campaign:
             return False
 
         else:
-            raise ValueError(
-                f"Experiment path does not follow expected format: {s_exp_path}"
-            )
-
+            s_filename = self.try_format_experiment_name(s_filename)
+            if self.follows_experiment_name_format(s_filename):
+                return False
+            else:
+                raise ValueError(
+                    f"Experiment path does not follow expected format: {s_exp_path}"
+                )
+            
     def process_file_df(
         self,
         s_exp_path: str = ""
@@ -569,6 +573,8 @@ class Campaign:
                 )
 
         ls_parts = s_exp_name.split("_")
+        pprint(ls_parts)
+
         d_qos = {
             "duration_secs": ls_parts[0].split("SEC")[0],
             "datalen_bytes": ls_parts[1].split("B")[0],
@@ -625,11 +631,13 @@ class Campaign:
                 {"name": s_exp_name, "paths": ls_exp_paths}
             )
 
-        ld_exp_names_and_paths = self.check_for_expected_files(ld_exp_names_and_paths)
+        ld_exp_names_and_paths = self.get_exp_with_expected_file_count(
+            ld_exp_names_and_paths
+        )
 
         return ld_exp_names_and_paths
 
-    def check_for_expected_files(
+    def get_exp_with_expected_file_count(
         self,
         ld_exp_names_and_paths: List[Dict[str, List[str]]] = []
     ) -> List[Dict[str, List[str]]]:
@@ -694,9 +702,11 @@ class Campaign:
             raise Exception("No experiment name provided")
 
         if not self.follows_experiment_name_format(s_exp_name):
-            raise ValueError(
-                f"Experiment name does not follow expected format: {s_exp_name}"
-            )
+            s_exp_name = self.try_format_experiment_name(s_exp_name)
+            if not self.follows_experiment_name_format(s_exp_name):
+                raise ValueError(
+                    f"Experiment name does not follow expected format: {s_exp_name}"
+                )
 
         ls_parts = s_exp_name.split("_")
         if len(ls_parts) != 8:
@@ -796,10 +806,10 @@ class Campaign:
 
         ls_parts = s_filename.upper().split("_")
         ld_end_matches = [
-            {"values": ["SEC", "S"]},
+            {"values": ["SEC"]},
             {"values": ["B"]},
-            {"values": ["P", "PUB"]},
-            {"values": ["S", "SUB"]},
+            {"values": ["PUB"]},
+            {"values": ["SUB"]},
             {"values": ["REL", "BE"]},
             {"values": ["MC", "UC"]},
             {"values": ["DUR"]},

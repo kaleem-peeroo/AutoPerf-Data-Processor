@@ -799,7 +799,7 @@ class TestCampaign:
                 "sub_1.csv",
             ]
         }]
-        assert o_c.check_for_expected_files(
+        assert o_c.get_exp_with_expected_file_count(
             ld_exp_names_and_paths
         ) == ld_exp_names_and_paths
 
@@ -812,7 +812,7 @@ class TestCampaign:
                 "sub_1.csv",
             ]
         }]
-        assert o_c.check_for_expected_files(
+        assert o_c.get_exp_with_expected_file_count(
             ld_exp_names_and_paths
         ) == ld_exp_names_and_paths
 
@@ -823,7 +823,7 @@ class TestCampaign:
                 "600SEC_100B_1PUB_2SUB_BE_MC_3DUR_100LC.csv",
             ]
         }]
-        assert o_c.check_for_expected_files(
+        assert o_c.get_exp_with_expected_file_count(
             ld_exp_names_and_paths
         ) == ld_exp_names_and_paths
 
@@ -835,7 +835,7 @@ class TestCampaign:
                 "sub_0.csv",
             ]
         }]
-        assert o_c.check_for_expected_files(ld_exp_names_and_paths) == []
+        assert o_c.get_exp_with_expected_file_count(ld_exp_names_and_paths) == []
 
         # INFO: Error Case - missing pub file
         ld_exp_names_and_paths = [{
@@ -845,7 +845,7 @@ class TestCampaign:
                 "sub_1.csv",
             ]
         }]
-        assert o_c.check_for_expected_files(ld_exp_names_and_paths) == []
+        assert o_c.get_exp_with_expected_file_count(ld_exp_names_and_paths) == []
 
     def test_get_expected_file_count(self):
         from app import Campaign
@@ -958,12 +958,6 @@ class TestCampaign:
         ls_normal_cases = [
             # INFO: Normal case - most up to date format
             "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC",
-            # INFO: P as PUB
-            "600SEC_100B_15P_15SUB_BE_MC_3DUR_100LC",
-            # INFO: S as SUB
-            "600SEC_100B_15PUB_15S_BE_MC_3DUR_100LC",
-            # INFO: P as PUB and S as SUB
-            "600S_100B_15P_15S_BE_MC_3DUR_100LC",
             # INFO: REL instead of BE
             "600SEC_100B_15PUB_15SUB_REL_MC_3DUR_100LC",
             # INFO: UC instead of MC
@@ -985,9 +979,7 @@ class TestCampaign:
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
 
-        ld_ds_config = LD_DATASETS
-        d_ds = ld_ds_config[0]
-        o_c = Campaign(d_ds)
+        o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case
         ls_exp_paths = o_c.get_experiment_paths_from_fpath(
