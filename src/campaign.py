@@ -125,6 +125,12 @@ class Campaign:
                 )
             )
             df_exp = self.process_exp_df(d_exp_names_and_paths)
+
+            try:
+                df_exp = self.process_exp_df(d_exp_names_and_paths)
+            except Exception as e:
+                lg.error(e)
+                continue
             
             df_ds = pd.concat([df_ds, df_exp], axis=0)
 
@@ -135,7 +141,6 @@ class Campaign:
 
         self.df_ds = df_ds
 
-        ds_output = self.get_dataset_path()
         os.makedirs(os.path.dirname(ds_output), exist_ok=True)
         df_ds.to_parquet(ds_output, index=False)
         lg.info(f"Dataset written to {ds_output}")
@@ -168,13 +173,13 @@ class Campaign:
         df_exp = pd.DataFrame()
 
         for i_exp_path, s_exp_path in enumerate(ls_exp_paths):
-            lg.debug(
-                "[{}/{}] Processing {}".format(
-                    i_exp_path + 1,
-                    len(ls_exp_paths),
-                    os.path.basename(s_exp_path)
-                )
-            )
+            # lg.debug(
+            #     "[{}/{}] Processing {}".format(
+            #         i_exp_path + 1,
+            #         len(ls_exp_paths),
+            #         os.path.basename(s_exp_path)
+            #     )
+            # )
             df_temp = self.get_exp_file_df(s_exp_path)
             df_exp = pd.concat([df_exp, df_temp], axis=1)
 
@@ -637,11 +642,15 @@ class Campaign:
             if ".ds_store" in s_exp_entry.lower():
                 continue
 
-            s_exp_name = self.get_experiment_name_from_fpath(s_exp_entry)
-            ls_exp_paths = self.get_experiment_paths_from_fpath(s_exp_entry)
-            ld_exp_names_and_paths.append(
-                {"name": s_exp_name, "paths": ls_exp_paths}
-            )
+            try:
+                s_exp_name = self.get_experiment_name_from_fpath(s_exp_entry)
+                ls_exp_paths = self.get_experiment_paths_from_fpath(s_exp_entry)
+                ld_exp_names_and_paths.append(
+                    {"name": s_exp_name, "paths": ls_exp_paths}
+                )
+            except Exception as e:
+                lg.error(e)
+                continue
 
         ld_exp_names_and_paths = self.get_exp_with_expected_file_count(
             ld_exp_names_and_paths
@@ -766,7 +775,12 @@ class Campaign:
         s_filename = os.path.basename(s_exp_entry)
         s_dirname = os.path.basename(os.path.dirname(s_exp_entry))
         if len(s_filename.split("_")) != 8 and len(s_dirname.split("_")) != 8:
-            raise ValueError(f"Experiment entry does not have 8 sections: {s_exp_entry}")
+            lg.warning(
+                "Experiment entry does not have 8 parts: {}".format(
+                    s_exp_entry
+                )
+            )
+            return s_exp_entry
 
         if "." in s_exp_entry:
             s_exp_entry = s_exp_entry.split(".")[0]
@@ -1104,3 +1118,4 @@ class Campaign:
 
         except Exception as e:
             raise e
+

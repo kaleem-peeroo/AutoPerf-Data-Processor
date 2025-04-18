@@ -11,35 +11,42 @@ from campaign import Campaign
 from config import LD_DATASETS
 from utils import clear_screen
 
-def main():
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(message)s",
-        handlers = [
-            logging.FileHandler("debug.log"),
-            RichHandler()
-        ]
-    )
-    lg = logging.getLogger(__name__)
+lg = logging.getLogger(__name__)
 
+def main():
+    setup_logging()
+    
     ld_ds_config = validate_config(LD_DATASETS)
 
     for i_ds, d_ds in enumerate(ld_ds_config):
+        
         lg.info("[{}/{}] Processing {}".format(
-            i_ds + 1, len(ld_ds_config), d_ds['name']
+            i_ds + 1, 
+            len(ld_ds_config), 
+            d_ds['name']
         ))
+
         campaign = Campaign(d_ds)
         campaign.create_dataset()
+        campaign.validate_dataset()
+
+def setup_logging():
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s %(levelname)s %(message)s",
+        datefmt="%H:%M:%S",
+        handlers = [
+            logging.FileHandler(
+                "debug.log",
+                mode='w',
+            ),
+            RichHandler()
+        ]
+    )
 
 def validate_config(
     ld_config: List[ Dict[str, str] ] = []
 ) -> List[ Dict[str, str] ]:
-    if ld_config is None:
-        raise ValueError("ld_config must not be None")
-
-    if not isinstance(ld_config, list):
-        raise ValueError(f"ld_config must be a list: {ld_config}")
-
     if len(ld_config) == 0:
         raise ValueError("ld_config must not be empty")
 
