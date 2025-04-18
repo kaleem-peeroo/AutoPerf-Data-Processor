@@ -973,6 +973,29 @@ class TestCampaign:
             "./test_campaign_with_csv/some_random_name.csv"
         ) is False
 
+    def test_is_exp_in_str(self):
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - with name in filename
+        assert o_c.is_exp_name_in_str(
+            "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv"
+        ) is True
+
+        # INFO: Normal Case - with name in dir
+        assert o_c.is_exp_name_in_str(
+            "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
+        ) is True
+
+        # INFO: Error Case - no name anywhere
+        assert o_c.is_exp_name_in_str(
+            "some_random_name.csv"
+        ) is False
+
+        # INFO: Error Case - has 8 underscores
+        assert o_c.is_exp_name_in_str(
+            "one_two_three_four_five_six_seven_eight"
+        ) is False
+
     def test_try_format_experiment_name_in_path(self):
         o_c = Campaign(LD_DATASETS[0])
 

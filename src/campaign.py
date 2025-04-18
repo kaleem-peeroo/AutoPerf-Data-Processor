@@ -650,7 +650,6 @@ class Campaign:
         ]
 
         ls_exp_entries = self.process_exp_entries_with_subdirs(ls_exp_entries)
-        pprint(ls_exp_entries)
 
         lg.debug(f"Found {len(ls_exp_entries)} entries in {s_raw_datadir}...")
 
@@ -659,13 +658,10 @@ class Campaign:
                 continue
 
             try:
-                pprint(s_exp_entry)
 
                 s_exp_name = self.get_experiment_name_from_fpath(s_exp_entry)
-                pprint(s_exp_name)
 
                 ls_exp_paths = self.get_experiment_paths_from_fpath(s_exp_entry)
-                pprint(ls_exp_paths)
 
                 ld_exp_names_and_paths.append(
                     {"name": s_exp_name, "paths": ls_exp_paths}
@@ -786,8 +782,6 @@ class Campaign:
             s_exp_name = d_exp_names_and_paths['name']
             ls_exp_paths = d_exp_names_and_paths['paths']
 
-            pprint(d_exp_names_and_paths)
-
             if not self.follows_experiment_name_format(s_exp_name):
                 s_exp_name = self.try_format_experiment_name(s_exp_name)
                 if not self.follows_experiment_name_format(s_exp_name):
@@ -896,10 +890,8 @@ class Campaign:
             )
 
         s_dirname = os.path.basename(os.path.dirname(s_exp_path))
-        i_underscore_count = s_dirname.count("_")
-
-        return i_underscore_count == 7 or i_underscore_count == 8
-
+        return self.is_exp_name_in_str(s_dirname)
+        
     def is_exp_name_in_filename(self, s_exp_path: str = "") -> bool:
         """
         Checks if the experiment name is in the filename.
@@ -909,8 +901,31 @@ class Campaign:
 
         s_filename = os.path.basename(s_exp_path)
 
-        i_underscore_count = s_filename.count("_")
-        return i_underscore_count == 7 or i_underscore_count == 8
+        return self.is_exp_name_in_str(s_filename)
+
+    def is_exp_name_in_str(self, s_value: str = "") -> bool:
+        """
+        Checks if the experiment name is in the string.
+        """
+        if s_value == "":
+            raise Exception("No experiment entry provided")
+
+        s_value = s_value.upper()
+
+        i_underscore_count = s_value.count("_")
+        if i_underscore_count == 0:
+            return False
+
+        if i_underscore_count != 7 and i_underscore_count != 8:
+            return False
+
+        if "." in s_value:
+            s_value = s_value.split(".")[0]
+
+        if s_value.endswith("LC"):
+            return True
+
+        return False
         
     def try_format_experiment_name_in_path(self, s_exp_entry: str = "") -> str:
         """
@@ -1016,13 +1031,6 @@ class Campaign:
 
         if s_filename == "":
             raise Exception("No filename provided")
-
-        if s_filename == "":
-            raise ValueError("Filename must not be empty")
-
-        i_underscore_count = s_filename.count("_")
-        if i_underscore_count != 7 and i_underscore_count != 8:
-            return False
 
         if "." in s_filename:
             s_filename = s_filename.split(".")[0]
