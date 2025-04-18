@@ -627,6 +627,13 @@ class TestCampaign:
         assert isinstance(i_end, int)
         assert i_end == 565
 
+        # INFO: Error Case - pub file with summary in middle
+        s_test_dir = "./tests/data/test_campaign_with_errors/"
+        s_test_file = f"{s_test_dir}/300SEC_100B_1P_1S_REL_UC_0DUR_100LC/pub_0.csv"
+        i_end = o_c.get_end_index_for_raw_file(s_test_file)
+        assert isinstance(i_end, int)
+        assert i_end == 65414
+
     def test_add_input_cols(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS

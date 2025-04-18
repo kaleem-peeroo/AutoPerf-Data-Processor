@@ -10,6 +10,7 @@ from rich.pretty import pprint
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
+from itertools import islice
 
 # from logger import logger
 from utils import get_qos_name, calculate_averages, get_df_from_csv, aggregate_across_cols
@@ -504,11 +505,11 @@ class Campaign:
         self,
         s_exp_path: str = ""
     ) -> int:
+        """
+        Read the file N lines at a time and look for the summary line.
+        """
         if s_exp_path == "":
             raise Exception("No experiment path provided")
-
-        if not isinstance(s_exp_path, str):
-            raise ValueError(f"Experiment path must be a string: {s_exp_path}")
 
         if not os.path.exists(s_exp_path):
             raise Exception(f"Experiment path does not exist: {s_exp_path}")
@@ -519,29 +520,44 @@ class Campaign:
         if not s_exp_path.endswith(".csv"):
             raise Exception(f"Experiment path is not a csv file: {s_exp_path}")
 
-        with open(s_exp_path, "r") as o_file:
-            ls_file_contents = o_file.readlines()
+        # Find the chunk with the summary line
+        i_chunk_size = 1_000
+        i_line_count = 0
+        with open(s_exp_path, "rb") as o_file:
+            for i_chunk, chunk in enumerate(
+                iter(
+                    lambda: b''.join(islice(o_file, i_chunk_size)),
+                    b''
+                )
+            ):
+                if b"summary" in chunk.lower():
+                    i_line_count = (i_chunk + 1) * i_chunk_size
+                    break
 
-        ls_last_5_lines = ls_file_contents[-5:]
-        line_count = len(ls_file_contents)
+        if i_line_count == 0:
+            raise ValueError(f"Could not find end index for raw file: {s_exp_path}")
+
+        # Narrow down in the chunk to find the exact line
+        i_chunk_start = i_line_count - i_chunk_size
+        i_chunk_end = i_line_count
+
+        with open(s_exp_path, "r") as o_file:
+            ls_chunk_lines = o_file.readlines()[i_chunk_start:i_chunk_end]
 
         end_index = 0
-        for i, line in enumerate(ls_last_5_lines):
+        for i, line in enumerate(ls_chunk_lines):
             if "summary" in line.lower():
-                end_index = line_count - 5 + i - 2
+                end_index = i_chunk_start + i - 2
                 break
 
         if end_index == 0:
-            end_index = line_count - 1
+            end_index = i_chunk_start
 
         if end_index <= 0:
             raise ValueError(f"Could not find end index for raw file: {s_exp_path}")
 
-        if end_index >= line_count:
-            raise ValueError(f"End index is greater than file length: {s_exp_path}")
-
         return end_index
-
+        
     def add_input_cols(self, df: pd.DataFrame) -> pd.DataFrame:
         if df.empty:
             raise ValueError("Input dataframe is empty")
