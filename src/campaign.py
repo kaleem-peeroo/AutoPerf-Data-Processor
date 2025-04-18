@@ -803,6 +803,21 @@ class Campaign:
 
         s_exp_entry = s_exp_entry.upper()
         ls_sections = s_exp_entry.split("_")
+    def is_path(self, s_exp_entry: str = "") -> bool:
+        """
+        Checks if the entry is a path by counting the number of slashes.
+        """
+        if s_exp_entry == "":
+            raise Exception("No experiment entry provided")
+        
+        if not isinstance(s_exp_entry, str):
+            raise ValueError(f"Experiment entry must be a string: {s_exp_entry}")
+
+        i_slash_count = s_exp_entry.count("/")
+        if i_slash_count == 0:
+            return False
+
+        return True
 
         if not ls_sections[0].endswith("SEC"):
             ls_sections[0] = ls_sections[0].replace("S", "SEC")

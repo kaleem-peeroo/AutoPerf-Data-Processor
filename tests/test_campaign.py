@@ -974,6 +974,32 @@ class TestCampaign:
         )
         assert isinstance(s_exp_name, str)
         assert s_exp_name == "invalid_experiment_name"
+
+    def test_is_path(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+        o_c = Campaign(LD_DATASETS[0])
+
+        # Normal Case - path to folder
+        assert o_c.is_path(
+            "./tests/data/test_campaign_with_dirs_small/"
+        ) is True
+
+        # Normal Case - path to file
+        assert o_c.is_path(
+            "./tests/data/test_campaign_with_dirs_small/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
+        ) is True
+
+        # Normal Case - not path
+        assert o_c.is_path(
+            "file.csv"
+        ) is False
+
+        # Error Case - numbers?
+        with pytest.raises(ValueError):
+            o_c.is_path(
+                123456
+            )
             
     def test_follows_experiment_name_format(self):
         from app import Campaign
