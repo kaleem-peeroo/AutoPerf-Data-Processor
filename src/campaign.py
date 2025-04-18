@@ -522,48 +522,36 @@ class Campaign:
 
         i_file_line_count = sum(1 for _ in open(s_exp_path))
         i_chunk_size = i_file_line_count // 10
-        i_line_count = 0
-        with open(s_exp_path, "rb") as o_file:
-            for i_chunk, chunk in enumerate(
-                iter(
-                    lambda: b''.join(islice(o_file, i_chunk_size)),
-                    b''
-                )
-            ):
-                i_line_count = i_chunk * i_chunk_size
 
-                # If its not the first 20 lines
-                if i_line_count > 20 and b"interval" in chunk.lower():
-                    i_line_count = ( i_chunk + 1 ) * i_chunk_size
-                    break
-
-                if b"summary" in chunk.lower():
-                    i_line_count = ( i_chunk + 1 ) * i_chunk_size
-                    break
-
-        if i_line_count == 0:
-            raise ValueError(f"Could not find end index for raw file: {s_exp_path}")
-
-        # Narrow down in the chunk to find the exact line
-        i_chunk_start = i_line_count - i_chunk_size
-        i_chunk_end = i_line_count
-
-        with open(s_exp_path, "r") as o_file:
-            ls_chunk_lines = o_file.readlines()[i_chunk_start:i_chunk_end]
-
+        b_found = False
         end_index = 0
-        for i, line in enumerate(ls_chunk_lines):
-            if "summary" in line.lower() or "interval" in line.lower():
-                end_index = i_chunk_start + i - 2
-                break
+        with open(s_exp_path, "rb") as o_file:
+            for i_chunk, chunk in enumerate(iter(
+                lambda: tuple(islice(o_file, i_chunk_size)), ()
+            )):
+                if b_found:
+                    break
 
-        if end_index == 0:
-            end_index = i_chunk_start
+                for i_line, s_line in enumerate(chunk):
+                    i_line_count = i_chunk * i_chunk_size + i_line
+                    if b"summary" in s_line.lower() and not b_found:
+                        end_index = i_line_count
+                        b_found = True
+                        break
 
-        if end_index <= 0:
-            raise ValueError(f"Could not find end index for raw file: {s_exp_path}")
+                    elif b"interval" in s_line.lower() and \
+                            not b_found and \
+                            i_line_count > 10:
+                        end_index = i_line_count
+                        b_found = True
+                        break
 
-        return end_index
+        if end_index <= 0 and not b_found:
+            raise ValueError(
+                f"Could not find end index for raw file: {s_exp_path}"
+            )
+
+        return end_index - 2
         
     def add_input_cols(self, df: pd.DataFrame) -> pd.DataFrame:
         if df.empty:

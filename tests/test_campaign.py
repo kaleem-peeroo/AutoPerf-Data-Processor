@@ -510,6 +510,18 @@ class TestCampaign:
         assert df_sub["sub_1_mbps"].dtype == "float64"
         assert len(df_sub) == 563
 
+        # INFO: Normal Case - erroneous sub file
+        s_test_datadir = "./tests/data/test_campaign_with_errors/"
+        df_sub = o_c.process_file_df(
+            f"{s_test_datadir}/600SEC_100B_25P_1S_BE_MC_2DUR_100LC/sub_0.csv"
+        )
+        assert df_sub is not None
+        assert isinstance(df_sub, pd.DataFrame)
+        assert len(df_sub) > 0
+        assert "sub_0_mbps" in df_sub.columns
+        assert df_sub["sub_0_mbps"].dtype == "float64"
+        assert len(df_sub) == 892
+
     def test_get_metric_col_from_df(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS
@@ -639,7 +651,8 @@ class TestCampaign:
         s_test_file = f"{s_test_dir}/600SEC_100B_25P_1S_BE_MC_2DUR_100LC/sub_0.csv"
         i_end = o_c.get_end_index_for_raw_file(s_test_file)
         assert isinstance(i_end, int)
-        assert i_end == 46361
+        # "Interval" is seen on line 897
+        assert i_end == 894
 
     def test_add_input_cols(self):
         from app import Campaign
