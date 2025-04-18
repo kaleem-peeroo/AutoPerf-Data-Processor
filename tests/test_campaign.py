@@ -90,7 +90,7 @@ class TestCampaign:
         ls_exp_names = df['experiment_name'].unique().tolist()
 
         for d_exp in ld_exp_names_and_paths:
-            s_exp_name = d_exp['name']
+            s_exp_name = o_c.try_format_experiment_name( d_exp['name'] )
             assert s_exp_name in ls_exp_names
 
             df_exp = df[df['experiment_name'] == s_exp_name].copy()
@@ -903,7 +903,7 @@ class TestCampaign:
         d_ds = ld_ds_config[0]
         o_c = Campaign(d_ds)
 
-        # INFO: Name in file
+        # INFO: Normal Case: Name in file
         s_exp_name = o_c.get_experiment_name_from_fpath(
             "./data/test_campaign_with_csv/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv"
         )
@@ -912,19 +912,119 @@ class TestCampaign:
         assert len(s_exp_name) > 0
         assert s_exp_name == "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
 
-        # INFO: Name in directory
+        # INFO: Normal Case: Name in directory
         s_exp_name = o_c.get_experiment_name_from_fpath(
             "./test_campaign_with_csv/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC/pub_0.csv"
         )
-
         assert isinstance(s_exp_name, str)
         assert len(s_exp_name) > 0
         assert s_exp_name == "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
 
-        # INFO: No name
+        # INFO: Error Case: No name
         with pytest.raises(ValueError):
             s_exp_name = o_c.get_experiment_name_from_fpath(
                 "./test_campaign_with_csv/pub_0.csv"
+            )
+
+        # INFO: Normal Case: Name in dir
+        s_exp_name = o_c.get_experiment_name_from_fpath(
+            "./another_test_campaign_with_csv/120SEC_100B_1PUB_1SUB_REL_MC_0DUR_100LC.csv"
+        )
+        assert isinstance(s_exp_name, str)
+        assert len(s_exp_name) > 0
+        assert s_exp_name == "120SEC_100B_1PUB_1SUB_REL_MC_0DUR_100LC"
+
+    def test_is_exp_name_in_dirpath(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - with name in dir
+        assert o_c.is_exp_name_in_dirpath(
+            "./test_campaign_with_csv/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC/pub_0.csv"
+        ) is True
+
+        # INFO: Normal Case - name in file
+        assert o_c.is_exp_name_in_dirpath(
+            "./test_campaign_with_csv/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv"
+        ) is False
+
+        # INFO: Error Case - no name anywhere
+        assert o_c.is_exp_name_in_dirpath(
+            "./test_campaign_with_csv/some_random_name.csv"
+        ) is False
+
+    def test_is_exp_name_in_filename(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - with name in filename
+        assert o_c.is_exp_name_in_filename(
+            "./test_campaign_with_csv/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv"
+        ) is True
+
+        # INFO: Normal Case - with name in dir
+        assert o_c.is_exp_name_in_filename(
+            "./test_campaign_with_csv/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC/pub_0.csv"
+        ) is False
+
+        # INFO: Error Case - no name anywhere
+        assert o_c.is_exp_name_in_filename(
+            "./test_campaign_with_csv/some_random_name.csv"
+        ) is False
+
+    def test_try_format_experiment_name_in_path(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - most up to date format
+        s_exp_name = o_c.try_format_experiment_name_in_path(
+            "some/path/to/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
+        )
+        assert isinstance(s_exp_name, str)
+        assert s_exp_name == "some/path/to/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
+
+        # INFO: Normal Case - with .csv at end
+        s_exp_name = o_c.try_format_experiment_name_in_path(
+            "path/to/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv"
+        )
+        assert isinstance(s_exp_name, str)
+        assert s_exp_name == "path/to/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv"
+
+        # INFO: Normal Case - old format with p and s
+        s_exp_name = o_c.try_format_experiment_name_in_path(
+            "path/to/600s_32000B_5P_1S_rel_mc_2dur_100lc"
+        )
+        assert isinstance(s_exp_name, str)
+        assert s_exp_name.lower() == "path/to/600sec_32000b_5pub_1sub_rel_mc_2dur_100lc"
+
+        # INFO: Normal Case - old format with p and s with file extension
+        s_exp_name = o_c.try_format_experiment_name_in_path(
+            "path/to/600s_32000B_5P_1S_rel_mc_2dur_100lc.csv"
+        )
+        assert isinstance(s_exp_name, str)
+        assert s_exp_name.lower() == "path/to/600sec_32000b_5pub_1sub_rel_mc_2dur_100lc.csv"
+
+        # INFO: Normal Case - entire path with dirs
+        s_exp_name = o_c.try_format_experiment_name_in_path(
+            "path/to/600s_32000B_5P_1S_rel_mc_2dur_100lc/pub_0.csv"
+        )
+        assert isinstance(s_exp_name, str)
+        assert s_exp_name.lower() == \
+                "path/to/600sec_32000b_5pub_1sub_rel_mc_2dur_100lc/pub_0.csv"
+
+        # INFO: Error Case - invalid name
+        with pytest.raises(ValueError):
+            s_exp_name = o_c.try_format_experiment_name_in_path(
+                "invalid_experiment_name"
+            )
+
+        # INFO: Error Case - valid name but not a path
+        with pytest.raises(ValueError):
+            s_exp_name = o_c.try_format_experiment_name_in_path(
+                "600sec_32000b_5pub_1sub_rel_mc_2dur_100lc.csv"
             )
 
     def test_try_format_experiment_name(self):
@@ -944,7 +1044,7 @@ class TestCampaign:
             "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv"
         )
         assert isinstance(s_exp_name, str)
-        assert s_exp_name == "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
+        assert s_exp_name == "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv"
 
         # INFO: Normal Case - old format with p and s
         s_exp_name = o_c.try_format_experiment_name(
@@ -958,15 +1058,7 @@ class TestCampaign:
             "600s_32000B_5P_1S_rel_mc_2dur_100lc.csv"
         )
         assert isinstance(s_exp_name, str)
-        assert s_exp_name.lower() == "600sec_32000b_5pub_1sub_rel_mc_2dur_100lc"
-
-        # INFO: Normal Case - entire path with dirs
-        s_exp_name = o_c.try_format_experiment_name(
-            "path/to/600s_32000B_5P_1S_rel_mc_2dur_100lc/pub_0.csv"
-        )
-        assert isinstance(s_exp_name, str)
-        assert s_exp_name.lower() == "600sec_32000b_5pub_1sub_rel_mc_2dur_100lc"
-
+        assert s_exp_name.lower() == "600sec_32000b_5pub_1sub_rel_mc_2dur_100lc.csv"
 
         # INFO: Error Case - invalid name
         s_exp_name = o_c.try_format_experiment_name(
@@ -1027,7 +1119,13 @@ class TestCampaign:
                 s_exp_name
             )
             assert isinstance(b_follows_format, bool)
-            assert b_follows_format is True
+            assert b_follows_format is True, f"Failed for {s_exp_name}"
+
+        # INFO: Error Case - file path to valid file
+        s_exp_name = "./tests/data/test_campaign_with_dirs_small/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
+        assert o_c.follows_experiment_name_format(
+            s_exp_name
+        ) is False
 
     def test_get_experiment_paths_from_fpath(self):
         from app import Campaign

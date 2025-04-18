@@ -310,21 +310,21 @@ class Campaign:
             raise ValueError(f"Experiment path must be a string: {s_exp_path}")
 
         s_filename = os.path.basename(s_exp_path)
+
         if s_filename.startswith("pub_0") or re.match(r"^sub_\d+\.csv$", s_filename):
             return True
 
-        elif self.follows_experiment_name_format(s_filename):
-            return False
-
         else:
-            s_filename = self.try_format_experiment_name(s_filename)
-            if self.follows_experiment_name_format(s_filename):
-                return False
-            else:
-                raise ValueError(
-                    f"Experiment path does not follow expected format: {s_exp_path}"
-                )
-            
+
+            if not self.follows_experiment_name_format(s_filename):
+                s_filename = self.try_format_experiment_name(s_filename)
+                if not self.follows_experiment_name_format(s_filename):
+                    raise ValueError(
+                        f"Experiment name does not follow expected format: {s_filename}"
+                    )
+
+        return False
+
     def process_file_df(
         self,
         s_exp_path: str = ""
@@ -567,7 +567,9 @@ class Campaign:
         if not self.follows_experiment_name_format(s_exp_name):
             s_exp_name = self.try_format_experiment_name(s_exp_name)
             if not self.follows_experiment_name_format(s_exp_name):
-                raise ValueError(f"Experiment name does not follow expected format: {s_exp_name}")
+                raise ValueError(
+                    f"Experiment name does not follow expected format: {s_exp_name}"
+                )
 
         d_qos = self.get_qos_from_exp_name(s_exp_name)
 
@@ -654,7 +656,9 @@ class Campaign:
 
             try:
                 s_exp_name = self.get_experiment_name_from_fpath(s_exp_entry)
+
                 ls_exp_paths = self.get_experiment_paths_from_fpath(s_exp_entry)
+
                 ld_exp_names_and_paths.append(
                     {"name": s_exp_name, "paths": ls_exp_paths}
                 )
@@ -753,56 +757,110 @@ class Campaign:
         if s_exp_entry == "":
             raise Exception("No experiment entry provided")
 
-        s_filename = os.path.basename(s_exp_entry).split(".")[0]
-        s_dirname = os.path.basename(os.path.dirname(s_exp_entry))
+        b_exp_in_dir = self.is_exp_name_in_dirpath(s_exp_entry)
+        b_exp_in_file = self.is_exp_name_in_filename(s_exp_entry)
 
-        if self.follows_experiment_name_format(s_filename):
-            return s_filename
+        if not b_exp_in_dir and not b_exp_in_file:
+            # Try to format the experiment name in both dir and file and try again
+            s_before = s_exp_entry
+            s_exp_entry = self.try_format_experiment_name_in_path(s_exp_entry)
+            s_after = s_exp_entry
 
-        elif self.follows_experiment_name_format(s_dirname):
-            return s_dirname
+            b_exp_in_dir = self.is_exp_name_in_dirpath(s_exp_entry)
+            b_exp_in_file = self.is_exp_name_in_filename(s_exp_entry)
+
+            if not b_exp_in_dir and not b_exp_in_file:
+                raise ValueError(
+                    f"Experiment entry does not follow expected format: {s_exp_entry}"
+                )
+            
+        if b_exp_in_file:
+            return os.path.basename(s_exp_entry).split(".")[0]
 
         else:
-            # Try to convert and try again
-            s_exp_name = self.try_format_experiment_name(s_exp_entry)
+            return os.path.basename(os.path.dirname(s_exp_entry))
 
-            if self.follows_experiment_name_format(s_exp_name):
-                return s_exp_name
-
-            else:
-                raise ValueError(
-                    f"Tried to format but Experiment entry does not follow expected format: {s_exp_entry}"
-                )
-
-    def try_format_experiment_name(self, s_exp_entry: str = "") -> str:
+    def is_exp_name_in_dirpath(self, s_exp_entry: str = "") -> bool:
         """
-        Try to format the experiment name.
-        This is a workaround for the experiment name format.
+        Checks if the experiment name is in the directory path.
+        """
+        if s_exp_entry == "":
+            raise Exception("No experiment entry provided")
+
+        i_slash_count = s_exp_entry.count("/")
+        if i_slash_count == 0:
+            raise ValueError(
+                f"Can't check for exp in dir of {s_exp_entry}. There is no dir..."
+            )
+
+        s_dirname = os.path.basename(os.path.dirname(s_exp_entry))
+        i_underscore_count = s_dirname.count("_")
+
+        return i_underscore_count == 7 or i_underscore_count == 8
+
+    def is_exp_name_in_filename(self, s_exp_entry: str = "") -> bool:
+        """
+        Checks if the experiment name is in the filename.
         """
         if s_exp_entry == "":
             raise Exception("No experiment entry provided")
 
         s_filename = os.path.basename(s_exp_entry)
-        s_dirname = os.path.basename(os.path.dirname(s_exp_entry))
-        if len(s_filename.split("_")) != 8 and len(s_dirname.split("_")) != 8:
-            lg.warning(
-                "Experiment entry does not have 8 parts: {}".format(
-                    s_exp_entry
-                )
+
+        i_underscore_count = s_filename.count("_")
+        return i_underscore_count == 7 or i_underscore_count == 8
+        
+    def try_format_experiment_name_in_path(self, s_exp_entry: str = "") -> str:
+        """
+        Try to format the experiment name wherever it may be.
+        """
+        if s_exp_entry == "":
+            raise Exception("No experiment entry provided")
+
+        if not self.is_path(s_exp_entry):
+            raise ValueError(f"Experiment entry is not a path: {s_exp_entry}")
+
+        b_exp_in_file = self.is_exp_name_in_filename(s_exp_entry)
+        b_exp_in_dir = self.is_exp_name_in_dirpath(s_exp_entry)
+
+        if not b_exp_in_file and not b_exp_in_dir:
+            raise ValueError(
+                f"Entry does not follow expected format in dir or file: {s_exp_entry}"
             )
-            return s_exp_entry
 
-        if "." in s_exp_entry:
-            s_exp_entry = s_exp_entry.split(".")[0]
+        if b_exp_in_dir and b_exp_in_file:
+            raise ValueError(
+                f"So...both dir and file have the exp name: {s_exp_entry}."
+            )
+            
+        if b_exp_in_file:
+            s_filename = os.path.basename(s_exp_entry)
+            
+            s_dirname = os.path.basename(os.path.dirname(s_exp_entry))
+            s_dir_dirpath = s_exp_entry.split(s_dirname)[0]
 
-        if len(s_filename.split("_")) == 8:
-            s_exp_entry = s_filename.split(".")[0]
+            s_filename = self.try_format_experiment_name(s_filename)
+
+            return os.path.join(
+                s_dir_dirpath,
+                s_dirname,
+                s_filename
+            )
 
         else:
-            s_exp_entry = s_dirname
+            s_filename = os.path.basename(s_exp_entry)
+            s_dirname = os.path.basename(os.path.dirname(s_exp_entry))
+            s_dir_dirpath = os.path.dirname(
+                os.path.dirname(s_exp_entry)
+            )
+            s_dirname = self.try_format_experiment_name(s_dirname)
 
-        s_exp_entry = s_exp_entry.upper()
-        ls_sections = s_exp_entry.split("_")
+            return os.path.join(
+                s_dir_dirpath,
+                s_dirname,
+                s_filename
+            )
+
     def is_path(self, s_exp_entry: str = "") -> bool:
         """
         Checks if the entry is a path by counting the number of slashes.
@@ -818,6 +876,24 @@ class Campaign:
             return False
 
         return True
+        
+    def try_format_experiment_name(self, s_exp_name: str = "") -> str:
+        if len(s_exp_name.split("_")) != 8:
+            lg.warning(
+                "Experiment entry does not have 8 parts: {}".format(
+                    s_exp_name
+                )
+            )
+            return s_exp_name
+
+        s_exp_extension = ""
+        if "." in s_exp_name:
+            s_exp_extension = s_exp_name.split(".")[1]
+            s_exp_name = s_exp_name.split(".")[0]
+        
+        s_exp_name = s_exp_name.upper()
+        ls_sections = s_exp_name.split("_")
+
 
         if not ls_sections[0].endswith("SEC"):
             ls_sections[0] = ls_sections[0].replace("S", "SEC")
@@ -828,9 +904,12 @@ class Campaign:
         if not ls_sections[3].endswith("SUB"):
             ls_sections[3] = ls_sections[3].replace("S", "SUB")
 
-        s_exp_entry = "_".join(ls_sections)
+        s_exp_name = "_".join(ls_sections)
 
-        return s_exp_entry
+        if s_exp_extension != "":
+            s_exp_name = f"{s_exp_name}.{s_exp_extension}"
+
+        return s_exp_name
                         
     def follows_experiment_name_format(self, s_filename: str = "") -> bool:
         """
@@ -844,12 +923,8 @@ class Campaign:
         if s_filename == "":
             raise ValueError("Filename must not be empty")
 
-        # INFO: Regex is hard to debug. Using manual checks.
         i_underscore_count = s_filename.count("_")
         if i_underscore_count != 7 and i_underscore_count != 8:
-            lg.warning(
-                f"Filename does not have 7 or 8 underscores: {s_filename}. It has {i_underscore_count}."
-            )
             return False
 
         if "." in s_filename:
@@ -877,9 +952,6 @@ class Campaign:
                     break
 
             if not b_match:
-                lg.warning(
-                    f"Filename does not match expected format: {s_filename} ({part})"
-                )
                 return False
                                         
         return True
