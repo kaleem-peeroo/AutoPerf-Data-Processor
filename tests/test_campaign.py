@@ -4,6 +4,9 @@ import pandas as pd
 
 from rich.pretty import pprint
 
+from app import Campaign
+from tests.configs.normal import LD_DATASETS
+
 class TestCampaign:
     @pytest.fixture
     def setup_method(self, method):
@@ -31,12 +34,7 @@ class TestCampaign:
                     os.rmdir(s_file_path)
 
     def test_init_with_normal_case(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
-        ld_ds_config = LD_DATASETS
-
-        for d_ds in ld_ds_config:
+        for d_ds in LD_DATASETS:
             o_c = Campaign(d_ds)
             assert o_c is not None
             assert isinstance(o_c, Campaign)
@@ -52,8 +50,6 @@ class TestCampaign:
             assert o_c.missing_exps == []
 
     def test_create_dataset_with_dirs(self):
-        from app import Campaign
-
         d_config = {
             "name": "test campaign with dirs",
             "exp_folders": \
@@ -125,8 +121,6 @@ class TestCampaign:
             assert len(df_exp_total_mbps) < 800
 
     def test_create_dataset_with_csv(self):
-        from app import Campaign
-
         d_config = {
             "name": "test campaign with csv",
             "exp_folders": \
@@ -199,11 +193,7 @@ class TestCampaign:
             assert len(df_exp_total_mbps) < 800
 
     def test_process_exp_df_with_exp_name_as_csv(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
-        d_ds_config = LD_DATASETS[0]
-        o_c = Campaign(d_ds_config)
+        o_c = Campaign(LD_DATASETS[0])
 
         d_test_exp_names_and_paths = {
             'name': "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC",
@@ -249,11 +239,7 @@ class TestCampaign:
         assert len(df_total_tp) == 784
 
     def test_process_exp_df_with_raw_files(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
-        d_ds_config = LD_DATASETS[0]
-        o_c = Campaign(d_ds_config)
+        o_c = Campaign(LD_DATASETS[0])
 
         s_test_dir = "./tests/data/test_campaign_with_dirs_simple/"
         d_test_exp_names_and_paths = {
@@ -297,8 +283,6 @@ class TestCampaign:
         assert len(df_total_tp) == 563
 
     def setup_test_calculate_metrics_for_subs(self):
-        from app import Campaign
-
         d_conf = {
             "name": "test campaign with dirs",
             "exp_folders": \
@@ -401,8 +385,6 @@ class TestCampaign:
         assert len(ls_cols) == len(set(ls_cols))
 
     def test_get_sub_mbps_cols(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
         o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - with 1 sub mbps col
@@ -427,11 +409,7 @@ class TestCampaign:
         assert o_c.get_sub_mbps_cols(df) == []
         
     def test_get_exp_file_df(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
-        d_ds_config = LD_DATASETS[0]
-        o_c = Campaign(d_ds_config)
+        o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - raw sub file
         s_raw_file = "./tests/data/test_campaign_with_dirs_small/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/sub_2.csv"
@@ -456,8 +434,6 @@ class TestCampaign:
         assert df['latency_us'].dtype == 'float64'
 
     def test_is_raw_exp_file(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
         o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - pub file
@@ -482,8 +458,6 @@ class TestCampaign:
             )
 
     def test_process_file_df(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
         o_c = Campaign(LD_DATASETS[0])
 
         s_test_datadir = "./tests/data/test_campaign_with_dirs_simple/"
@@ -523,9 +497,6 @@ class TestCampaign:
         assert len(df_sub) == 892
 
     def test_get_metric_col_from_df(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
         o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - Latency (us)
@@ -549,9 +520,6 @@ class TestCampaign:
         ) == "mbps"
 
     def test_rename_df_col(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
         o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - Latency (us)
@@ -580,9 +548,6 @@ class TestCampaign:
             )
 
     def test_raw_file_is_pub(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
         o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - pub file
@@ -602,9 +567,6 @@ class TestCampaign:
             )
 
     def test_get_start_index_for_raw_file(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
         o_c = Campaign(LD_DATASETS[0])
         s_test_dir = "./tests/data/test_campaign_with_dirs_simple/"
 
@@ -621,9 +583,6 @@ class TestCampaign:
         assert i_start == 2
 
     def test_get_end_index_for_raw_file(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
         o_c = Campaign(LD_DATASETS[0])
         s_test_dir = "./tests/data/test_campaign_with_dirs_simple/"
 
@@ -655,11 +614,7 @@ class TestCampaign:
         assert i_end == 894
 
     def test_add_input_cols(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
-        d_ds_config = LD_DATASETS[0]
-        o_c = Campaign(d_ds_config)
+        o_c = Campaign(LD_DATASETS[0])
 
         ls_input_cols = [
             'duration_secs',
@@ -725,9 +680,6 @@ class TestCampaign:
             df_after = o_c.add_input_cols(df_before.copy())
 
     def test_get_qos_from_exp_name_with_normal_case(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
         o_c = Campaign(LD_DATASETS[0])
 
         d_qos = o_c.get_qos_from_exp_name(
@@ -748,9 +700,6 @@ class TestCampaign:
         }
 
     def test_get_qos_from_exp_name_with_invalid_cases(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
         o_c = Campaign(LD_DATASETS[0])
 
         ls_invalid_exp_names = [
@@ -768,12 +717,7 @@ class TestCampaign:
                 o_c.get_qos_from_exp_name(s_exp_name)
 
     def test_get_experiments_with_normal_case(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
-        ld_ds_config = LD_DATASETS
-
-        for d_ds in ld_ds_config:
+        for d_ds in LD_DATASETS:
             o_c = Campaign(d_ds)
             s_raw_datadir = o_c.get_raw_datadir()
             ld_exp_names_and_paths = o_c.get_experiments(s_raw_datadir)
@@ -813,8 +757,6 @@ class TestCampaign:
                     assert s_path.endswith('.csv')
 
     def test_get_experiments_with_csv(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
         o_c = Campaign({
             "name": "another test campaign with csv",
             "exp_folders": \
@@ -827,6 +769,8 @@ class TestCampaign:
         s_raw_datadir = o_c.get_raw_datadir()
         ld_exp_names_and_paths = o_c.get_experiments(s_raw_datadir)
 
+        assert len(ld_exp_names_and_paths) == 18
+
         for d_exp_names_and_paths in ld_exp_names_and_paths:
             for s_path in d_exp_names_and_paths['paths']:
                 assert isinstance(s_path, str)
@@ -835,8 +779,6 @@ class TestCampaign:
                 assert os.path.exists(s_path)
 
     def test_check_for_expected_files(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
         o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - with expected files
@@ -897,8 +839,6 @@ class TestCampaign:
         assert o_c.get_exp_with_expected_file_count(ld_exp_names_and_paths) == []
 
     def test_get_expected_file_count(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
         o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - latest name format
@@ -918,12 +858,7 @@ class TestCampaign:
             )
     
     def test_get_experiment_name_from_fpath(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
-        ld_ds_config = LD_DATASETS
-        d_ds = ld_ds_config[0]
-        o_c = Campaign(d_ds)
+        o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case: Name in file
         s_exp_name = o_c.get_experiment_name_from_fpath(
@@ -957,8 +892,6 @@ class TestCampaign:
         assert s_exp_name == "120SEC_100B_1PUB_1SUB_REL_MC_0DUR_100LC"
 
     def test_is_exp_name_in_dirpath(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
         o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - with name in dir
@@ -977,8 +910,6 @@ class TestCampaign:
         ) is False
 
     def test_is_exp_name_in_filename(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
         o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - with name in filename
@@ -997,8 +928,6 @@ class TestCampaign:
         ) is False
 
     def test_try_format_experiment_name_in_path(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
         o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - most up to date format
@@ -1050,8 +979,6 @@ class TestCampaign:
             )
 
     def test_try_format_experiment_name(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
         o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - most up to date format
@@ -1090,8 +1017,6 @@ class TestCampaign:
         assert s_exp_name == "invalid_experiment_name"
 
     def test_is_path(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
         o_c = Campaign(LD_DATASETS[0])
 
         # Normal Case - path to folder
@@ -1116,12 +1041,7 @@ class TestCampaign:
             )
             
     def test_follows_experiment_name_format(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
-        ld_ds_config = LD_DATASETS
-        d_ds = ld_ds_config[0]
-        o_c = Campaign(d_ds)
+        o_c = Campaign(LD_DATASETS[0])
 
         ls_normal_cases = [
             # INFO: Normal case - most up to date format
@@ -1150,9 +1070,6 @@ class TestCampaign:
         ) is False
 
     def test_get_experiment_paths_from_fpath(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
         o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case
@@ -1170,12 +1087,7 @@ class TestCampaign:
             assert s_path.endswith('.csv')
         
     def test_recursively_get_fpaths(self):
-        from app import Campaign
-        from tests.configs.normal import LD_DATASETS
-
-        ld_ds_config = LD_DATASETS
-        d_ds = ld_ds_config[0]
-        o_c = Campaign(d_ds)
+        o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - subdirs
         ls_fpaths = o_c.recursively_get_fpaths(
