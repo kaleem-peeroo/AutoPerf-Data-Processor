@@ -812,6 +812,28 @@ class TestCampaign:
                     assert os.path.getsize(s_path) > 0
                     assert s_path.endswith('.csv')
 
+    def test_get_experiments_with_csv(self):
+        from app import Campaign
+        from tests.configs.normal import LD_DATASETS
+        o_c = Campaign({
+            "name": "another test campaign with csv",
+            "exp_folders": \
+                "./tests/data/another_test_campaign_with_csv/",
+            "ap_config": "",
+            "dataset_path": \
+                "./tests/output/another_test_campaign_with_csv_small.parquet",
+        })
+
+        s_raw_datadir = o_c.get_raw_datadir()
+        ld_exp_names_and_paths = o_c.get_experiments(s_raw_datadir)
+
+        for d_exp_names_and_paths in ld_exp_names_and_paths:
+            for s_path in d_exp_names_and_paths['paths']:
+                assert isinstance(s_path, str)
+                assert len(s_path) > 0
+                assert s_path.endswith('.csv')
+                assert os.path.exists(s_path)
+
     def test_check_for_expected_files(self):
         from app import Campaign
         from tests.configs.normal import LD_DATASETS

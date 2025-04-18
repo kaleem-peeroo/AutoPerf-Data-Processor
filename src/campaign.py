@@ -651,6 +651,10 @@ class Campaign:
         ]
 
         for s_exp_entry in ls_exp_entries:
+            if not os.path.exists(s_exp_entry):
+                lg.warning(f"Experiment entry does not exist: {s_exp_entry}")
+                continue
+
             if ".ds_store" in s_exp_entry.lower():
                 continue
 
@@ -662,9 +666,13 @@ class Campaign:
                 ld_exp_names_and_paths.append(
                     {"name": s_exp_name, "paths": ls_exp_paths}
                 )
+
             except Exception as e:
                 lg.error(e)
-                continue
+                raise e
+
+        if len(ld_exp_names_and_paths) == 0:
+            raise ValueError("No experiment names and paths found")
 
         ld_exp_names_and_paths = self.get_exp_with_expected_file_count(
             ld_exp_names_and_paths
@@ -760,11 +768,11 @@ class Campaign:
         b_exp_in_dir = self.is_exp_name_in_dirpath(s_exp_entry)
         b_exp_in_file = self.is_exp_name_in_filename(s_exp_entry)
 
+        lg.debug(f"Getting exp name from {s_exp_entry}...")
+
         if not b_exp_in_dir and not b_exp_in_file:
             # Try to format the experiment name in both dir and file and try again
-            s_before = s_exp_entry
             s_exp_entry = self.try_format_experiment_name_in_path(s_exp_entry)
-            s_after = s_exp_entry
 
             b_exp_in_dir = self.is_exp_name_in_dirpath(s_exp_entry)
             b_exp_in_file = self.is_exp_name_in_filename(s_exp_entry)
@@ -773,6 +781,11 @@ class Campaign:
                 raise ValueError(
                     f"Experiment entry does not follow expected format: {s_exp_entry}"
                 )
+
+        if b_exp_in_dir and b_exp_in_file:
+            raise ValueError(
+                f"So...both dir and file have the exp name: {s_exp_entry}."
+            )
             
         if b_exp_in_file:
             return os.path.basename(s_exp_entry).split(".")[0]
