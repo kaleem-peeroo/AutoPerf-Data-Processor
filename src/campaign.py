@@ -99,6 +99,19 @@ class Campaign:
 
         lg.debug("Creating dataset...")
 
+        ds_output = self.get_dataset_path()
+        if os.path.exists(ds_output):
+            df_ds = pd.read_parquet(ds_output)
+            if df_ds.empty:
+                raise Exception(f"Existing dataset is empty: {ds_output}")
+
+            self.df_ds = df_ds
+
+            lg.warning(
+                f"Dataset {ds_output} already exists."
+            )
+            return
+
         s_raw_datadir = self.get_raw_datadir()
         ld_exp_names_and_paths = self.get_experiments(s_raw_datadir)
 
