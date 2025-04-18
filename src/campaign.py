@@ -520,8 +520,8 @@ class Campaign:
         if not s_exp_path.endswith(".csv"):
             raise Exception(f"Experiment path is not a csv file: {s_exp_path}")
 
-        # Find the chunk with the summary line
-        i_chunk_size = 1_000
+        i_file_line_count = sum(1 for _ in open(s_exp_path))
+        i_chunk_size = i_file_line_count // 10
         i_line_count = 0
         with open(s_exp_path, "rb") as o_file:
             for i_chunk, chunk in enumerate(
@@ -530,8 +530,15 @@ class Campaign:
                     b''
                 )
             ):
+                i_line_count = i_chunk * i_chunk_size
+
+                # If its not the first 20 lines
+                if i_line_count > 20 and b"interval" in chunk.lower():
+                    i_line_count = ( i_chunk + 1 ) * i_chunk_size
+                    break
+
                 if b"summary" in chunk.lower():
-                    i_line_count = (i_chunk + 1) * i_chunk_size
+                    i_line_count = ( i_chunk + 1 ) * i_chunk_size
                     break
 
         if i_line_count == 0:
@@ -546,7 +553,7 @@ class Campaign:
 
         end_index = 0
         for i, line in enumerate(ls_chunk_lines):
-            if "summary" in line.lower():
+            if "summary" in line.lower() or "interval" in line.lower():
                 end_index = i_chunk_start + i - 2
                 break
 

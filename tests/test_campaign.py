@@ -288,7 +288,7 @@ class TestCampaign:
             assert s_col in df.columns
 
         df_lat = df[['latency_us']].copy().dropna()
-        assert len(df_lat) == 11
+        assert len(df_lat) == 251
 
         df_avg_tp = df[['avg_mbps_per_sub']].copy().dropna()
         assert len(df_avg_tp) == 563
@@ -497,7 +497,7 @@ class TestCampaign:
         assert len(df_pub) > 0
         assert "latency_us" in df_pub.columns
         assert df_pub["latency_us"].dtype == "float64"
-        assert len(df_pub) == 11
+        assert len(df_pub) == 251
 
         # INFO: Normal Case - sub file
         df_sub = o_c.process_file_df(
@@ -619,7 +619,7 @@ class TestCampaign:
         s_test_file = f"{s_test_dir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
         i_end = o_c.get_end_index_for_raw_file(s_test_file)
         assert isinstance(i_end, int)
-        assert i_end == 13
+        assert i_end == 253
 
         # INFO: Normal Case - sub file
         s_test_file = f"{s_test_dir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/sub_1.csv"
@@ -633,6 +633,13 @@ class TestCampaign:
         i_end = o_c.get_end_index_for_raw_file(s_test_file)
         assert isinstance(i_end, int)
         assert i_end == 65414
+
+        # INFO: Error Case - sub file with summary in middle
+        s_test_dir = "./tests/data/test_campaign_with_errors/"
+        s_test_file = f"{s_test_dir}/600SEC_100B_25P_1S_BE_MC_2DUR_100LC/sub_0.csv"
+        i_end = o_c.get_end_index_for_raw_file(s_test_file)
+        assert isinstance(i_end, int)
+        assert i_end == 46361
 
     def test_add_input_cols(self):
         from app import Campaign
