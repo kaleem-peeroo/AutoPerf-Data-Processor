@@ -124,7 +124,6 @@ class Campaign:
                     d_exp_names_and_paths['name']
                 )
             )
-            df_exp = self.process_exp_df(d_exp_names_and_paths)
 
             try:
                 df_exp = self.process_exp_df(d_exp_names_and_paths)
@@ -1119,3 +1118,41 @@ class Campaign:
         except Exception as e:
             raise e
 
+    def validate_dataset(self):
+        """
+        Checks for cases in dataset where mbps has more than 600 samples.
+        """
+        df = pd.read_parquet(self.get_dataset_path())
+        if df.empty:
+            raise ValueError("Dataset is empty")
+
+        if len(df.columns) == 0:
+            raise ValueError("Dataset has no columns")
+
+        if 'experiment_name' not in df.columns:
+            raise ValueError("Dataset must have experiment_name column")
+
+        ls_exp_names = df['experiment_name'].unique().tolist()
+        if len(ls_exp_names) == 0:
+            raise ValueError("Dataset has no experiment names")
+
+        for s_exp_name in ls_exp_names:
+            df_exp = df[df['experiment_name'] == s_exp_name].copy()
+
+            df_avg_mbps = df_exp['avg_mbps_per_sub'].copy()
+            df_avg_mbps.dropna(inplace=True)
+
+            if len(df_avg_mbps) > 600:
+                lg.warning(
+                    f"Experiment {s_exp_name} has more than 600 samples. "
+                )
+                continue
+
+            df_total_mbps = df_exp['total_mbps_over_subs'].copy()
+            df_total_mbps.dropna(inplace=True)
+
+            if len(df_total_mbps) > 600:
+                lg.warning(
+                    f"Experiment {s_exp_name} has more than 600 samples. "
+                )
+                continue
