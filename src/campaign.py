@@ -315,13 +315,10 @@ class Campaign:
             return True
 
         else:
-
             if not self.follows_experiment_name_format(s_filename):
                 s_filename = self.try_format_experiment_name(s_filename)
                 if not self.follows_experiment_name_format(s_filename):
-                    raise ValueError(
-                        f"Experiment name does not follow expected format: {s_filename}"
-                    )
+                    return False
 
         return False
 
@@ -644,24 +641,31 @@ class Campaign:
         if not os.path.isdir(s_raw_datadir):
             raise Exception(f"Raw data directory is not a directory: {s_raw_datadir}")
 
+        lg.debug(f"Getting exps in {s_raw_datadir}...")
+
         ld_exp_names_and_paths = []
         ls_exp_entries = os.listdir(s_raw_datadir)
         ls_exp_entries = [
             os.path.join(s_raw_datadir, item) for item in ls_exp_entries
         ]
 
-        for s_exp_entry in ls_exp_entries:
-            if not os.path.exists(s_exp_entry):
-                lg.warning(f"Experiment entry does not exist: {s_exp_entry}")
-                continue
+        ls_exp_entries = self.process_exp_entries_with_subdirs(ls_exp_entries)
+        pprint(ls_exp_entries)
 
+        lg.debug(f"Found {len(ls_exp_entries)} entries in {s_raw_datadir}...")
+
+        for s_exp_entry in ls_exp_entries:
             if ".ds_store" in s_exp_entry.lower():
                 continue
 
             try:
+                pprint(s_exp_entry)
+
                 s_exp_name = self.get_experiment_name_from_fpath(s_exp_entry)
+                pprint(s_exp_name)
 
                 ls_exp_paths = self.get_experiment_paths_from_fpath(s_exp_entry)
+                pprint(ls_exp_paths)
 
                 ld_exp_names_and_paths.append(
                     {"name": s_exp_name, "paths": ls_exp_paths}
@@ -680,6 +684,85 @@ class Campaign:
 
         return ld_exp_names_and_paths
 
+    def process_exp_entries_with_subdirs(
+        self,
+        ls_exp_entries: List[str] = []
+    ) -> List[str]:
+        """
+        Go through each experiment entry.
+        If it has folders in it, then remove the entry and add the folders to the list.
+        """
+        if len(ls_exp_entries) == 0:
+            raise ValueError("No experiment entries found")
+
+        ls_exp_entries = [
+            os.path.abspath(item) for item in ls_exp_entries
+        ]
+
+        ls_exp_entries_without_subdirs = []
+        for s_exp_entry in ls_exp_entries:
+
+            if os.path.isfile(s_exp_entry):
+                ls_exp_entries_without_subdirs.append(s_exp_entry)
+
+            elif os.path.isdir(s_exp_entry):
+                
+                if not self.contains_dirs(s_exp_entry):
+
+                    if self.contains_raw_files(s_exp_entry):
+                        # NOTE: folders that contain pub_0.csv and sub_n.csv files
+                        # - add the folders
+                        ls_exp_entries_without_subdirs.append(s_exp_entry)
+
+                    else:
+                        # NOTE:folders that contain experiment csv files and 
+                        # - add those experiment csv files
+                        ls_exp_entries_without_subdirs.extend(
+                            self.get_experiment_paths_from_fpath(s_exp_entry)
+                        )
+
+            else:
+                raise ValueError(
+                    f"Experiment entry is not a file or directory: {s_exp_entry}"
+                )
+
+        return ls_exp_entries_without_subdirs
+
+    def contains_raw_files(self, s_exp_entry: str = "") -> bool:
+        """
+        Checks if the entry contains raw files (pub_0.csv or sub_n.csv).
+        """
+        if s_exp_entry == "":
+            raise Exception("No experiment entry provided")
+
+        if not os.path.isdir(s_exp_entry):
+            raise ValueError(f"Experiment entry is not a directory: {s_exp_entry}")
+
+        ls_entries = os.listdir(s_exp_entry)
+        for s_entry in ls_entries:
+            if os.path.isfile(os.path.join(s_exp_entry, s_entry)):
+                if self.is_raw_exp_file(os.path.join(s_exp_entry, s_entry)):
+                    return True
+
+        return False
+
+    def contains_dirs(self, s_exp_entry: str = "") -> bool:
+        """
+        Checks if the entry contains directories.
+        """
+        if s_exp_entry == "":
+            raise Exception("No experiment entry provided")
+
+        if not os.path.isdir(s_exp_entry):
+            raise ValueError(f"Experiment entry is not a directory: {s_exp_entry}")
+
+        ls_entries = os.listdir(s_exp_entry)
+        for s_entry in ls_entries:
+            if os.path.isdir(os.path.join(s_exp_entry, s_entry)):
+                return True
+
+        return False
+                        
     def get_exp_with_expected_file_count(
         self,
         ld_exp_names_and_paths: List[Dict[str, List[str]]] = []
@@ -702,6 +785,8 @@ class Campaign:
 
             s_exp_name = d_exp_names_and_paths['name']
             ls_exp_paths = d_exp_names_and_paths['paths']
+
+            pprint(d_exp_names_and_paths)
 
             if not self.follows_experiment_name_format(s_exp_name):
                 s_exp_name = self.try_format_experiment_name(s_exp_name)
@@ -765,10 +850,14 @@ class Campaign:
         if s_exp_entry == "":
             raise Exception("No experiment entry provided")
 
+        if not isinstance(s_exp_entry, str):
+            raise ValueError(f"Experiment entry must be a string: {s_exp_entry}")
+
+        if not self.is_path(s_exp_entry):
+            raise ValueError(f"Experiment entry is not a path: {s_exp_entry}")
+
         b_exp_in_dir = self.is_exp_name_in_dirpath(s_exp_entry)
         b_exp_in_file = self.is_exp_name_in_filename(s_exp_entry)
-
-        lg.debug(f"Getting exp name from {s_exp_entry}...")
 
         if not b_exp_in_dir and not b_exp_in_file:
             # Try to format the experiment name in both dir and file and try again
@@ -793,32 +882,32 @@ class Campaign:
         else:
             return os.path.basename(os.path.dirname(s_exp_entry))
 
-    def is_exp_name_in_dirpath(self, s_exp_entry: str = "") -> bool:
+    def is_exp_name_in_dirpath(self, s_exp_path: str = "") -> bool:
         """
         Checks if the experiment name is in the directory path.
         """
-        if s_exp_entry == "":
+        if s_exp_path == "":
             raise Exception("No experiment entry provided")
 
-        i_slash_count = s_exp_entry.count("/")
+        i_slash_count = s_exp_path.count("/")
         if i_slash_count == 0:
             raise ValueError(
-                f"Can't check for exp in dir of {s_exp_entry}. There is no dir..."
+                f"Can't check for exp in dir of {s_exp_path}. There is no dir..."
             )
 
-        s_dirname = os.path.basename(os.path.dirname(s_exp_entry))
+        s_dirname = os.path.basename(os.path.dirname(s_exp_path))
         i_underscore_count = s_dirname.count("_")
 
         return i_underscore_count == 7 or i_underscore_count == 8
 
-    def is_exp_name_in_filename(self, s_exp_entry: str = "") -> bool:
+    def is_exp_name_in_filename(self, s_exp_path: str = "") -> bool:
         """
         Checks if the experiment name is in the filename.
         """
-        if s_exp_entry == "":
+        if s_exp_path == "":
             raise Exception("No experiment entry provided")
 
-        s_filename = os.path.basename(s_exp_entry)
+        s_filename = os.path.basename(s_exp_path)
 
         i_underscore_count = s_filename.count("_")
         return i_underscore_count == 7 or i_underscore_count == 8
@@ -892,11 +981,6 @@ class Campaign:
         
     def try_format_experiment_name(self, s_exp_name: str = "") -> str:
         if len(s_exp_name.split("_")) != 8:
-            lg.warning(
-                "Experiment entry does not have 8 parts: {}".format(
-                    s_exp_name
-                )
-            )
             return s_exp_name
 
         s_exp_extension = ""
@@ -980,6 +1064,9 @@ class Campaign:
         if not os.path.exists(s_exp_entry):
             raise Exception(f"Experiment entry does not exist: {s_exp_entry}")
 
+        if os.path.isfile(s_exp_entry) and s_exp_entry.endswith(".csv"):
+            return [s_exp_entry]
+
         ls_fpaths = self.recursively_get_fpaths(s_exp_entry)
         ls_csvpaths = [fpath for fpath in ls_fpaths if fpath.endswith(".csv")]
 
@@ -993,7 +1080,6 @@ class Campaign:
             raise Exception(f"Experiment entry does not exist: {s_exp_entry}")
 
         if os.path.isfile(s_exp_entry):
-            lg.warning("Experiment entry is a file. Returning that file.")
             return [s_exp_entry]
 
         if not os.path.isdir(s_exp_entry):

@@ -451,11 +451,10 @@ class TestCampaign:
             "./path/to/300SEC_1B_1P_3S_BE_MC_0DUR_100LC.csv"
         ) is False
 
-        # INFO: Error Case - some random csv file
-        with pytest.raises(ValueError):
-            o_c.is_raw_exp_file(
-                "./path/to/idk_what_this_file_is.csv"
-            )
+        # INFO: Normal Case - some random csv file
+        o_c.is_raw_exp_file(
+            "./path/to/idk_what_this_file_is.csv"
+        ) is False
 
     def test_process_file_df(self):
         o_c = Campaign(LD_DATASETS[0])
@@ -760,10 +759,10 @@ class TestCampaign:
         o_c = Campaign({
             "name": "another test campaign with csv",
             "exp_folders": \
-                "./tests/data/another_test_campaign_with_csv/",
+                "./tests/data/test_campaign_with_dir_with_csv/",
             "ap_config": "",
             "dataset_path": \
-                "./tests/output/another_test_campaign_with_csv_small.parquet",
+                "./tests/output/test_campaign_with_dir_with_csv_small.parquet",
         })
 
         s_raw_datadir = o_c.get_raw_datadir()
@@ -777,6 +776,53 @@ class TestCampaign:
                 assert len(s_path) > 0
                 assert s_path.endswith('.csv')
                 assert os.path.exists(s_path)
+
+    def test_process_exp_entries_with_subdirs(self):
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - with dirs
+        s_test_dir = "./tests/data/test_campaign_with_dirs/"
+        ls_exp_entries = os.listdir(s_test_dir)
+        ls_exp_entries = [
+            os.path.join(s_test_dir, s_exp_entry)
+            for s_exp_entry in ls_exp_entries
+        ]
+        ls_exp_entries = o_c.process_exp_entries_with_subdirs(ls_exp_entries)
+        # There are 109 experiment folders
+        assert len(ls_exp_entries) == 81
+
+        # INFO: Normal Case - with subdirs
+        s_test_dir = "./tests/data/test_campaign_with_dir_with_csv/"
+        ls_exp_entries = os.listdir(s_test_dir)
+        ls_exp_entries = [
+            os.path.join(s_test_dir, s_exp_entry)
+            for s_exp_entry in ls_exp_entries
+        ]
+        ls_exp_entries = o_c.process_exp_entries_with_subdirs(ls_exp_entries)
+        # There are 18 experiment csv files
+        assert len(ls_exp_entries) == 18
+
+        # INFO: Normal Case - with csv
+        s_test_dir = "./tests/data/test_campaign_with_csv/"
+        ls_exp_entries = os.listdir(s_test_dir)
+        ls_exp_entries = [
+            os.path.join(s_test_dir, s_exp_entry)
+            for s_exp_entry in ls_exp_entries
+        ]
+        ls_exp_entries = o_c.process_exp_entries_with_subdirs(ls_exp_entries)
+        # There are 4 experiment csv files
+        assert len(ls_exp_entries) == 4
+
+    def test_contains_dirs(self):
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - with dirs
+        s_test_dir = "./tests/data/test_campaign_with_dirs/"
+        assert o_c.contains_dirs(s_test_dir) is True
+
+        # INFO: Normal Case - without dirs
+        s_test_dir = "./tests/data/test_campaign_with_csv/"
+        assert o_c.contains_dirs(s_test_dir) is False
 
     def test_check_for_expected_files(self):
         o_c = Campaign(LD_DATASETS[0])
@@ -885,7 +931,7 @@ class TestCampaign:
 
         # INFO: Normal Case: Name in dir
         s_exp_name = o_c.get_experiment_name_from_fpath(
-            "./another_test_campaign_with_csv/120SEC_100B_1PUB_1SUB_REL_MC_0DUR_100LC.csv"
+            "./test_campaign_with_dir_with_csv/120SEC_100B_1PUB_1SUB_REL_MC_0DUR_100LC.csv"
         )
         assert isinstance(s_exp_name, str)
         assert len(s_exp_name) > 0
@@ -1078,6 +1124,20 @@ class TestCampaign:
         )
         assert isinstance(ls_exp_paths, list)
         assert len(ls_exp_paths) == 8
+
+        for s_path in ls_exp_paths:
+            assert isinstance(s_path, str)
+            assert os.path.exists(s_path)
+            assert os.path.isfile(s_path)
+            assert os.path.getsize(s_path) > 0
+            assert s_path.endswith('.csv')
+
+        # INFO: Normal Case - with subdirs
+        ls_exp_paths = o_c.get_experiment_paths_from_fpath(
+            "./tests/data/test_campaign_with_dir_with_csv/"
+        )
+        assert isinstance(ls_exp_paths, list)
+        assert len(ls_exp_paths) == 18
 
         for s_path in ls_exp_paths:
             assert isinstance(s_path, str)
