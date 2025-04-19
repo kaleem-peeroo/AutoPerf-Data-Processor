@@ -498,7 +498,7 @@ class TestCampaign:
         assert len(df_sub) > 0
         assert "sub_0_mbps" in df_sub.columns
         assert df_sub["sub_0_mbps"].dtype == "float64"
-        assert len(df_sub) == 892
+        assert len(df_sub) == 600
 
     def test_get_metric_col_from_df(self):
         o_c = Campaign(LD_DATASETS[0])
@@ -570,21 +570,33 @@ class TestCampaign:
                 "./path/to/300SEC_1B_1P_3S_BE_MC_0DUR_100LC.csv"
             )
 
-    def test_get_start_index_for_raw_file(self):
+    def test_get_start_index_for_pub_file(self):
         o_c = Campaign(LD_DATASETS[0])
         s_test_dir = "./tests/data/test_campaign_with_dirs_simple/"
 
         # INFO: Normal Case - pub file
         s_test_file = f"{s_test_dir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
-        i_start = o_c.get_start_index_for_raw_file(s_test_file)
+        i_start = o_c.get_start_index_for_pub_file(s_test_file)
         assert isinstance(i_start, int)
         assert i_start == 2
 
+    def test_get_start_index_for_sub_file(self):
+        o_c = Campaign(LD_DATASETS[0])
+        s_test_dir = "./tests/data/test_campaign_with_dirs_simple/"
+
         # INFO: Normal Case - sub file
         s_test_file = f"{s_test_dir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/sub_1.csv"
-        i_start = o_c.get_start_index_for_raw_file(s_test_file)
+        i_start = o_c.get_start_index_for_sub_file(s_test_file)
         assert isinstance(i_start, int)
         assert i_start == 2
+
+        # INFO: Normal Case - sub file with many "interval"
+        s_test_dir = "./tests/data/test_campaign_with_errors/"
+        s_test_file = f"{s_test_dir}/600SEC_100B_25P_1S_BE_MC_2DUR_100LC/sub_0.csv"
+        i_start = o_c.get_start_index_for_sub_file(s_test_file)
+        assert isinstance(i_start, int)
+        # Last "interval" seen on line 47259
+        assert i_start == 47259
 
     def test_get_end_index_for_raw_file(self):
         o_c = Campaign(LD_DATASETS[0])
@@ -592,30 +604,30 @@ class TestCampaign:
 
         # INFO: Normal Case - pub file
         s_test_file = f"{s_test_dir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
-        i_end = o_c.get_end_index_for_raw_file(s_test_file)
+        i_end = o_c.get_end_index_for_pub_file(s_test_file)
         assert isinstance(i_end, int)
         assert i_end == 253
 
         # INFO: Normal Case - sub file
         s_test_file = f"{s_test_dir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/sub_1.csv"
-        i_end = o_c.get_end_index_for_raw_file(s_test_file)
+        i_end = o_c.get_end_index_for_sub_file(s_test_file)
         assert isinstance(i_end, int)
         assert i_end == 565
 
         # INFO: Error Case - pub file with summary in middle
         s_test_dir = "./tests/data/test_campaign_with_errors/"
         s_test_file = f"{s_test_dir}/300SEC_100B_1P_1S_REL_UC_0DUR_100LC/pub_0.csv"
-        i_end = o_c.get_end_index_for_raw_file(s_test_file)
+        i_end = o_c.get_end_index_for_pub_file(s_test_file)
         assert isinstance(i_end, int)
         assert i_end == 65414
 
         # INFO: Error Case - sub file with summary in middle
         s_test_dir = "./tests/data/test_campaign_with_errors/"
         s_test_file = f"{s_test_dir}/600SEC_100B_25P_1S_BE_MC_2DUR_100LC/sub_0.csv"
-        i_end = o_c.get_end_index_for_raw_file(s_test_file)
+        i_end = o_c.get_end_index_for_sub_file(s_test_file)
         assert isinstance(i_end, int)
-        # "Interval" is seen on line 897
-        assert i_end == 894
+        # "summary" is seen on line 47862
+        assert i_end == 47859
 
     def test_add_input_cols(self):
         o_c = Campaign(LD_DATASETS[0])

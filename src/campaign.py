@@ -352,8 +352,8 @@ class Campaign:
         if not s_exp_path.endswith(".csv"):
             raise Exception(f"Experiment path is not a csv file: {s_exp_path}")
 
-        i_start = self.get_start_index_for_raw_file(s_exp_path)
-        i_end = self.get_end_index_for_raw_file(s_exp_path)
+        i_start = self.get_start_index_for_pub_file(s_exp_path)
+        i_end = self.get_end_index_for_pub_file(s_exp_path)
 
         df = pd.read_csv(
             s_exp_path,
@@ -362,19 +362,8 @@ class Campaign:
             on_bad_lines="skip",
         )
 
-        if self.raw_file_is_pub(s_exp_path):
-            s_metric = "latency"
-
-        # else:
-            # s_metric = "mbps"
-
         s_metric_col = self.get_metric_col_from_df(df, "latency")
         df = df[[s_metric_col]]
-
-        # if s_metric == "latency":
-
-        # else:
-            # s_metric = f"{os.path.basename(s_exp_path).split(".")[0]}_mbps"
 
         df = self.rename_df_col(
             df=df,
@@ -410,8 +399,8 @@ class Campaign:
         if not s_exp_path.endswith(".csv"):
             raise Exception(f"Experiment path is not a csv file: {s_exp_path}")
 
-        i_start = self.get_start_index_for_raw_file(s_exp_path)
-        i_end = self.get_end_index_for_raw_file(s_exp_path)
+        i_start = self.get_start_index_for_sub_file(s_exp_path)
+        i_end = self.get_end_index_for_sub_file(s_exp_path)
 
         df = pd.read_csv(
             s_exp_path,
@@ -518,7 +507,7 @@ class Campaign:
                 f"Experiment path does not follow expected format: {s_exp_path}"
             )
 
-    def get_start_index_for_raw_file(
+    def get_start_index_for_pub_file(
         self,
         s_exp_path: str = ""
     ) -> int:
@@ -556,7 +545,49 @@ class Campaign:
 
         return start_index
 
-    def get_end_index_for_raw_file(
+    def get_start_index_for_sub_file(
+        self,
+        s_exp_path: str = ""
+    ) -> int:
+        """
+        Read the file N lines at a time and look for the last instance of "interval"
+        """
+        if s_exp_path == "":
+            raise Exception("No experiment path provided")
+
+        if not os.path.exists(s_exp_path):
+            raise Exception(f"Experiment path does not exist: {s_exp_path}")
+
+        if not os.path.isfile(s_exp_path):
+            raise Exception(f"Experiment path is not a file: {s_exp_path}")
+
+        if not s_exp_path.endswith(".csv"):
+            raise Exception(f"Experiment path is not a csv file: {s_exp_path}")
+
+        i_file_line_count = sum(1 for _ in open(s_exp_path))
+        i_chunk_size = i_file_line_count // 10
+
+        li_interval_lines = []
+        with open(s_exp_path, "rb") as o_file:
+            for i_chunk, chunk in enumerate(iter(
+                lambda: tuple(islice(o_file, i_chunk_size)), ()
+            )):
+                for i_line, s_line in enumerate(chunk):
+                    i_line_count = i_chunk * i_chunk_size + i_line
+
+                    if b"interval" in s_line.lower():
+                        li_interval_lines.append(i_line_count)
+
+        if len(li_interval_lines) == 0:
+            raise ValueError(
+                f"Could not find start index for raw file: {s_exp_path}"
+            )
+
+        i_last_interval = li_interval_lines[-1]
+
+        return i_last_interval + 1
+
+    def get_end_index_for_pub_file(
         self,
         s_exp_path: str = ""
     ) -> int:
@@ -606,6 +637,50 @@ class Campaign:
                 f"Could not find end index for raw file: {s_exp_path}"
             )
 
+        return end_index - 2
+
+    def get_end_index_for_sub_file(
+        self,
+        s_exp_path: str = ""
+    ) -> int:
+        """
+        Read the file N lines at a time and look for the summary line.
+        """
+        if s_exp_path == "":
+            raise Exception("No experiment path provided")
+
+        if not os.path.exists(s_exp_path):
+            raise Exception(f"Experiment path does not exist: {s_exp_path}")
+
+        if not os.path.isfile(s_exp_path):
+            raise Exception(f"Experiment path is not a file: {s_exp_path}")
+
+        if not s_exp_path.endswith(".csv"):
+            raise Exception(f"Experiment path is not a csv file: {s_exp_path}")
+
+        i_file_line_count = sum(1 for _ in open(s_exp_path))
+        i_chunk_size = i_file_line_count // 10
+
+        b_found = False
+        end_index = 0
+        with open(s_exp_path, "rb") as o_file:
+            for i_chunk, chunk in enumerate(iter(
+                lambda: tuple(islice(o_file, i_chunk_size)), ()
+            )):
+                if b_found:
+                    break
+
+                for i_line, s_line in enumerate(chunk):
+                    i_line_count = i_chunk * i_chunk_size + i_line
+                    if b"summary" in s_line.lower() and not b_found:
+                        end_index = i_line_count
+                        b_found = True
+                        break
+
+        if end_index <= 0 and not b_found:
+            lg.warning(f"Couldn't find 'summary' in {s_exp_path}. Using last line.")
+            end_index = i_file_line_count
+            
         return end_index - 2
         
     def add_input_cols(self, df: pd.DataFrame) -> pd.DataFrame:
