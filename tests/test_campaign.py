@@ -1,38 +1,15 @@
 import pytest
 import os
+import shutil
 import pandas as pd
 
 from rich.pretty import pprint
+from pathlib import Path
 
 from app import Campaign
 from tests.configs.normal import LD_DATASETS
 
 class TestCampaign:
-    @pytest.fixture
-    def setup_method(self, method):
-        """
-        Fixture to set up the test method.
-        This will be called before each test method.
-        """
-        print(f"\nSetting up for test: {method.__name__}")
-
-        # Remove everything in ./tests/output except for existing_test_campaign.parquet
-        s_output_dir = "./tests/output/"
-
-        if os.path.exists(s_output_dir):
-
-            for s_file in os.listdir(s_output_dir):
-                s_file_path = os.path.join(s_output_dir, s_file)
-
-                if s_file == "existing_test_campaign.parquet":
-                    continue
-
-                if os.path.isfile(s_file_path):
-                    os.remove(s_file_path)
-
-                elif os.path.isdir(s_file_path):
-                    os.rmdir(s_file_path)
-
     def test_init_with_normal_case(self):
         d_ds = {
             "name": "test campaign with dirs",
@@ -69,6 +46,9 @@ class TestCampaign:
         assert os.path.isdir(o_c.s_summaries_dpath)
         assert len(os.listdir(o_c.s_summaries_dpath)) == 2
 
+        # Delete the generates summaries folder at the end of the test
+        shutil.rmtree(o_c.s_summaries_dpath)
+
     def test_create_dataset_with_dirs(self):
         d_config = {
             "name": "test campaign with dirs",
@@ -83,6 +63,7 @@ class TestCampaign:
         s_raw_datadir = o_c.get_raw_datadir()
         ld_exp_names_and_paths = o_c.get_experiments(s_raw_datadir)
 
+        o_c.summarise_experiments()
         o_c.create_dataset()
 
         assert os.path.exists(o_c.ds_output_path)
@@ -141,9 +122,10 @@ class TestCampaign:
             assert len(df_exp_total_mbps) > 400
             assert len(df_exp_total_mbps) < 800
 
-        # Delete the dataset after test done
-        if os.path.exists(o_c.ds_output_path):
-            os.remove(o_c.ds_output_path)
+        # Delete the summaries
+        shutil.rmtree(o_c.s_summaries_dpath)
+        # Delete the dataset
+        Path(o_c.ds_output_path).unlink()
 
     def test_create_dataset_with_csv(self):
         d_config = {
@@ -159,6 +141,7 @@ class TestCampaign:
         s_raw_datadir = o_c.get_raw_datadir()
         ld_exp_names_and_paths = o_c.get_experiments(s_raw_datadir)
 
+        o_c.summarise_experiments()
         o_c.create_dataset()
 
         assert os.path.exists(o_c.ds_output_path)
@@ -216,6 +199,11 @@ class TestCampaign:
             # This covers the expected 600 samples range
             assert len(df_exp_total_mbps) > 400
             assert len(df_exp_total_mbps) < 800
+
+        # Delete the summaries
+        shutil.rmtree(o_c.s_summaries_dpath)
+        # Delete the dataset
+        Path(o_c.ds_output_path).unlink()
 
     def test_process_exp_df_with_exp_name_as_csv(self):
         o_c = Campaign(LD_DATASETS[0])

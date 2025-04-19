@@ -121,25 +121,19 @@ class Campaign:
                 f"Written {s_exp_name} summary to {self.s_summaries_dpath}"
             )
 
+            del df_exp
+            gc.collect()
+
     def create_dataset(self):
         """
-        1. Go through each item in the experiment directory
-        2. Read the csv file
-        3. Add the experiment name
-        4. Add the qos settings to the dataframe
-        5. Add to a big ds df
-        6. Write the ds df to a parquet file
-
-        The dataset should have the following columns:
-            - experiment_name
-            - latency_us
-            - avg_mbps
-            - total_mbps
-
-        For any experiment, there should be:
-            - around 600 avg_mbps samples
-            - around 600 total_mbps samples
+        Read all experiment summaries and stick into one big dataset.
         """
+
+        if not os.path.exists(self.s_summaries_dpath):
+            raise Exception(
+                f"Summaries directory does not exist: {self.s_summaries_dpath}. "
+                f"You need to run summarise_experiments() first."
+            )
 
         lg.debug("Creating dataset...")
 
@@ -151,38 +145,35 @@ class Campaign:
             os.rename(ds_output, new_ds_output)
             lg.warning(f"Dataset renamed to {new_ds_output}")
 
-        s_raw_datadir = self.get_raw_datadir()
-        ld_exp_names_and_paths = self.get_experiments(s_raw_datadir)
-
         df_ds = pd.DataFrame()
-        for i_exp, d_exp_names_and_paths in enumerate(ld_exp_names_and_paths):
+
+        ls_summaries = os.listdir(self.s_summaries_dpath)
+        lg.info(f"Found {len(ls_summaries)} summaries in {self.s_summaries_dpath}")
+
+        for i_summ, s_summ_path in enumerate(ls_summaries):
+            s_summ_path = os.path.join(self.s_summaries_dpath, s_summ_path)
+
             lg.info(
-                "[{}/{}] Processing df for {}".format(
-                    i_exp + 1,
-                    len(ld_exp_names_and_paths),
-                    d_exp_names_and_paths['name']
-                )
+                f"[{i_summ + 1}/{len(ls_summaries)}] "
+                f"Processing {s_summ_path}"
             )
 
+            if not os.path.isfile(s_summ_path):
+                lg.warning(f"{s_summ_path} is not a file. Skipping...")
+                continue
+
+            if not s_summ_path.endswith(".parquet"):
+                lg.warning(f"{s_summ_path} is not a parquet file. Skipping...")
+                continue
+
             try:
-                df_exp = self.process_exp_df(d_exp_names_and_paths)
+                df_temp = pd.read_parquet(s_summ_path)
+                df_ds = pd.concat([df_ds, df_temp], axis=0)
 
             except Exception as e:
                 lg.error(e)
                 continue
-            
-            df_ds = pd.concat([df_ds, df_exp], axis=0)
-
-            del df_exp
-            gc.collect()
-
-            df_ds.reset_index(drop=True, inplace=True)
-
-            # Periodically write the dataset
-            if i_exp % 10 == 0:
-                lg.info(f"Writing dataset to {ds_output}...")
-                self.write_dataset(df_ds)
-
+        
         if df_ds.empty:
             raise Exception("No data found in the dataset")
 
