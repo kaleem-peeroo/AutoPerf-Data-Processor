@@ -98,6 +98,7 @@ class Campaign:
                 lg.info(
                     f"{s_exp_summ_path} summary exists. Skipping..."
                 )
+                continue
 
             try:
                 df_exp = self.process_exp_df(d_exp_names_and_paths)
@@ -849,6 +850,20 @@ class Campaign:
         ld_exp_names_and_paths = self.get_exp_with_expected_file_count(
             ld_exp_names_and_paths
         )
+
+        # Check for duplicate experiment names
+        ls_exp_names = [d_exp['name'] for d_exp in ld_exp_names_and_paths]
+        ls_exp_names = list(set(ls_exp_names))
+        if len(ls_exp_names) != len(ld_exp_names_and_paths):
+            df_exp_names_and_paths = pd.DataFrame(
+                ld_exp_names_and_paths
+            )
+            df_exp_names_and_paths.to_csv(
+                "./ld_exp_names_and_paths.csv",
+                index=False
+            )
+            lg.warning("Duplicate experiment names found. Please check your data.")
+            lg.warning("I've written the dict to ./ld_exp_names_and_paths.csv")
 
         return ld_exp_names_and_paths
 
