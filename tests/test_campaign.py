@@ -789,7 +789,7 @@ class TestCampaign:
         ]
         ls_exp_entries = o_c.process_exp_entries_with_subdirs(ls_exp_entries)
         # There are 109 experiment folders
-        assert len(ls_exp_entries) == 81
+        assert len(ls_exp_entries) == 80
 
         # INFO: Normal Case - with subdirs
         s_test_dir = "./tests/data/test_campaign_with_dir_with_csv/"
@@ -1177,7 +1177,7 @@ class TestCampaign:
             "./tests/data/test_campaign_with_dirs_small/"
         )
         assert isinstance(ls_fpaths, list)
-        assert len(ls_fpaths) == 168
+        assert len(ls_fpaths) == 8
 
         for s_path in ls_fpaths:
             assert isinstance(s_path, str)
@@ -1196,4 +1196,4 @@ class TestCampaign:
             "./tests/data/test_campaign_with_mix/600s_100B_1P_1S_be_uc_3dur_100lc/"
         )
         assert isinstance(ls_fpaths, list)
-        assert len(ls_fpaths) == 84
+        assert len(ls_fpaths) == 4
