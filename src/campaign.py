@@ -30,13 +30,6 @@ class Campaign:
 
         self.df_ds = None
 
-        self.config = None
-        self.qos_variations = {}
-
-        self.qos_exp_list   = []    # Expected experiment list generated from qos
-        self.data_exp_list  = []    # experiment list from the data dir experiment names
-        self.missing_exps   = []    # Missing experiment list
-
     def get_raw_datadir(self):
         if not self.raw_datadir:
             raise Exception("No raw data directory provided")

@@ -43,11 +43,6 @@ class TestCampaign:
             assert o_c.apconf_path == d_ds['ap_config']
             assert o_c.raw_datadir == d_ds['exp_folders']
             assert o_c.df_ds is None
-            assert o_c.config is None
-            assert o_c.qos_variations == {}
-            assert o_c.qos_exp_list == []
-            assert o_c.data_exp_list == []
-            assert o_c.missing_exps == []
 
     def test_create_dataset_with_dirs(self):
         d_config = {
