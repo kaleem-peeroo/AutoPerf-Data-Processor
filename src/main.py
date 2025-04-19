@@ -27,6 +27,7 @@ def main():
         ))
 
         campaign = Campaign(d_ds)
+        campaign.summarise_experiments()
         campaign.create_dataset()
         campaign.validate_dataset()
 

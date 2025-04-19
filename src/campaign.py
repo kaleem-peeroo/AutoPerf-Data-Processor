@@ -27,7 +27,7 @@ class Campaign:
         self.raw_datadir = d_config['exp_folders']
         self.apconf_path = d_config['ap_config']
         self.ds_output_path = d_config['dataset_path']
-        self.summaries_dpath = os.path.join(
+        self.s_summaries_dpath = os.path.join(
             os.path.dirname(self.ds_output_path),
             f"{os.path.basename(self.ds_output_path).split('.')[0]}_summaries"
         )
@@ -75,6 +75,52 @@ class Campaign:
 
         return self.df_ds
 
+    def summarise_experiments(self):
+        """
+        Goes through each experiment.
+        Gathers all the data and puts it into a single dataframe.
+        Writes the df to a parquet file.
+        Stores the parquet file summaries_dpath.
+        """
+        s_raw_datadir = self.get_raw_datadir()
+        ld_exp_names_and_paths = self.get_experiments(s_raw_datadir)
+
+        os.makedirs(self.s_summaries_dpath, exist_ok=True)
+
+        for i_exp, d_exp_names_and_paths in enumerate(ld_exp_names_and_paths):
+            s_exp_name = d_exp_names_and_paths['name']
+            s_exp_summ_path = os.path.join(
+                self.s_summaries_dpath,
+                f"{s_exp_name}.parquet"
+            )
+
+            if os.path.exists(s_exp_summ_path):
+                lg.info(
+                    f"{s_exp_summ_path} summary exists. Skipping..."
+                )
+
+            try:
+                df_exp = self.process_exp_df(d_exp_names_and_paths)
+
+            except Exception as e:
+                lg.error(e)
+                continue
+
+            if df_exp.empty:
+                lg.warning(f"Experiment dataframe is empty: {d_exp_names_and_paths['name']}")
+                continue
+
+            df_exp.reset_index(drop=True, inplace=True)
+            df_exp.to_parquet(
+                s_exp_summ_path,
+                index=False
+            )
+
+            lg.info(
+                f"[{i_exp + 1}/{len(ld_exp_names_and_paths)}] "
+                f"Written {s_exp_name} summary to {self.s_summaries_dpath}"
+            )
+
     def create_dataset(self):
         """
         1. Go through each item in the experiment directory
@@ -120,6 +166,7 @@ class Campaign:
 
             try:
                 df_exp = self.process_exp_df(d_exp_names_and_paths)
+
             except Exception as e:
                 lg.error(e)
                 continue

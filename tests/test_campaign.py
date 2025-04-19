@@ -51,8 +51,23 @@ class TestCampaign:
         assert o_c.apconf_path == d_ds['ap_config']
         assert o_c.raw_datadir == d_ds['exp_folders']
         assert o_c.df_ds is None
-        assert o_c.summaries_dpath == "./tests/output/test_campaign_with_dirs_small_summaries/"
+        assert o_c.s_summaries_dpath == "./tests/output/test_campaign_with_dirs_small_summaries"
 
+    def test_summarise_experiments(self):
+        d_config = {
+            "name": "test campaign with dirs",
+            "exp_folders": \
+                "./tests/data/test_campaign_with_dirs_small/",
+            "ap_config": "",
+            "dataset_path": \
+                "./tests/output/test_campaign_with_dirs_small.parquet",
+        }
+
+        o_c = Campaign(d_config)
+        o_c.summarise_experiments()
+        assert os.path.exists(o_c.s_summaries_dpath)
+        assert os.path.isdir(o_c.s_summaries_dpath)
+        assert len(os.listdir(o_c.s_summaries_dpath)) == 2
 
     def test_create_dataset_with_dirs(self):
         d_config = {
