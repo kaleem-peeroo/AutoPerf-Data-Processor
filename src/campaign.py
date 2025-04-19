@@ -114,7 +114,7 @@ class Campaign:
         df_ds = pd.DataFrame()
         for i_exp, d_exp_names_and_paths in enumerate(ld_exp_names_and_paths):
             lg.info(
-                "[{}/{}] Processing exp df for {}".format(
+                "[{}/{}] Processing df for {}".format(
                     i_exp + 1,
                     len(ld_exp_names_and_paths),
                     d_exp_names_and_paths['name']
@@ -295,7 +295,11 @@ class Campaign:
             raise ValueError(f"Experiment file is empty: {s_exp_path}")
 
         if self.is_raw_exp_file(s_exp_path):
-            df_temp = self.process_file_df(s_exp_path)
+            if self.raw_file_is_pub(s_exp_path):
+                df_temp = self.process_pub_file_df(s_exp_path)
+
+            else:
+                df_temp = self.process_sub_file_df(s_exp_path)
 
         else:
             df_temp = pd.read_csv(s_exp_path)
@@ -328,7 +332,7 @@ class Campaign:
 
         return False
 
-    def process_file_df(
+    def process_pub_file_df(
         self,
         s_exp_path: str = ""
     ) -> pd.DataFrame:
@@ -361,17 +365,65 @@ class Campaign:
         if self.raw_file_is_pub(s_exp_path):
             s_metric = "latency"
 
-        else:
-            s_metric = "mbps"
+        # else:
+            # s_metric = "mbps"
 
-        s_metric_col = self.get_metric_col_from_df(df, s_metric)
+        s_metric_col = self.get_metric_col_from_df(df, "latency")
         df = df[[s_metric_col]]
 
-        if s_metric == "latency":
-            s_metric = "latency_us"
+        # if s_metric == "latency":
 
-        else:
-            s_metric = f"{os.path.basename(s_exp_path).split(".")[0]}_mbps"
+        # else:
+            # s_metric = f"{os.path.basename(s_exp_path).split(".")[0]}_mbps"
+
+        df = self.rename_df_col(
+            df=df,
+            s_old_colname=s_metric_col,
+            s_new_colname="latency_us",
+        )
+
+        for col in df.columns:
+            try:
+                df[col] = df[col].astype('float64')
+            except ValueError:
+                lg.error(f"Could not convert column {col} to float64: {df[col]}")
+                    
+        return df
+
+    def process_sub_file_df(
+        self,
+        s_exp_path: str = ""
+    ) -> pd.DataFrame:
+        """
+        Read the file manually and get the necessary columns.
+        """
+        
+        if s_exp_path == "":
+            raise Exception("No experiment path provided")
+
+        if not os.path.exists(s_exp_path):
+            raise Exception(f"Experiment path does not exist: {s_exp_path}")
+
+        if not os.path.isfile(s_exp_path):
+            raise Exception(f"Experiment path is not a file: {s_exp_path}")
+
+        if not s_exp_path.endswith(".csv"):
+            raise Exception(f"Experiment path is not a csv file: {s_exp_path}")
+
+        i_start = self.get_start_index_for_raw_file(s_exp_path)
+        i_end = self.get_end_index_for_raw_file(s_exp_path)
+
+        df = pd.read_csv(
+            s_exp_path,
+            skiprows=i_start,
+            nrows=i_end - i_start,
+            on_bad_lines="skip",
+        )
+
+        s_metric_col = self.get_metric_col_from_df(df, "mbps")
+        df = df[[s_metric_col]]
+
+        s_metric = f"{os.path.basename(s_exp_path).split(".")[0]}_mbps"
 
         df = self.rename_df_col(
             df=df,

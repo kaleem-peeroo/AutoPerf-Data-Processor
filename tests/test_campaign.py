@@ -467,7 +467,7 @@ class TestCampaign:
         s_test_datadir = "./tests/data/test_campaign_with_dirs_simple/"
 
         # INFO: Normal Case - pub file
-        df_pub = o_c.process_file_df(
+        df_pub = o_c.process_pub_file_df(
             f"{s_test_datadir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
         )
         assert df_pub is not None
@@ -478,7 +478,7 @@ class TestCampaign:
         assert len(df_pub) == 251
 
         # INFO: Normal Case - sub file
-        df_sub = o_c.process_file_df(
+        df_sub = o_c.process_sub_file_df(
             f"{s_test_datadir}/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/sub_1.csv"
         )
         assert df_sub is not None
@@ -490,7 +490,7 @@ class TestCampaign:
 
         # INFO: Normal Case - erroneous sub file
         s_test_datadir = "./tests/data/test_campaign_with_errors/"
-        df_sub = o_c.process_file_df(
+        df_sub = o_c.process_sub_file_df(
             f"{s_test_datadir}/600SEC_100B_25P_1S_BE_MC_2DUR_100LC/sub_0.csv"
         )
         assert df_sub is not None
