@@ -1,4 +1,5 @@
 import os
+import gc
 import toml
 import itertools
 import sys
@@ -129,6 +130,7 @@ class Campaign:
             
             df_ds = pd.concat([df_ds, df_exp], axis=0)
             del df_exp
+            gc.collect()
             df_ds.reset_index(drop=True, inplace=True)
 
             # Periodically write the dataset
