@@ -102,16 +102,11 @@ class Campaign:
 
         ds_output = self.get_dataset_path()
         if os.path.exists(ds_output):
-            df_ds = pd.read_parquet(ds_output)
-            if df_ds.empty:
-                raise Exception(f"Existing dataset is empty: {ds_output}")
-
-            self.df_ds = df_ds
-
-            lg.warning(
-                f"Dataset {ds_output} already exists."
-            )
-            return
+            lg.warning("Dataset already exists. Renaming with timestamp...")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            new_ds_output = ds_output.replace(".parquet", f"_{timestamp}.parquet")
+            os.rename(ds_output, new_ds_output)
+            lg.warning(f"Dataset renamed to {new_ds_output}")
 
         s_raw_datadir = self.get_raw_datadir()
         ld_exp_names_and_paths = self.get_experiments(s_raw_datadir)
@@ -173,13 +168,6 @@ class Campaign:
         df_exp = pd.DataFrame()
 
         for i_exp_path, s_exp_path in enumerate(ls_exp_paths):
-            # lg.debug(
-            #     "[{}/{}] Processing {}".format(
-            #         i_exp_path + 1,
-            #         len(ls_exp_paths),
-            #         os.path.basename(s_exp_path)
-            #     )
-            # )
             df_temp = self.get_exp_file_df(s_exp_path)
             df_exp = pd.concat([df_exp, df_temp], axis=1)
 
@@ -194,7 +182,7 @@ class Campaign:
         if 'experiment_name' in df_exp.columns:
             df_exp.drop(columns=['experiment_name'], inplace=True)
 
-        df_exp['experiment_name'] = s_exp_name
+        df_exp['experiment_name'] = self.try_format_experiment_name(s_exp_name)
 
         df_exp = self.add_input_cols(df_exp)
 
@@ -1005,7 +993,6 @@ class Campaign:
         
         s_exp_name = s_exp_name.upper()
         ls_sections = s_exp_name.split("_")
-
 
         if not ls_sections[0].endswith("SEC"):
             ls_sections[0] = ls_sections[0].replace("S", "SEC")

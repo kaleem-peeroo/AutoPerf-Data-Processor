@@ -87,7 +87,8 @@ class TestCampaign:
 
         for d_exp in ld_exp_names_and_paths:
             s_exp_name = o_c.try_format_experiment_name( d_exp['name'] )
-            assert s_exp_name in ls_exp_names
+            assert s_exp_name in ls_exp_names, \
+                    f"Experiment name {s_exp_name} not found in df: {ls_exp_names}"
 
             df_exp = df[df['experiment_name'] == s_exp_name].copy()
             assert len(df_exp) > 0
@@ -119,6 +120,10 @@ class TestCampaign:
             # This covers the expected 600 samples range
             assert len(df_exp_total_mbps) > 400
             assert len(df_exp_total_mbps) < 800
+
+        # Delete the dataset after test done
+        if os.path.exists(o_c.ds_output_path):
+            os.remove(o_c.ds_output_path)
 
     def test_create_dataset_with_csv(self):
         d_config = {
