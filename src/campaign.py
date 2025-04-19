@@ -27,7 +27,10 @@ class Campaign:
         self.raw_datadir = d_config['exp_folders']
         self.apconf_path = d_config['ap_config']
         self.ds_output_path = d_config['dataset_path']
-
+        self.summaries_dpath = os.path.join(
+            os.path.dirname(self.ds_output_path),
+            f"{os.path.basename(self.ds_output_path).split('.')[0]}_summaries"
+        )
         self.df_ds = None
 
     def get_raw_datadir(self):

@@ -34,15 +34,25 @@ class TestCampaign:
                     os.rmdir(s_file_path)
 
     def test_init_with_normal_case(self):
-        for d_ds in LD_DATASETS:
-            o_c = Campaign(d_ds)
-            assert o_c is not None
-            assert isinstance(o_c, Campaign)
+        d_ds = {
+            "name": "test campaign with dirs",
+            "exp_folders": \
+                "./tests/data/test_campaign_with_dirs_small/",
+            "ap_config": "",
+            "dataset_path": \
+                "./tests/output/test_campaign_with_dirs_small.parquet",
+        }
 
-            assert o_c.ds_output_path == d_ds['dataset_path']
-            assert o_c.apconf_path == d_ds['ap_config']
-            assert o_c.raw_datadir == d_ds['exp_folders']
-            assert o_c.df_ds is None
+        o_c = Campaign(d_ds)
+        assert o_c is not None
+        assert isinstance(o_c, Campaign)
+
+        assert o_c.ds_output_path == d_ds['dataset_path']
+        assert o_c.apconf_path == d_ds['ap_config']
+        assert o_c.raw_datadir == d_ds['exp_folders']
+        assert o_c.df_ds is None
+        assert o_c.summaries_dpath == "./tests/output/test_campaign_with_dirs_small_summaries/"
+
 
     def test_create_dataset_with_dirs(self):
         d_config = {
