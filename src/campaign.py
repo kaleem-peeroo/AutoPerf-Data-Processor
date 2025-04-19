@@ -128,17 +128,35 @@ class Campaign:
                 continue
             
             df_ds = pd.concat([df_ds, df_exp], axis=0)
+            df_ds.reset_index(drop=True, inplace=True)
 
-        df_ds.reset_index(drop=True, inplace=True)
+            # Periodically write the dataset
+            if i_exp % 10 == 0:
+                lg.info(f"Writing dataset to {ds_output}...")
+                self.write_dataset(df_ds)
 
         if df_ds.empty:
             raise Exception("No data found in the dataset")
 
         self.df_ds = df_ds
 
-        os.makedirs(os.path.dirname(ds_output), exist_ok=True)
-        df_ds.to_parquet(ds_output, index=False)
-        lg.info(f"Dataset written to {ds_output}")
+        self.write_dataset(df_ds)
+
+    def write_dataset(
+        self,
+        df: pd.DataFrame = pd.DataFrame()
+    ) -> None:
+        if df.empty:
+            lg.warning("Input dataframe is empty")
+
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError(f"Input must be a dataframe: {df}")
+
+        s_ds_output = self.get_dataset_path()
+        os.makedirs(os.path.dirname(s_ds_output), exist_ok=True)
+
+        df.to_parquet(s_ds_output, index=False)
+        lg.info(f"Dataset written to {self.ds_output_path}")
 
     def process_exp_df(
         self, 
