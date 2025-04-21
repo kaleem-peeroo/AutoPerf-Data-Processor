@@ -884,6 +884,8 @@ class Campaign:
 
         ls_exp_entries_without_subdirs = []
         for s_exp_entry in ls_exp_entries:
+            if s_exp_entry.endswith(".DS_Store"):
+                continue
 
             if os.path.isfile(s_exp_entry):
                 ls_exp_entries_without_subdirs.append(s_exp_entry)
