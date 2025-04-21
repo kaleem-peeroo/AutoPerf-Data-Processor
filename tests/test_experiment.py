@@ -223,3 +223,43 @@ class TestExperiment:
         assert isinstance(sr, pd.Series)
         assert len(sr) > 0
         assert sr.name == "sub_0_mbps"
+
+    def test_calculate_sub_metrics(self):
+        s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
+        s_exp_name = "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"
+        o_exp = Experiment(
+            s_name=s_exp_name,
+            ls_csv_paths=[
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/sub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/sub_0.csv",
+            ],
+        )
+
+        o_exp.process_runs()
+        o_exp.pick_best_run()
+
+        df_summary = pd.DataFrame()
+        for o_file in o_exp.best_exp_run.lo_exp_files:
+            if not o_file.is_raw():
+                df = o_file.get_df()
+                df_summary = pd.concat([df_summary, df], axis=0)
+
+            elif o_file.is_pub():
+                df_lat = o_exp.get_lat_df(o_file)
+                df_summary = pd.concat([df_summary, df_lat], axis=1)
+
+            elif o_file.is_sub():
+                df_mbps = o_exp.get_mbps_df(o_file)
+                df_summary = pd.concat([df_summary, df_mbps], axis=1)
+
+            else:
+                raise ValueError("Unknown file type")
+
+        df = o_exp.calculate_sub_metrics(df_summary)
+
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) > 0
+        assert "avg_mbps_per_sub" in df.columns
+        assert "total_mbps_over_subs" in df.columns

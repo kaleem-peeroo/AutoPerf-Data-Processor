@@ -197,6 +197,8 @@ class Experiment:
             else:
                 raise ValueError("Unknown file type")
 
+        df_summary = self.calculate_sub_metrics(df_summary)
+
         df_summary['experiment_name'] = self.s_name
 
         df_summary.reset_index(drop=True, inplace=True)
@@ -264,3 +266,25 @@ class Experiment:
         
         return sr
 
+    def calculate_sub_metrics(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate subscriber metrics.
+        """
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError(
+                "Input is not a dataframe"
+                f"It is a {type(df)}"
+            )
+
+        if df.empty:
+            raise ValueError("Dataframe is empty")
+
+        # Calculate avg mbps per sub
+        ls_mbps_cols = [col for col in df.columns if "mbps" in col.lower()]
+        if len(ls_mbps_cols) == 0:
+            raise ValueError("No mbps columns found in dataframe")
+
+        df["avg_mbps_per_sub"] = df[ls_mbps_cols].mean(axis=1)
+        df["total_mbps_over_subs"] = df[ls_mbps_cols].sum(axis=1)
+
+        return df
