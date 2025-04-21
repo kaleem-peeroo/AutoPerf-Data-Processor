@@ -46,3 +46,17 @@ class Experiment:
 
         if s_csv_path not in self.ls_csv_paths:
             self.ls_csv_paths.append(s_csv_path)
+    def get_run_names(self) -> List[str]:
+        """
+        Get unique run names from the CSV paths.
+        """
+        ls_run_names = []
+
+        for s_csv_path in self.ls_csv_paths:
+            s_fname = os.path.basename(s_csv_path)
+            s_run_name = os.path.dirname(s_csv_path)
+
+            if s_run_name not in ls_run_names:
+                ls_run_names.append(s_run_name)
+
+        return ls_run_names
