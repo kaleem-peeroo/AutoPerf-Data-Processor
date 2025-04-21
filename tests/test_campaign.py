@@ -6,7 +6,8 @@ import pandas as pd
 from rich.pretty import pprint
 from pathlib import Path
 
-from app import Campaign
+from campaign import Campaign
+from experiment import Experiment
 from tests.configs.normal import LD_DATASETS
 
 class TestCampaign:
@@ -61,7 +62,7 @@ class TestCampaign:
 
         o_c = Campaign(d_config)
         s_raw_datadir = o_c.get_raw_datadir()
-        ld_exp_names_and_paths = o_c.get_experiments(s_raw_datadir)
+        ld_exp_names_and_paths = o_c.gather_experiments(s_raw_datadir)
 
         o_c.summarise_experiments()
         o_c.create_dataset()
@@ -139,7 +140,7 @@ class TestCampaign:
 
         o_c = Campaign(d_config)
         s_raw_datadir = o_c.get_raw_datadir()
-        ld_exp_names_and_paths = o_c.get_experiments(s_raw_datadir)
+        ld_exp_names_and_paths = o_c.gather_experiments(s_raw_datadir)
 
         o_c.summarise_experiments()
         o_c.create_dataset()
@@ -740,47 +741,7 @@ class TestCampaign:
             with pytest.raises(ValueError):
                 o_c.get_qos_from_exp_name(s_exp_name)
 
-    def test_get_experiments_with_normal_case(self):
-        for d_ds in LD_DATASETS:
-            o_c = Campaign(d_ds)
-            s_raw_datadir = o_c.get_raw_datadir()
-            ld_exp_names_and_paths = o_c.get_experiments(s_raw_datadir)
-
-            """
-            Checks:
-                - should be a list of dicts
-                - each dict should have two items
-                    - name: name of experiment
-                        - should be a string
-                        - format of {int}SEC_{int}B_{int}P_{int}S_{REL/BE}_{MC/UC}_{int}DUR
-                    - paths: list of all files for that experiment
-                        - should be a list of strings
-                        - should be a valid path to file
-            """
-
-            assert isinstance(ld_exp_names_and_paths, list)
-            assert len(ld_exp_names_and_paths) > 0
-            for d_exp in ld_exp_names_and_paths:
-                assert isinstance(d_exp, dict)
-                assert len(d_exp) == 2
-                assert 'name' in d_exp
-                assert 'paths' in d_exp
-
-                assert isinstance(d_exp['name'], str)
-                assert len(d_exp['name']) > 0
-
-                assert isinstance(d_exp['paths'], list)
-                assert len(d_exp['paths']) > 0
-
-                for s_path in d_exp['paths']:
-                    assert isinstance(s_path, str)
-                    assert len(s_path) > 0
-                    assert os.path.exists(s_path)
-                    assert os.path.isfile(s_path)
-                    assert os.path.getsize(s_path) > 0
-                    assert s_path.endswith('.csv')
-
-    def test_get_experiments_with_csv(self):
+    def test_gather_experiments_with_csv(self):
         o_c = Campaign({
             "name": "another test campaign with csv",
             "exp_folders": \
@@ -791,16 +752,39 @@ class TestCampaign:
         })
 
         s_raw_datadir = o_c.get_raw_datadir()
-        ld_exp_names_and_paths = o_c.get_experiments(s_raw_datadir)
+        lo_exps = o_c.gather_experiments(s_raw_datadir)
 
-        assert len(ld_exp_names_and_paths) == 18
+        assert lo_exps is not None
+        assert isinstance(lo_exps, list)
 
-        for d_exp_names_and_paths in ld_exp_names_and_paths:
-            for s_path in d_exp_names_and_paths['paths']:
-                assert isinstance(s_path, str)
-                assert len(s_path) > 0
-                assert s_path.endswith('.csv')
-                assert os.path.exists(s_path)
+        # There are 4 csv files (1 per experiment)
+        assert len(lo_exps) == 4
+
+        for o_exp in lo_exps:
+            assert isinstance(o_exp, Experiment)
+            assert o_exp.s_name is not None
+            assert isinstance(o_exp.s_name, str)
+            assert o_exp.ls_paths is not None
+            assert isinstance(o_exp.ls_paths, list)
+            assert len(o_exp.ls_paths) > 0
+                    
+    def test_gather_experiments_with_dir_with_csv(self):
+        raise NotImplementedError("This test is not implemented yet.")
+
+    def test_gather_experiments_with_dirs(self):
+        raise NotImplementedError("This test is not implemented yet.")
+
+    def test_gather_experiments_with_dirs_simple(self):
+        raise NotImplementedError("This test is not implemented yet.")
+
+    def test_gather_experiments_with_dirs_small(self):
+        raise NotImplementedError("This test is not implemented yet.")
+
+    def test_gather_experiments_with_errors(self):
+        raise NotImplementedError("This test is not implemented yet.")
+
+    def test_gather_experiments_with_mix(self):
+        raise NotImplementedError("This test is not implemented yet.")
 
     def test_process_exp_entries_with_subdirs(self):
         o_c = Campaign(LD_DATASETS[0])
