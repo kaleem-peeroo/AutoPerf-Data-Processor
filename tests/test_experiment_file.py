@@ -121,3 +121,161 @@ class TestExperimentFile:
             TestExperimentFile.s_sub_fpath_valid["s_path"],
         )
         assert o_e.is_sub() is True
+
+    def test_is_valid(self):
+        # INFO: Normal Case - Exp csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_exp_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_exp_fpath_valid["s_path"],
+        )
+        assert o_e.is_valid() is True
+
+        # INFO: Normal Case - Pub csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_pub_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_pub_fpath_valid["s_path"],
+        )
+        assert o_e.is_valid() is True
+
+        # INFO: Normal Case - Sub csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_sub_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_sub_fpath_valid["s_path"],
+        )
+        assert o_e.is_valid() is True
+
+        # INFO: Normal Case - Pub csv with invalid data
+        o_e = ExperimentFile(
+            TestExperimentFile.s_pub_fpath_invalid["s_exp_name"],
+            TestExperimentFile.s_pub_fpath_invalid["s_path"],
+        )
+        with pytest.raises(ValueError):
+            o_e.is_valid()
+
+        # INFO: Normal Case - Sub csv with invalid data
+        o_e = ExperimentFile(
+            TestExperimentFile.s_sub_fpath_invalid["s_exp_name"],
+            TestExperimentFile.s_sub_fpath_invalid["s_path"],
+        )
+        assert o_e.is_valid() is False
+
+    def test_get_df(self):
+        # INFO: Normal Case - Exp csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_exp_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_exp_fpath_valid["s_path"],
+        )
+        df = o_e.get_df()
+        assert isinstance(df, pd.DataFrame)
+        assert df.shape[0] == 784
+        assert df.shape[1] == 52
+
+        # INFO: Normal Case - Pub csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_pub_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_pub_fpath_valid["s_path"],
+        )
+        df = o_e.get_df()
+        assert isinstance(df, pd.DataFrame)
+        assert df.shape[0] == 93
+        assert df.shape[1] == 6
+
+        # INFO: Normal Case - Sub csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_sub_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_sub_fpath_valid["s_path"],
+        )
+        df = o_e.get_df()
+        assert isinstance(df, pd.DataFrame)
+        assert df.shape[0] == 598
+        assert df.shape[1] == 8
+
+    def test_get_start_index(self):
+        # INFO: Normal Case - Pub csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_pub_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_pub_fpath_valid["s_path"],
+        )
+        i_start_index = o_e.get_start_index()
+        assert i_start_index == 2
+
+        # INFO: Normal Case - Sub csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_sub_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_sub_fpath_valid["s_path"],
+        )
+        i_start_index = o_e.get_start_index()
+        assert i_start_index == 2
+
+        # INFO: Normal Case - Exp csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_exp_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_exp_fpath_valid["s_path"],
+        )
+        with pytest.raises(ValueError):
+            o_e.get_start_index()
+
+    def test_get_end_index(self):
+        # INFO: Normal Case - Pub csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_pub_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_pub_fpath_valid["s_path"],
+        )
+        i_end_index = o_e.get_end_index()
+        assert i_end_index == 95
+
+        # INFO: Normal Case - Sub csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_sub_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_sub_fpath_valid["s_path"],
+        )
+        i_end_index = o_e.get_end_index()
+        assert i_end_index == 600
+
+        # INFO: Normal Case - Exp csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_exp_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_exp_fpath_valid["s_path"],
+        )
+        with pytest.raises(ValueError):
+            o_e.get_end_index()
+
+    def test_get_expected_sample_count(self):
+        # INFO: Normal Case - Exp csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_exp_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_exp_fpath_valid["s_path"],
+        )
+        i_expected_samples = o_e.get_expected_sample_count()
+        assert i_expected_samples == 600
+
+        # INFO: Normal Case - Pub csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_pub_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_pub_fpath_valid["s_path"],
+        )
+        i_expected_samples = o_e.get_expected_sample_count()
+        assert i_expected_samples == 600
+
+        # INFO: Normal Case - Sub csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_sub_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_sub_fpath_valid["s_path"],
+        )
+        i_expected_samples = o_e.get_expected_sample_count()
+        assert i_expected_samples == 600
+
+    def test_remove_trailing_zeroes(self):
+        o_e = ExperimentFile(
+            TestExperimentFile.s_pub_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_pub_fpath_valid["s_path"],
+        )
+
+        df_before = pd.DataFrame({
+            'a': [1, 0, 0, 0],
+            'b': [2, 0, 0, 0],
+        })
+        df_after = o_e.remove_trailing_zeroes(df_before)
+
+        assert df_after['a'].tolist() == [1]
+        assert df_after['b'].tolist() == [2]
