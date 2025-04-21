@@ -7,7 +7,7 @@ from typing import List
 
 from experiment_run import ExperimentRun
 
-logger = logging.getLogger(__name__)
+lg = logging.getLogger(__name__)
 
 class Experiment:
     def __init__(
@@ -171,10 +171,66 @@ class Experiment:
         )
 
         if os.path.exists(s_output_path):
-            logger.info(
+            lg.info(
                 f"{self.s_name} summary already exists. Skipping."
             )
             return
 
-        
-        
+        if self.best_exp_run is None:    
+            raise ValueError("No best experiment run found")
+
+        df_summary = pd.DataFrame()
+        for o_file in self.best_exp_run.lo_exp_files:
+            
+            if not o_file.is_raw():
+                df = o_file.get_df()
+                df_summary = pd.concat([df_summary, df], axis=0)
+
+            elif o_file.is_pub():
+                df_lat = self.get_lat_df(o_file)
+
+            elif o_file.is_sub():
+                df_mbps = self.get_mbps_df(o_file)
+
+            else:
+                raise ValueError("Unknown file type")
+
+        df_summary.reset_index(drop=True, inplace=True)
+        df_summary.to_parquet(s_output_path, index=False)
+        lg.info(
+            f"Summary file written to {s_output_path}"
+        )
+
+    def get_lat_df(self, o_file):
+        """
+        Get latency dataframe.
+        """
+        if not o_file.is_pub():
+            raise ValueError("File is not a publisher file")
+
+        df = o_file.get_df()
+        ls_lat_cols = [col for col in df.columns if "latency" in col.lower()]
+        if len(ls_lat_cols) == 0:
+            raise ValueError("No latency columns found in file")
+        df = df[ls_lat_cols]
+        df = df.dropna()
+        return df
+
+    def get_mbps_df(self, o_file):
+        """
+        Get mbps dataframe.
+        """
+        if not o_file.is_sub():
+            raise ValueError("File is not a subscriber file")
+
+        df = o_file.get_df()
+        ls_mbps_cols = [
+            col for col in df.columns if "mbps" in col.lower() \
+                    and 'avg' not in col.lower()
+        ]
+        if len(ls_mbps_cols) == 0:
+            raise ValueError("No mbps columns found in file")
+        df = df[ls_mbps_cols]
+        df = df.dropna()
+        return df
+

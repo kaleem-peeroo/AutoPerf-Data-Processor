@@ -7,6 +7,7 @@ from rich.pretty import pprint
 from pathlib import Path
 
 from experiment import Experiment
+from experiment_file import ExperimentFile
 
 class TestExperiment:
     def test_process_runs_with_trailing_zeros(self):
@@ -174,3 +175,51 @@ class TestExperiment:
 
         # INFO: Delete the output directory after testing
         shutil.rmtree(s_dpath)
+
+    def test_get_lat_df(self):
+        s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
+        s_exp_name = "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"
+        o_exp = Experiment(
+            s_name=s_exp_name,
+            ls_csv_paths=[
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/sub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/sub_0.csv",
+            ],
+        )
+
+        # INFO: Normal Case - valid pub file
+        s_pub_file = "/Users/kaleem/PhD/Tools/AutoPerfDataProcessor/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run1_with_trailing_0/pub_0.csv"
+        s_pub_file = ExperimentFile(
+            s_exp_name,    
+            s_pub_file,
+        )
+        df_lat = o_exp.get_lat_df(s_pub_file)
+        assert isinstance(df_lat, pd.DataFrame)
+        assert len(df_lat) > 0
+        assert len(df_lat.columns) == 1
+
+    def test_get_mbps_df(self):
+        s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
+        s_exp_name = "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"
+        o_exp = Experiment(
+            s_name=s_exp_name,
+            ls_csv_paths=[
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/sub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/sub_0.csv",
+            ],
+        )
+
+        # INFO: Normal Case - valid pub file
+        s_pub_file = "/Users/kaleem/PhD/Tools/AutoPerfDataProcessor/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run1_with_trailing_0/sub_0.csv"
+        s_pub_file = ExperimentFile(
+            s_exp_name,    
+            s_pub_file,
+        )
+        df_mpbs = o_exp.get_mbps_df(s_pub_file)
+        assert isinstance(df_mpbs, pd.DataFrame)
+        assert len(df_mpbs) > 0
+        assert len(df_mpbs.columns) == 1
