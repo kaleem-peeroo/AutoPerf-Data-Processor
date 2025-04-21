@@ -1,0 +1,7 @@
+
+Intervals One-Way Latency for 64000 Bytes:
+Length (Bytes), Latency (μs), Ave (μs), Std (μs), Min (μs), Max (μs)
+
+One-way Latency Summary:
+Sample Size (Bytes), Ave (μs), Std (μs), Min (μs), Max (μs), 50% (μs), 90% (μs), 99% (μs), 99.99% (μs), 99.9999% (μs)
+              64000,   569052, 425352.1,    15156,  1566062,   526428,  1140149,  1566062,     1566062,       1566062
