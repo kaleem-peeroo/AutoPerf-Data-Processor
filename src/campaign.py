@@ -1020,26 +1020,32 @@ class Campaign:
         
         return i_sub_count + 1
                     
-    def get_experiment_name_from_fpath(self, s_exp_entry: str = ""):
-        if s_exp_entry == "":
+    def get_experiment_name_from_fpath(self, s_fpath: str = ""):
+        if s_fpath == "":
             raise Exception("No experiment entry provided")
 
-        if not isinstance(s_exp_entry, str):
-            raise ValueError(f"Experiment entry must be a string: {s_exp_entry}")
+        if not isinstance(s_fpath, str):
+            raise ValueError(f"Experiment entry must be a string: {s_fpath}")
 
-        if not self.is_path(s_exp_entry):
-            raise ValueError(f"Experiment entry is not a path: {s_exp_entry}")
+        if not self.is_experiment_name_in_fpath(s_fpath):
+            raise ValueError(
+                f"No experiment name found in file path: {s_fpath}"
+            )
 
-        b_exp_in_dir = self.is_exp_name_in_dirpath(s_exp_entry)
-        b_exp_in_file = self.is_exp_name_in_filename(s_exp_entry)
+        s_exp_name = ""
+        ls_parts = s_fpath.split("/")
+        for s_part in ls_parts:
+            if self.is_exp_name_in_str(s_part):
+                s_exp_name = s_part
+                break
 
-        if not b_exp_in_dir and not b_exp_in_file:
-            # Try to format the experiment name in both dir and file and try again
-            s_exp_entry = self.try_format_experiment_name_in_path(s_exp_entry)
+        if s_exp_name == "":
+            raise ValueError(
+                f"No experiment name found in file path: {s_fpath}"
+            )
 
-            b_exp_in_dir = self.is_exp_name_in_dirpath(s_exp_entry)
-            b_exp_in_file = self.is_exp_name_in_filename(s_exp_entry)
-    def is_exp_name_in_fpath(self, s_fpath: str = "") -> bool:
+        return s_exp_name
+        
     def is_experiment_name_in_fpath(self, s_fpath: str = "") -> bool:
         """
         Checks if the experiment name is in the file path.

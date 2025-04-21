@@ -1259,7 +1259,30 @@ class TestCampaign:
             s_exp_name
         ) is False
 
-    def test_is_exp_name_in_fpath(self):
+    def test_get_experiment_name_from_fpath(self):
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - with old format name in filename
+        assert o_c.get_experiment_name_from_fpath(
+            "./data/campaign/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
+        ) == "300SEC_1B_1P_3S_BE_MC_0DUR_100LC"
+
+        # INFO: Normal Case - with new format name in filename
+        assert o_c.get_experiment_name_from_fpath(
+            "./data/campaign/300SEC_1B_1PUB_3SUB_BE_MC_0DUR_100LC/pub_0.csv"
+        ) == "300SEC_1B_1PUB_3SUB_BE_MC_0DUR_100LC"
+
+        # INFO: Normal Case - name far from file
+        assert o_c.get_experiment_name_from_fpath(
+            "./300SEC_1B_1P_3S_BE_MC_0DUR_100LC/a/b/c/d/pub_0.csv"
+        ) == "300SEC_1B_1P_3S_BE_MC_0DUR_100LC"
+
+        # INFO: Normal Case - no name
+        with pytest.raises(ValueError):
+            o_c.get_experiment_name_from_fpath(
+                "./data/campaign/some_random_name.csv"
+            )
+
     def test_is_experiment_name_in_fpath(self):
         o_c = Campaign(LD_DATASETS[0])
 
