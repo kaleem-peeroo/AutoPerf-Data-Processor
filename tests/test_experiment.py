@@ -72,6 +72,28 @@ class TestExperiment:
             o_exp.best_exp_run.s_run_name
         ) == "run1_with_trailing_0"
 
+    def test_pick_best_run_with_exp_csv(self):
+        s_test_dir = "./tests/data/test_experiment_with_runs_with_single_csv"
+        s_exp_name = "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
+        o_exp = Experiment(
+            s_name=s_exp_name,
+            ls_csv_paths=[
+                f"{s_test_dir}/run1/{s_exp_name}.csv",
+                f"{s_test_dir}/run2/{s_exp_name}.csv",
+            ],
+        )
+
+        o_exp.process_runs()
+        o_exp.pick_best_run()
+
+        assert o_exp.best_exp_run is not None
+        assert len(o_exp.lo_exp_runs) == 2
+        assert o_exp.best_exp_run.s_exp_name == s_exp_name
+        assert os.path.basename(
+            o_exp.best_exp_run.s_run_name
+        ) == "run1"
+
+
 
         assert o_exp.best_run_csv_paths == [
             f"{s_test_dir}/{s_exp_name}/run2_with_good_data/pub_0.csv",

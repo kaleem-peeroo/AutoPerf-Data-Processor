@@ -46,7 +46,7 @@ class ExperimentRun:
         for o_exp_file in self.lo_exp_files:
             if not o_exp_file.is_raw():
                 lg.warning(
-                    f"{o_exp_file.get_name()} is not raw"
+                    f"{o_exp_file.s_exp_name} is not raw"
                 )
                 return False
 
