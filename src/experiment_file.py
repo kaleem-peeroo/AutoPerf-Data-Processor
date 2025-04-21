@@ -2,7 +2,11 @@ import os
 import re
 
 class ExperimentFile:
-    def __init__(self, s_path: str = ""):
+    def __init__(
+        self, 
+        s_exp_name: str = "",
+        s_path: str = ""
+    ):
         if s_path == "":
             raise ValueError(
                 "Experiment file path must not be empty"
@@ -18,6 +22,17 @@ class ExperimentFile:
                 f"Experiment file path must be a .csv file: {s_path}"
             )
 
+        if s_exp_name == "":
+            raise ValueError(
+                "Experiment name must not be empty"
+            )
+
+        if s_exp_name.lower() not in s_path.lower():
+            raise ValueError(
+                f"Experiment name must be in the file path: {s_path}"
+            )
+
+        self.s_exp_name = s_exp_name
         self.s_path = s_path
 
     def get_s_path(self):
