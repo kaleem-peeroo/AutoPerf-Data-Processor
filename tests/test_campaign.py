@@ -814,6 +814,7 @@ class TestCampaign:
         ]
         ls_exp_entries = o_c.process_exp_entries_with_subdirs(ls_exp_entries)
         # There are 109 experiment folders
+        # 29 of these dont have any csv files
         assert len(ls_exp_entries) == 80
 
         # INFO: Normal Case - with subdirs
