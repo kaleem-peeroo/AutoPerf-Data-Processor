@@ -1267,6 +1267,11 @@ class TestCampaign:
             "./data/campaign/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
         ) is True
 
+        # INFO: Normal Case - with latest name format in filename
+        assert o_c.is_exp_name_in_fpath(
+            "./data/campaign/300SEC_1B_1PUB_3SUB_BE_MC_0DUR_100LC/pub_0.csv"
+        ) is True
+
         # INFO: Normal Case - with name in dir
         assert o_c.is_exp_name_in_fpath(
             "./data/campaign/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
