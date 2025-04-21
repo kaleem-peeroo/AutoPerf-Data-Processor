@@ -279,3 +279,28 @@ class TestExperimentFile:
 
         assert df_after['a'].tolist() == [1]
         assert df_after['b'].tolist() == [2]
+
+    def test_get_total_sample_count(self):
+        # INFO: Normal Case - Exp csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_exp_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_exp_fpath_valid["s_path"],
+        )
+        i_total_samples = o_e.get_total_sample_count()
+        assert i_total_samples == 6904
+
+        # INFO: Normal Case - Pub csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_pub_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_pub_fpath_valid["s_path"],
+        )
+        i_total_samples = o_e.get_total_sample_count()
+        assert i_total_samples == 558
+
+        # INFO: Normal Case - Sub csv
+        o_e = ExperimentFile(
+            TestExperimentFile.s_sub_fpath_valid["s_exp_name"],
+            TestExperimentFile.s_sub_fpath_valid["s_path"],
+        )
+        i_total_samples = o_e.get_total_sample_count()
+        assert i_total_samples == 598
