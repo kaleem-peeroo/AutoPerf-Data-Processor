@@ -1259,6 +1259,29 @@ class TestCampaign:
             s_exp_name
         ) is False
 
+    def test_is_exp_name_in_fpath(self):
+        o_c = Campaign(LD_DATASETS[0])
+
+        # INFO: Normal Case - with name in filename
+        assert o_c.is_exp_name_in_fpath(
+            "./data/campaign/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
+        ) is True
+
+        # INFO: Normal Case - with name in dir
+        assert o_c.is_exp_name_in_fpath(
+            "./data/campaign/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
+        ) is True
+
+        # INFO: Normal Case - with name in dir far from file
+        assert o_c.is_exp_name_in_fpath(
+            "./a/b/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/c/d/e/pub_0.csv"
+        ) is True
+
+        # INFO: Error Case - no name anywhere
+        assert o_c.is_exp_name_in_fpath(
+            "./data/campaign/some_random_name.csv"
+        ) is False
+
     def test_get_experiment_paths_from_fpath(self):
         o_c = Campaign(LD_DATASETS[0])
 
