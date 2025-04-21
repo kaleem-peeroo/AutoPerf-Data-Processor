@@ -5,6 +5,8 @@ import pandas as pd
 from rich.pretty import pprint
 from typing import List
 
+from experiment_run import ExperimentRun
+
 logger = logging.getLogger(__name__)
 
 class Experiment:
@@ -21,6 +23,7 @@ class Experiment:
 
         self.s_name = s_name
         self.ls_csv_paths = ls_csv_paths
+        self.lo_exp_runs = []
         
     def __str__(self):
         return "Experiment: {}, CSV Paths: {}".format(
@@ -46,6 +49,24 @@ class Experiment:
 
         if s_csv_path not in self.ls_csv_paths:
             self.ls_csv_paths.append(s_csv_path)
+
+    def process_runs(self):
+        """
+        Differentiate between csv paths and run names.
+        """
+        ls_run_names = self.get_run_names()
+        
+        for s_run in ls_run_names:
+            ls_run_csvs = [_ for _ in self.ls_csv_paths if s_run in _]
+
+            o_exp_run = ExperimentRun(
+                s_exp_name=self.s_name,
+                s_run_name=s_run,
+                ls_csv_paths=ls_run_csvs
+            )
+
+            self.lo_exp_runs.append(o_exp_run)
+
     def get_run_names(self) -> List[str]:
         """
         Get unique run names from the CSV paths.

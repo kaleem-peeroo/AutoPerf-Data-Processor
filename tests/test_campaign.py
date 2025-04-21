@@ -767,6 +767,7 @@ class TestCampaign:
             assert o_exp.ls_csv_paths is not None
             assert isinstance(o_exp.ls_csv_paths, list)
             assert len(o_exp.ls_csv_paths) > 0
+            assert len( o_exp.lo_exp_runs ) == 1
                     
     def test_gather_experiments_with_dir_with_csv(self):
         o_c = Campaign({
@@ -902,7 +903,6 @@ class TestCampaign:
             assert o_exp.ls_csv_paths is not None
             assert isinstance(o_exp.ls_csv_paths, list)
             assert len(o_exp.ls_csv_paths) > 0
-
 
     def test_process_csv_paths_into_experiments_with_csv(self):
         o_c = Campaign({
