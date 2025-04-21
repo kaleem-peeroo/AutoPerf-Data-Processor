@@ -119,6 +119,13 @@ class ExperimentFile:
                 return False
 
         elif self.is_sub():
+            s_mbps_col = [col for col in df.columns if "mbps" in col.lower()]
+            if len(s_mbps_col) == 0:
+                lg.warning(f"{self.s_path} has no mbps columns")
+                return False
+
+            df = df[s_mbps_col]
+            df = df.dropna()
 
             if df.shape[0] < i_lower_bound:
                 lg.warning(
@@ -202,7 +209,8 @@ class ExperimentFile:
             )
 
             if self.is_sub():
-                df = self.remove_trailing_zeroes(df)
+                s_mbps_col = self.get_mbps_col(df)
+                df[s_mbps_col] = self.remove_trailing_zeroes(df[s_mbps_col])
 
         if df.empty:
             raise ValueError(
@@ -210,6 +218,18 @@ class ExperimentFile:
             )
 
         return df
+
+    def get_mbps_col(self, df: pd.DataFrame) -> str:
+        """
+        Get the mbps column name from the DataFrame.
+        """
+        s_mbps_col = [col for col in df.columns if "mbps" in col.lower()]
+        if len(s_mbps_col) == 0:
+            raise ValueError(
+                f"Could not find mbps column in {self.s_path}"
+            )
+
+        return s_mbps_col[0]
 
     def get_start_index(self):
         s_path = self.get_s_path()
@@ -345,6 +365,7 @@ class ExperimentFile:
         """
         if isinstance(df, pd.Series):
             df = df.to_frame()
+
         mask = df.ne(0).any(axis=1)
         last_nonzero_idx = mask[::-1].idxmax()
         df = df.loc[:last_nonzero_idx]
