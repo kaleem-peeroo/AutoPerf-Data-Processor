@@ -821,51 +821,42 @@ class Campaign:
         ls_exp_entries = [
             os.path.join(s_raw_datadir, item) for item in ls_exp_entries
         ]
+    def process_csv_paths_into_experiments(
+        self,
+        ls_csv_paths: List[str] = []
+    ) -> List[Experiment]:
+        if not isinstance(ls_csv_paths, list):
+            raise ValueError(f"CSV paths must be a list: {ls_csv_paths}")
 
-        ls_exp_entries = self.process_exp_entries_with_subdirs(ls_exp_entries)
+        if len(ls_csv_paths) == 0:
+            raise ValueError("No csv paths provided")
 
-        lg.debug(f"Found {len(ls_exp_entries)} entries in {s_raw_datadir}...")
+        lo_exps = []
+        for s_csv_path in ls_csv_paths:
+            if not os.path.isfile(s_csv_path):
+                raise ValueError(f"CSV path is not a file: {s_csv_path}")
 
-        for s_exp_entry in ls_exp_entries:
-            if ".ds_store" in s_exp_entry.lower():
-                continue
+            if not s_csv_path.endswith(".csv"):
+                raise ValueError(f"CSV path is not a csv file: {s_csv_path}")
 
-            try:
+            ls_exp_names = [o_exp.get_name() for o_exp in lo_exps]
+            s_exp_name = self.get_experiment_name_from_fpath(s_csv_path)
 
-                s_exp_name = self.get_experiment_name_from_fpath(s_exp_entry)
+            if s_exp_name in ls_exp_names:
+                o_exp = lo_exps[ls_exp_names.index(s_exp_name)]
+                o_exp.add_csv_path(s_csv_path)
 
-                ls_exp_paths = self.get_experiment_paths_from_fpath(s_exp_entry)
-
-                ld_exp_names_and_paths.append(
-                    {"name": s_exp_name, "paths": ls_exp_paths}
+            else:
+                o_exp = Experiment(
+                    s_name=s_exp_name,
+                    ls_csv_paths=[ s_csv_path ]
                 )
+                lo_exps.append(o_exp)
 
-            except Exception as e:
-                lg.error(e)
-                raise e
+        if len(lo_exps) == 0:
+            raise ValueError("No experiments found")
 
-        if len(ld_exp_names_and_paths) == 0:
-            raise ValueError("No experiment names and paths found")
-
-        ld_exp_names_and_paths = self.get_exp_with_expected_file_count(
-            ld_exp_names_and_paths
-        )
-
-        # Check for duplicate experiment names
-        ls_exp_names = [d_exp['name'] for d_exp in ld_exp_names_and_paths]
-        ls_exp_names = list(set(ls_exp_names))
-        if len(ls_exp_names) != len(ld_exp_names_and_paths):
-            df_exp_names_and_paths = pd.DataFrame(
-                ld_exp_names_and_paths
-            )
-            df_exp_names_and_paths.to_csv(
-                "./ld_exp_names_and_paths.csv",
-                index=False
-            )
-            lg.warning("Duplicate experiment names found. Please check your data.")
-            lg.warning("I've written the dict to ./ld_exp_names_and_paths.csv")
-
-        return ld_exp_names_and_paths
+        return lo_exps
 
     def process_exp_entries_with_subdirs(
         self,
