@@ -145,3 +145,32 @@ class TestExperiment:
 
         assert len(lo_sorted_runs) == 2
         assert lo_sorted_runs[0].get_total_sample_count() >= lo_sorted_runs[1].get_total_sample_count()
+
+    def test_process(self):
+        s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
+        s_exp_name = "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"
+        o_exp = Experiment(
+            s_name=s_exp_name,
+            ls_csv_paths=[
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/sub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/sub_0.csv",
+            ],
+        )
+
+        o_exp.process_runs()
+        o_exp.pick_best_run()
+
+        s_dpath = "./tests/output/test_process_summaries/"
+        os.makedirs(s_dpath, exist_ok=True)
+
+        o_exp.process(s_dpath)
+
+        assert os.path.exists(s_dpath)
+        assert os.path.exists(
+            os.path.join(s_dpath, f"{s_exp_name}.parquet")
+        )
+
+        # INFO: Delete the output directory after testing
+        shutil.rmtree(s_dpath)

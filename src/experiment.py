@@ -33,11 +33,23 @@ class Experiment:
             [os.path.basename(s_csv_path) for s_csv_path in self.ls_csv_paths]
         )
 
+    def __repr__(self):
+        return "Experiment: {}, CSV Paths: {}".format(
+            self.s_name,
+            [os.path.basename(s_csv_path) for s_csv_path in self.ls_csv_paths]
+        )
+
     def get_name(self):
         if self.s_name == "":
             raise ValueError("Experiment name must not be empty")
 
         return self.s_name
+
+    def get_csv_paths(self) -> List[str]:
+        if len(self.ls_csv_paths) == 0:
+            raise ValueError("Experiment csv paths must not be empty")
+
+        return self.ls_csv_paths
 
     def add_csv_path(self, s_csv_path: str = ""):
         if s_csv_path == "":
@@ -57,9 +69,10 @@ class Experiment:
         Differentiate between csv paths and run names.
         """
         ls_run_names = self.get_run_names()
+        ls_csv_paths = self.get_csv_paths()
         
         for s_run in ls_run_names:
-            ls_run_csvs = [_ for _ in self.ls_csv_paths if s_run in _]
+            ls_run_csvs = [_ for _ in ls_csv_paths if s_run in _]
 
             o_exp_run = ExperimentRun(
                 s_exp_name=self.s_name,
@@ -164,4 +177,4 @@ class Experiment:
             return
 
         
-
+        
