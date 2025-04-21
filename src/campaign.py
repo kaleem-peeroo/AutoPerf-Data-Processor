@@ -1040,6 +1040,7 @@ class Campaign:
             b_exp_in_dir = self.is_exp_name_in_dirpath(s_exp_entry)
             b_exp_in_file = self.is_exp_name_in_filename(s_exp_entry)
     def is_exp_name_in_fpath(self, s_fpath: str = "") -> bool:
+    def is_experiment_name_in_fpath(self, s_fpath: str = "") -> bool:
         """
         Checks if the experiment name is in the file path.
         1. Break fpath into parts.
