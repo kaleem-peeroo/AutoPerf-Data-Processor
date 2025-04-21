@@ -23,7 +23,9 @@ class Experiment:
 
         self.s_name = s_name
         self.ls_csv_paths = ls_csv_paths
+
         self.lo_exp_runs = []
+        self.best_exp_run = None
         
     def __str__(self):
         return "Experiment: {}, CSV Paths: {}".format(
@@ -97,4 +99,69 @@ class Experiment:
 
         # If no raw runs, pick the first one
         self.best_exp_run = self.lo_exp_runs[0]
+
+    def get_good_exp_runs(self) -> List[ExperimentRun]:
+        """
+        Get all experiment runs that have good data.
+        """
+        lo_good_runs = []
+
+        for o_exp_run in self.lo_exp_runs:
+            if o_exp_run.has_good_data():
+                lo_good_runs.append(o_exp_run)
+
+        # Sort by total sample count decreasing
+        lo_good_runs = self.sort_by_total_sample_count(lo_good_runs)
+        return lo_good_runs
+
+    def sort_by_total_sample_count(
+        self, 
+        lo_exp_runs: List[ExperimentRun]
+    ) -> List[ExperimentRun]:
+        """
+        Sort experiment runs by total sample count.
+        """
+        lo_exp_runs.sort(
+            key=lambda x: x.get_total_sample_count(), 
+            reverse=True
+        )
+        return lo_exp_runs
+
+    def get_raw_exp_runs(self) -> List[ExperimentRun]:
+        """
+        Get all experiment runs that have raw data.
+        """
+        lo_raw_runs = []
+
+        for o_exp_run in self.lo_exp_runs:
+            if o_exp_run.has_raw_data():
+                lo_raw_runs.append(o_exp_run)
+
+        # Sort by total sample count decreasing
+        lo_raw_runs = self.sort_by_total_sample_count(lo_raw_runs)
+
+        return lo_raw_runs
+        
+    def process(self, s_dpath: str = ""):
+        """
+        1. Summarise.
+        2. Write summary file to s_dpath as {exp_name}.parquet.
+        """
+
+        if s_dpath == "":
+            raise ValueError("Output path must not be empty")
+
+        os.makedirs(s_dpath, exist_ok=True)
+        s_output_path = os.path.join(
+            s_dpath,
+            f"{self.s_name}.parquet"
+        )
+
+        if os.path.exists(s_output_path):
+            logger.info(
+                f"{self.s_name} summary already exists. Skipping."
+            )
+            return
+
+        
 
