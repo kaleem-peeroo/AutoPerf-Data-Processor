@@ -849,13 +849,53 @@ class TestCampaign:
         assert len(ls_csv_paths) == 4
 
     def test_process_csv_paths_into_experiments_with_dirs_small(self):
-        raise NotImplementedError("This test is not implemented yet.")
+        o_c = Campaign({
+            "name": "test campaign with dirs small",
+            "exp_folders": \
+                "./tests/data/test_campaign_with_dirs_small/",
+            "ap_config": "",
+            "dataset_path": \
+                "./tests/output/test_campaign_with_dirs_small.parquet",
+        })
+
+        s_raw_datadir = o_c.get_raw_datadir()
+        ls_fpaths = o_c.recursively_get_fpaths(s_raw_datadir)
+        ls_csv_paths = [_ for _ in ls_fpaths if _.endswith(".csv")]
+        # There are 8 csv files in 2 dir (4 per experiment)
+        assert len(ls_csv_paths) == 8
 
     def test_process_csv_paths_into_experiments_with_errors(self):
-        raise NotImplementedError("This test is not implemented yet.")
+        o_c = Campaign({
+            "name": "test campaign with dirs errors",
+            "exp_folders": \
+                "./tests/data/test_campaign_with_errors/",
+            "ap_config": "",
+            "dataset_path": \
+                "./tests/output/test_campaign_with_errors.parquet",
+        })
+
+        s_raw_datadir = o_c.get_raw_datadir()
+        ls_fpaths = o_c.recursively_get_fpaths(s_raw_datadir)
+        ls_csv_paths = [_ for _ in ls_fpaths if _.endswith(".csv")]
+        # There are 4 csv files in 2 dir (2 per experiment)
+        assert len(ls_csv_paths) == 4
 
     def test_process_csv_paths_into_experiments_with_mix(self):
-        raise NotImplementedError("This test is not implemented yet.")
+        o_c = Campaign({
+            "name": "test campaign with dirs mix",
+            "exp_folders": \
+                "./tests/data/test_campaign_with_mix/",
+            "ap_config": "",
+            "dataset_path": \
+                "./tests/output/test_campaign_with_mix.parquet",
+        })
+
+        s_raw_datadir = o_c.get_raw_datadir()
+        ls_fpaths = o_c.recursively_get_fpaths(s_raw_datadir)
+        ls_csv_paths = [_ for _ in ls_fpaths if _.endswith(".csv")]
+
+        # There are 182 csv files
+        assert len(ls_csv_paths) == 182
 
     def test_process_exp_entries_with_subdirs(self):
         o_c = Campaign(LD_DATASETS[0])
