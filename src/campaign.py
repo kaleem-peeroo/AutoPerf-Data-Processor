@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Dict, List
 from itertools import islice
 
-# from logger import logger
 from utils import get_qos_name, calculate_averages, get_df_from_csv, aggregate_across_cols
 from experiment import Experiment
 
@@ -83,7 +82,7 @@ class Campaign:
         Stores the parquet file summaries_dpath.
         """
         s_raw_datadir = self.get_raw_datadir()
-        ld_exp_names_and_paths = self.get_experiments(s_raw_datadir)
+        lo_exps = self.gather_experiments(s_raw_datadir)
 
         os.makedirs(self.s_summaries_dpath, exist_ok=True)
 
@@ -792,17 +791,18 @@ class Campaign:
 
         return d_qos
 
-    def get_experiments(
+    def gather_experiments(
         self, 
         s_raw_datadir: str = ""
-    ) -> List[Dict[str, List[str]]]:
+    ) -> List[Experiment]:
         """
-        Gather a list of experiments.
-        In the format of {name: str, paths: list}.
-        Name is experiment name.
-        Paths is a list of all files for that experiment.
-            This could be a single file or multiple files.
+        1. Get list of csv paths.
+        2. Group into experiments (use experiment_name).
+        3. Create Experiment objects.
+        4. Find best run per o_exp
+        5. Store experiment objects in a list as self.lo_exps
         """
+
         lg.debug("Gathering experiments...")
 
         if s_raw_datadir == "":
@@ -816,11 +816,15 @@ class Campaign:
 
         lg.debug(f"Getting exps in {s_raw_datadir}...")
 
-        ld_exp_names_and_paths = []
-        ls_exp_entries = os.listdir(s_raw_datadir)
-        ls_exp_entries = [
-            os.path.join(s_raw_datadir, item) for item in ls_exp_entries
-        ]
+        ls_fpaths = self.recursively_get_fpaths(s_raw_datadir)
+        ls_csv_paths = [_ for _ in ls_fpaths if _.endswith(".csv")]
+        if len(ls_csv_paths) == 0:
+            raise ValueError(f"No csv files found in {s_raw_datadir}")
+
+        lo_exps = self.process_csv_paths_into_experiments(ls_csv_paths)
+
+        return lo_exps
+        
     def process_csv_paths_into_experiments(
         self,
         ls_csv_paths: List[str] = []
