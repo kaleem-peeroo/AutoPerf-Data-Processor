@@ -1199,11 +1199,14 @@ class TestCampaign:
         o_c = Campaign(LD_DATASETS[0])
 
         # INFO: Normal Case - subdirs
+        # There are 2 folders
+        # Each folder has 84 files
+        # 4 of these are csv files
         ls_fpaths = o_c.recursively_get_fpaths(
             "./tests/data/test_campaign_with_dirs_small/"
         )
         assert isinstance(ls_fpaths, list)
-        assert len(ls_fpaths) == 8
+        assert len(ls_fpaths) == 168
 
         for s_path in ls_fpaths:
             assert isinstance(s_path, str)
@@ -1222,4 +1225,4 @@ class TestCampaign:
             "./tests/data/test_campaign_with_mix/600s_100B_1P_1S_be_uc_3dur_100lc/"
         )
         assert isinstance(ls_fpaths, list)
-        assert len(ls_fpaths) == 4
+        assert len(ls_fpaths) == 84
