@@ -46,3 +46,29 @@ class TestExperimentFile:
         # INFO: Normal Case - Sub csv
         o_e = ExperimentFile(TestExperimentFile.s_sub_fpath)
         assert o_e.is_raw() is True
+
+    def test_is_pub(self):
+        # INFO: Normal Case - Exp csv
+        o_e = ExperimentFile(TestExperimentFile.s_exp_fpath)
+        assert o_e.is_pub() is False
+
+        # INFO: Normal Case - Pub csv
+        o_e = ExperimentFile(TestExperimentFile.s_pub_fpath)
+        assert o_e.is_pub() is True
+
+        # INFO: Normal Case - Sub csv
+        o_e = ExperimentFile(TestExperimentFile.s_sub_fpath)
+        assert o_e.is_pub() is False
+
+    def test_is_sub(self):
+        # INFO: Normal Case - Exp csv
+        o_e = ExperimentFile(TestExperimentFile.s_exp_fpath)
+        assert o_e.is_sub() is False
+
+        # INFO: Normal Case - Pub csv
+        o_e = ExperimentFile(TestExperimentFile.s_pub_fpath)
+        assert o_e.is_sub() is False
+
+        # INFO: Normal Case - Sub csv
+        o_e = ExperimentFile(TestExperimentFile.s_sub_fpath)
+        assert o_e.is_sub() is True

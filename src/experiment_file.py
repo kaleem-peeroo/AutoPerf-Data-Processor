@@ -49,3 +49,26 @@ class ExperimentFile:
 
         else:
             return False
+        
+    def is_pub(self):
+        s_path = self.get_s_path()
+        s_file_name = os.path.basename(s_path)
+
+        # Check if file contains *pub_0.csv
+        if re.search(r"pub_0\.csv", s_file_name):
+            return True
+
+        else:
+            return False
+
+    def is_sub(self):
+        s_path = self.get_s_path()
+        s_file_name = os.path.basename(s_path)
+
+        # Check if file contains *sub_n.csv
+        if re.search(r"sub_\d+\.csv", s_file_name):
+            return True
+
+        else:
+            return False
+
