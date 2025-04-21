@@ -116,33 +116,11 @@ class Campaign:
         ls_summaries = os.listdir(self.s_summaries_dpath)
         lg.info(f"Found {len(ls_summaries)} summaries in {self.s_summaries_dpath}")
 
-        for i_summ, s_summ_path in enumerate(ls_summaries):
-            s_summ_path = os.path.join(self.s_summaries_dpath, s_summ_path)
-
-            lg.info(
-                f"[{i_summ + 1}/{len(ls_summaries)}] "
-                f"Processing {s_summ_path}"
-            )
-
-            if not os.path.isfile(s_summ_path):
-                lg.warning(f"{s_summ_path} is not a file. Skipping...")
-                continue
-
-            if not s_summ_path.endswith(".parquet"):
-                lg.warning(f"{s_summ_path} is not a parquet file. Skipping...")
-                continue
-
-            try:
-                df_temp = pd.read_parquet(s_summ_path)
-                df_ds = pd.concat([df_ds, df_temp], axis=0)
-
-            except Exception as e:
-                lg.error(e)
-                continue
-        
-        if df_ds.empty:
-            raise Exception("No data found in the dataset")
-
+        # TODO: Need to loop through lo_exp, get summary paths, read and glue together.
+        raise NotImplementedError(
+            "Need to implement"
+        )
+    
         self.df_ds = df_ds
 
         self.write_dataset(df_ds)
