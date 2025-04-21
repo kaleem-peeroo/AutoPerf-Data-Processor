@@ -81,3 +81,20 @@ class Experiment:
                 ls_run_names.append(s_run_name)
 
         return ls_run_names
+
+    def pick_best_run(self):
+        if len(self.lo_exp_runs) == 0:
+            raise ValueError("No experiment runs found")
+
+        lo_good_runs = self.get_good_exp_runs()
+        if len(lo_good_runs) > 0:
+            self.best_exp_run = lo_good_runs[0]
+
+        # If no good runs, pick the one with raw files
+        lo_raw_runs = self.get_raw_exp_runs()
+        if len(lo_raw_runs) > 0:
+            self.best_exp_run = lo_raw_runs[0]
+
+        # If no raw runs, pick the first one
+        self.best_exp_run = self.lo_exp_runs[0]
+
