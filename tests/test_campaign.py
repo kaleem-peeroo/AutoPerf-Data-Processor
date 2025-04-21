@@ -745,10 +745,10 @@ class TestCampaign:
         o_c = Campaign({
             "name": "another test campaign with csv",
             "exp_folders": \
-                "./tests/data/test_campaign_with_dir_with_csv/",
+                "./tests/data/test_campaign_with_csv/",
             "ap_config": "",
             "dataset_path": \
-                "./tests/output/test_campaign_with_dir_with_csv_small.parquet",
+                "./tests/output/test_campaign_with_csv.parquet",
         })
 
         s_raw_datadir = o_c.get_raw_datadir()
@@ -785,6 +785,36 @@ class TestCampaign:
 
     def test_gather_experiments_with_mix(self):
         raise NotImplementedError("This test is not implemented yet.")
+
+    def test_process_csv_paths_into_experiment_with_csv(self):
+        o_c = Campaign({
+            "name": "test campaign with csv",
+            "exp_folders": \
+                "./tests/data/test_campaign_with_csv/",
+            "ap_config": "",
+            "dataset_path": \
+                "./tests/output/test_campaign_with_csv.parquet",
+        })
+
+        s_raw_datadir = o_c.get_raw_datadir()
+        ls_fpaths = o_c.recursively_get_fpaths(s_raw_datadir)
+        ls_csv_paths = [_ for _ in ls_fpaths if _.endswith(".csv")]
+        # There are 4 csv files (1 per experiment)
+        assert len(ls_csv_paths) == 4
+
+        lo_exps = o_c.process_csv_paths_into_experiment(ls_csv_paths)
+
+        assert lo_exps is not None
+        assert isinstance(lo_exps, list)
+
+        assert len(lo_exps) == 4
+        for o_exp in lo_exps:
+            assert isinstance(o_exp, Experiment)
+            assert o_exp.s_name is not None
+            assert isinstance(o_exp.s_name, str)
+            assert o_exp.ls_paths is not None
+            assert isinstance(o_exp.ls_paths, list)
+            assert len(o_exp.ls_paths) > 0
 
     def test_process_exp_entries_with_subdirs(self):
         o_c = Campaign(LD_DATASETS[0])
