@@ -166,7 +166,7 @@ class TestExperiment:
         s_dpath = "./tests/output/test_process_summaries/"
         os.makedirs(s_dpath, exist_ok=True)
 
-        o_exp.process(s_dpath)
+        df_summary = o_exp.process(s_dpath)
 
         assert os.path.exists(s_dpath)
         assert os.path.exists(
@@ -195,10 +195,10 @@ class TestExperiment:
             s_exp_name,    
             s_pub_file,
         )
-        df_lat = o_exp.get_lat_df(s_pub_file)
-        assert isinstance(df_lat, pd.DataFrame)
-        assert len(df_lat) > 0
-        assert len(df_lat.columns) == 1
+        sr = o_exp.get_lat_df(s_pub_file)
+        assert isinstance(sr, pd.Series)
+        assert len(sr) > 0
+        assert sr.name == "latency_us"
 
     def test_get_mbps_df(self):
         s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
@@ -219,7 +219,7 @@ class TestExperiment:
             s_exp_name,    
             s_pub_file,
         )
-        df_mpbs = o_exp.get_mbps_df(s_pub_file)
-        assert isinstance(df_mpbs, pd.DataFrame)
-        assert len(df_mpbs) > 0
-        assert len(df_mpbs.columns) == 1
+        sr = o_exp.get_mbps_df(s_pub_file)
+        assert isinstance(sr, pd.Series)
+        assert len(sr) > 0
+        assert sr.name == "sub_0_mbps"

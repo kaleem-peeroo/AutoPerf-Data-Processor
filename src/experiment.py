@@ -188,18 +188,24 @@ class Experiment:
 
             elif o_file.is_pub():
                 df_lat = self.get_lat_df(o_file)
+                df_summary = pd.concat([df_summary, df_lat], axis=1)
 
             elif o_file.is_sub():
                 df_mbps = self.get_mbps_df(o_file)
+                df_summary = pd.concat([df_summary, df_mbps], axis=1)
 
             else:
                 raise ValueError("Unknown file type")
+
+        df_summary['experiment_name'] = self.s_name
 
         df_summary.reset_index(drop=True, inplace=True)
         df_summary.to_parquet(s_output_path, index=False)
         lg.info(
             f"Summary file written to {s_output_path}"
         )
+
+        return df_summary
 
     def get_lat_df(self, o_file):
         """
@@ -209,12 +215,21 @@ class Experiment:
             raise ValueError("File is not a publisher file")
 
         df = o_file.get_df()
+
         ls_lat_cols = [col for col in df.columns if "latency" in col.lower()]
+
         if len(ls_lat_cols) == 0:
             raise ValueError("No latency columns found in file")
-        df = df[ls_lat_cols]
-        df = df.dropna()
-        return df
+        if len(ls_lat_cols) > 1:
+            raise ValueError("Multiple latency columns found in file")
+
+        s_lat_col = ls_lat_cols[0]
+
+        sr = df[s_lat_col]
+        sr = sr.dropna()
+        sr.rename("latency_us", inplace=True)
+
+        return sr
 
     def get_mbps_df(self, o_file):
         """
@@ -230,7 +245,22 @@ class Experiment:
         ]
         if len(ls_mbps_cols) == 0:
             raise ValueError("No mbps columns found in file")
-        df = df[ls_mbps_cols]
-        df = df.dropna()
-        return df
+        if len(ls_mbps_cols) > 1:
+            raise ValueError("Multiple mbps columns found in file")
+
+        s_mbps_col = ls_mbps_cols[0]
+
+        sr = df[s_mbps_col]
+        sr = sr.dropna()
+
+        s_sub_name = os.path.basename(o_file.s_path)
+        s_sub_name = s_sub_name.split(".")[0]
+
+        # Rename and prepend with sub_n
+        sr.rename(
+            f"{s_sub_name}_mbps",
+            inplace=True
+        )
+        
+        return sr
 
