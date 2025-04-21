@@ -786,7 +786,7 @@ class TestCampaign:
     def test_gather_experiments_with_mix(self):
         raise NotImplementedError("This test is not implemented yet.")
 
-    def test_process_csv_paths_into_experiment_with_csv(self):
+    def test_process_csv_paths_into_experiments_with_csv(self):
         o_c = Campaign({
             "name": "test campaign with csv",
             "exp_folders": \
@@ -802,7 +802,7 @@ class TestCampaign:
         # There are 4 csv files (1 per experiment)
         assert len(ls_csv_paths) == 4
 
-        lo_exps = o_c.process_csv_paths_into_experiment(ls_csv_paths)
+        lo_exps = o_c.process_csv_paths_into_experiments(ls_csv_paths)
 
         assert lo_exps is not None
         assert isinstance(lo_exps, list)
