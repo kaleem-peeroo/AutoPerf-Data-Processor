@@ -86,43 +86,9 @@ class Campaign:
 
         os.makedirs(self.s_summaries_dpath, exist_ok=True)
 
-        for i_exp, d_exp_names_and_paths in enumerate(ld_exp_names_and_paths):
-            s_exp_name = d_exp_names_and_paths['name']
-            s_exp_summ_path = os.path.join(
-                self.s_summaries_dpath,
-                f"{s_exp_name}.parquet"
-            )
-
-            if os.path.exists(s_exp_summ_path):
-                lg.info(
-                    f"{s_exp_summ_path} summary exists. Skipping..."
-                )
-                continue
-
-            try:
-                df_exp = self.process_exp_df(d_exp_names_and_paths)
-
-            except Exception as e:
-                lg.error(e)
-                continue
-
-            if df_exp.empty:
-                lg.warning(f"Experiment dataframe is empty: {d_exp_names_and_paths['name']}")
-                continue
-
-            df_exp.reset_index(drop=True, inplace=True)
-            df_exp.to_parquet(
-                s_exp_summ_path,
-                index=False
-            )
-
-            lg.info(
-                f"[{i_exp + 1}/{len(ld_exp_names_and_paths)}] "
-                f"Written {s_exp_name} summary to {self.s_summaries_dpath}"
-            )
-
-            del df_exp
-            gc.collect()
+        for o_exp in lo_exps:
+            lg.info(f"Processing experiment: {o_exp.s_name}")
+            o_exp.process(s_dpath=self.s_summaries_dpath)
 
     def create_dataset(self):
         """
@@ -822,8 +788,41 @@ class Campaign:
             raise ValueError(f"No csv files found in {s_raw_datadir}")
 
         lo_exps = self.process_csv_paths_into_experiments(ls_csv_paths)
+        lo_exps = self.process_exp_runs(lo_exps)
+        lo_exps = self.pick_best_exp_run(lo_exps)
 
         return lo_exps
+
+    def process_exp_runs(
+        self,
+        lo_exps: List[Experiment] = []
+    ) -> List[Experiment]:
+        if len(lo_exps) == 0:
+            raise ValueError("No experiments found")
+
+        for o_exp in lo_exps:
+            if not isinstance(o_exp, Experiment):
+                raise ValueError(f"Experiment is not an Experiment object: {o_exp}")
+
+            o_exp.process_runs()
+
+        return lo_exps
+
+    def pick_best_exp_run(
+        self,
+        lo_exps: List[Experiment] = []
+    ) -> List[Experiment]:
+        if len(lo_exps) == 0:
+            raise ValueError("No experiments found")
+
+        for o_exp in lo_exps:
+            if not isinstance(o_exp, Experiment):
+                raise ValueError(f"Experiment is not an Experiment object: {o_exp}")
+
+            o_exp.pick_best_run()
+
+        return lo_exps
+
         
     def process_csv_paths_into_experiments(
         self,
