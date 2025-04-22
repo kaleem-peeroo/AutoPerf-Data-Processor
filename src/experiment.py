@@ -349,10 +349,6 @@ class Experiment:
 
         ls_parts = s_exp_name.split("_")
         if len(ls_parts) != 8:
-            lg.warning(
-                f"Experiment name is not valid: {s_exp_name}.\n"
-                f"Expected 8 parts, got {len(ls_parts)}"
-            )
             return False
 
         ls_parts_no_nums = [re.sub(r'\d+', '', part) for part in ls_parts]
@@ -370,10 +366,6 @@ class Experiment:
 
         for i, ls_valid in enumerate(ll_valid_matches):
             if ls_parts_no_nums[i] not in ls_valid:
-                lg.warning(
-                    f"Experiment name is not valid: {s_exp_name}.\n"
-                    f"Expected {ls_valid}, got {ls_parts[i]}"
-                )
                 return False
 
         return True
