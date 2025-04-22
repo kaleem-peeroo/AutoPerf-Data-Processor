@@ -28,8 +28,8 @@ def main():
         lg.info(f"{s_counter} Creating dataset: {d_ds['name']}")
         campaign.create_dataset()
 
-        lg.info(f"{s_counter} Validating dataset: {d_ds['name']}")
-        campaign.validate_dataset()
+        # lg.info(f"{s_counter} Validating dataset: {d_ds['name']}")
+        # campaign.validate_dataset()
 
 def setup_logging():
     logging.basicConfig(
