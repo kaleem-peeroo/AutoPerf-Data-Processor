@@ -94,6 +94,7 @@ class Campaign:
             )
             try:
                 o_exp.process(s_dpath=self.s_summaries_dpath)
+
             except Exception as e:
                 lg.error(
                     f"{s_counter} "
@@ -128,13 +129,18 @@ class Campaign:
         ls_summaries = os.listdir(self.s_summaries_dpath)
         lg.info(f"Found {len(ls_summaries)} summaries in {self.s_summaries_dpath}")
 
-        for s_summary in ls_summaries:
+        for i_summary, s_summary in enumerate(ls_summaries):
+            s_counter = f"[{i_summary + 1}/{len(ls_summaries)}]"
+            lg.debug(
+                f"{s_counter} "
+                f"Adding summary: {s_summary}"
+            )
+
             if not s_summary.endswith(".parquet"):
                 lg.warning(f"Skipping non-parquet file: {s_summary}")
                 continue
 
             s_summary_path = os.path.join(self.s_summaries_dpath, s_summary)
-            lg.info(f"Reading summary file: {s_summary_path}")
 
             df_temp = pd.read_parquet(s_summary_path)
             df_ds = pd.concat([df_ds, df_temp], axis=0)
