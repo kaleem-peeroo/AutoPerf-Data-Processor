@@ -120,23 +120,33 @@ class Campaign:
         df_ds = pd.DataFrame()
 
         ls_summaries = os.listdir(self.s_summaries_dpath)
+        ls_summaries = [
+            os.path.join(self.s_summaries_dpath, s_summary) for s_summary in ls_summaries
+        ]
+        ls_summaries = [
+            s_summary for s_summary in ls_summaries if s_summary.endswith(".parquet")
+        ]
+
         lg.info(f"Found {len(ls_summaries)} summaries in {self.s_summaries_dpath}")
 
-        for i_summary, s_summary in enumerate(ls_summaries):
-            s_counter = f"[{i_summary + 1}/{len(ls_summaries)}]"
-            lg.debug(
-                f"{s_counter} "
-                f"Adding summary: {s_summary.split('.')[0]}"
-            )
-
-            if not s_summary.endswith(".parquet"):
-                lg.warning(f"Skipping non-parquet file: {s_summary}")
-                continue
-
-            s_summary_path = os.path.join(self.s_summaries_dpath, s_summary)
-
-            df_temp = pd.read_parquet(s_summary_path)
-            df_ds = pd.concat([df_ds, df_temp], axis=0)
+        df_ds = pd.concat(
+            (pd.read_parquet(s_summary) for s_summary in ls_summaries),
+            ignore_index=True
+        )
+        
+        # for i_summary, s_summary in enumerate(ls_summaries):
+        #     s_counter = f"[{i_summary + 1}/{len(ls_summaries)}]"
+        #     lg.debug(
+        #         f"{s_counter} "
+        #         f"Adding summary: {s_summary.split('.')[0]}"
+        #     )
+        #
+        #     if not s_summary.endswith(".parquet"):
+        #         lg.warning(f"Skipping non-parquet file: {s_summary}")
+        #         continue
+        #
+        #     df_temp = pd.read_parquet(s_summary)
+        #     df_ds = pd.concat([df_ds, df_temp], axis=0)
             
         self.df_ds = df_ds
 
