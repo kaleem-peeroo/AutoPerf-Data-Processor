@@ -485,8 +485,8 @@ class TestCampaign:
         assert lo_exps is not None
         assert isinstance(lo_exps, list)
 
-        # There 21 experiments
-        assert len(lo_exps) == 21
+        # There 5 experiments
+        assert len(lo_exps) == 5
 
         for o_exp in lo_exps:
             assert isinstance(o_exp, Experiment)
@@ -604,8 +604,8 @@ class TestCampaign:
         ls_fpaths = o_c.recursively_get_fpaths(s_raw_datadir)
         ls_csv_paths = [_ for _ in ls_fpaths if _.endswith(".csv")]
 
-        # There are 182 csv files
-        assert len(ls_csv_paths) == 182
+        # There are 77 csv files
+        assert len(ls_csv_paths) == 77
 
     def test_get_experiment_name_from_fpath(self):
         o_c = Campaign(LD_DATASETS[0])
