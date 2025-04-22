@@ -177,6 +177,27 @@ class TestExperiment:
             os.path.join(s_dpath, f"{s_exp_name}.parquet")
         )
 
+        assert isinstance(df_summary, pd.DataFrame)
+        assert len(df_summary) > 0
+
+        assert "avg_mbps_per_sub" in df_summary.columns
+        assert "total_mbps_over_subs" in df_summary.columns
+        assert "latency_us" in df_summary.columns
+        assert "experiment_name" in df_summary.columns
+
+        ls_input_cols = [
+            'duration_secs',
+            'datalen_bytes',
+            'pub_count',
+            'sub_count',
+            'use_reliable',
+            'use_multicast',
+            'durability',
+            'latency_count',
+        ]
+        for s_col in ls_input_cols:
+            assert s_col in df_summary.columns
+
         # INFO: Delete the output directory after testing
         shutil.rmtree(s_dpath)
 
@@ -312,6 +333,51 @@ class TestExperiment:
             "600S_100B_10P_1S_REL_MC_0DUR_100LC"
         ) is False
 
+    def test_add_input_cols(self):
+        s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
+        s_exp_name = "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"
+        o_exp = Experiment(
+            s_name=s_exp_name,
+            ls_csv_paths=[
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/sub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/sub_0.csv",
+            ],
+        )
+
+        df_test = pd.DataFrame(
+            {
+                "latency_us": [100, 200, 300],
+                "avg_mbps_per_sub": [10, 20, 30],
+                "total_mbps_over_subs": [100, 200, 300],
+                "experiment_name": ["600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"] * 3,
+            }
+        )
+
+        df_test = o_exp.add_input_cols(df_test)
+        assert isinstance(df_test, pd.DataFrame)
+        assert len(df_test) == 3
+
+        # INFO: Keep the original columns
+        assert "latency_us" in df_test.columns
+        assert "avg_mbps_per_sub" in df_test.columns
+        assert "total_mbps_over_subs" in df_test.columns
+        assert "experiment_name" in df_test.columns
+
+        ls_input_cols = [
+            "duration_secs",
+            "datalen_bytes",
+            "pub_count",
+            "sub_count",
+            "use_reliable",
+            "use_multicast",
+            "durability",
+            "latency_count",
+        ]
+        for s_col in ls_input_cols:
+            assert s_col in df_test.columns
+
     def test_get_input_cols(self):
         s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
         s_exp_name = "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"
@@ -329,7 +395,7 @@ class TestExperiment:
         assert o_exp.get_input_cols(
             "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"
         ) == [
-            {"duration": 600},
+            {"duration_secs": 600},
             {"datalen_bytes": 100},
             {"pub_count": 10},
             {"sub_count": 1},

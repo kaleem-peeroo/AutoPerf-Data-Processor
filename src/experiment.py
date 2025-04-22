@@ -4,7 +4,7 @@ import logging
 import pandas as pd
 
 from rich.pretty import pprint
-from typing import List
+from typing import List, Dict
 
 from experiment_run import ExperimentRun
 
@@ -200,8 +200,14 @@ class Experiment:
 
         df_summary = self.calculate_sub_metrics(df_summary)
         df_summary['experiment_name'] = self.format_exp_name(self.s_name)
+        df_summary = df_summary[[
+            'experiment_name',
+            'latency_us',
+            'avg_mbps_per_sub',
+            'total_mbps_over_subs',
+        ]]
 
-        df_summary['experiment_name'] = self.s_name
+        df_summary = self.add_input_cols(df_summary)
 
         df_summary.reset_index(drop=True, inplace=True)
         df_summary.to_parquet(s_output_path, index=False)
@@ -362,6 +368,35 @@ class Experiment:
 
         return True
 
+    def add_input_cols(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Add input columns to dataframe.
+        """
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError(
+                "Input is not a dataframe"
+                f"It is a {type(df)}"
+            )
+
+        if df.empty:
+            raise ValueError("Dataframe is empty")
+
+        ld_input_cols = self.get_input_cols(self.s_name)
+
+        for d_col in ld_input_cols:
+            key = list(d_col.keys())[0]
+            val = list(d_col.values())[0]
+
+            if key not in df.columns:
+                df[key] = val
+            else:
+                lg.warning(
+                    f"Column {key} already exists in dataframe. "
+                    f"Skipping adding column."
+                )
+                    
+        return df
+
     def get_input_cols(self, s_exp_name: str = "") -> List[Dict[str, str]]:
         """
         Get input columns from the experiment name.
@@ -379,7 +414,7 @@ class Experiment:
         ls_parts_nums = [int(part) for part in ls_parts_nums if part.isdigit()]
 
         ld_input_cols = [
-            {"duration": ls_parts_nums[0]},
+            {"duration_secs": ls_parts_nums[0]},
             {"datalen_bytes": ls_parts_nums[1]},
             {"pub_count": ls_parts_nums[2]},
             {"sub_count": ls_parts_nums[3]},
