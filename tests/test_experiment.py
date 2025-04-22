@@ -312,3 +312,29 @@ class TestExperiment:
             "600S_100B_10P_1S_REL_MC_0DUR_100LC"
         ) is False
 
+    def test_get_input_cols(self):
+        s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
+        s_exp_name = "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"
+        o_exp = Experiment(
+            s_name=s_exp_name,
+            ls_csv_paths=[
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/sub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/sub_0.csv",
+            ],
+        )
+
+        # INFO: Normal Case
+        assert o_exp.get_input_cols(
+            "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"
+        ) == [
+            {"duration": 600},
+            {"datalen_bytes": 100},
+            {"pub_count": 10},
+            {"sub_count": 1},
+            {"use_reliable": True},
+            {"use_multicast": True},
+            {"durability": 0},
+            {"latency_count": 100},
+        ]

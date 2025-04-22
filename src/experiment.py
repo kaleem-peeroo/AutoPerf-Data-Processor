@@ -362,3 +362,31 @@ class Experiment:
 
         return True
 
+    def get_input_cols(self, s_exp_name: str = "") -> List[Dict[str, str]]:
+        """
+        Get input columns from the experiment name.
+        """
+        if s_exp_name == "":
+            raise ValueError("Experiment name must not be empty")
+
+        if not self.is_valid_experiment_name(s_exp_name):
+            raise ValueError("Experiment name is not valid")
+
+        s_exp_name = s_exp_name.strip().lower()
+        ls_parts = s_exp_name.split("_")
+        ls_parts_no_nums = [re.sub(r'\d+', '', part) for part in ls_parts]
+        ls_parts_nums = [re.sub(r'\D+', '', part) for part in ls_parts]
+        ls_parts_nums = [int(part) for part in ls_parts_nums if part.isdigit()]
+
+        ld_input_cols = [
+            {"duration": ls_parts_nums[0]},
+            {"datalen_bytes": ls_parts_nums[1]},
+            {"pub_count": ls_parts_nums[2]},
+            {"sub_count": ls_parts_nums[3]},
+            {"use_reliable": ls_parts_no_nums[4] == "rel"},
+            {"use_multicast": ls_parts_no_nums[5] == "mc"},
+            {"durability": ls_parts_nums[-2]},
+            {"latency_count": ls_parts_nums[-1]}
+        ]
+
+        return ld_input_cols
