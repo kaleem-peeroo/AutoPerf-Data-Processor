@@ -172,7 +172,7 @@ class Experiment:
 
         if os.path.exists(s_output_path):
             lg.info(
-                f"{self.s_name} summary already exists. Skipping."
+                f"Skipping {self.s_name}"
             )
             return
 

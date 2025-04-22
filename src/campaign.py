@@ -518,6 +518,7 @@ class Campaign:
         Checks for cases in dataset where mbps has more than 600 samples.
         """
         df = pd.read_parquet(self.get_dataset_path())
+
         if df.empty:
             raise ValueError("Dataset is empty")
 
@@ -531,7 +532,14 @@ class Campaign:
         if len(ls_exp_names) == 0:
             raise ValueError("Dataset has no experiment names")
 
-        for s_exp_name in ls_exp_names:
+        for i_exp, s_exp_name in ls_exp_names:
+            s_counter = f"[{i_exp + 1:,.0f}/{len(ls_exp_names):,.0f}]"
+
+            lg.debug(
+                f"{s_counter} "
+                f"Validating {s_exp_name}"
+            )
+
             df_exp = df[df['experiment_name'] == s_exp_name].copy()
 
             df_avg_mbps = df_exp['avg_mbps_per_sub'].copy()
