@@ -45,7 +45,8 @@ class TestCampaign:
         o_c.summarise_experiments()
         assert os.path.exists(o_c.s_summaries_dpath)
         assert os.path.isdir(o_c.s_summaries_dpath)
-        assert len(os.listdir(o_c.s_summaries_dpath)) == 2
+        assert len(os.listdir(o_c.s_summaries_dpath)) == 2, \
+                f"Expected 2 summaries, got {len(os.listdir(o_c.s_summaries_dpath))}"
 
         # Delete the generates summaries folder at the end of the test
         shutil.rmtree(o_c.s_summaries_dpath)
@@ -88,7 +89,7 @@ class TestCampaign:
         ls_exp_names = df['experiment_name'].unique().tolist()
 
         for o_exp in lo_exps:
-            s_exp_name = o_exp.get_name()
+            s_exp_name = o_exp.format_exp_name(o_exp.get_name())
             assert s_exp_name in ls_exp_names, \
                     f"Experiment name {s_exp_name} not found in df: {ls_exp_names}"
 
@@ -167,7 +168,7 @@ class TestCampaign:
         ls_exp_names = df['experiment_name'].unique().tolist()
 
         for o_exp in lo_exps:
-            s_exp_name = o_exp.get_name()
+            s_exp_name = o_exp.format_exp_name(o_exp.get_name())
             assert s_exp_name in ls_exp_names
 
             df_exp = df[df['experiment_name'] == s_exp_name].copy()
@@ -229,109 +230,6 @@ class TestCampaign:
             'latency_us': [7, 8, 9],
         })
         assert o_c.get_sub_mbps_cols(df) == []
-
-    def test_add_input_cols(self):
-        o_c = Campaign(LD_DATASETS[0])
-
-        ls_input_cols = [
-            'duration_secs',
-            'datalen_bytes',
-            'pub_count',
-            'sub_count',
-            'use_reliable',
-            'use_multicast',
-            'durability',
-            'latency_count'
-        ]
-
-        # INFO: Normal Case
-        df_before = pd.DataFrame({
-            'experiment_name': ["600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"] * 3,
-            'latency_us': [1, 2, 3],
-            'avg_mbps': [4, 5, 6],
-            'total_mbps': [7, 8, 9],
-        })
-        df_after = o_c.add_input_cols(df_before.copy())
-
-        assert df_after is not None
-        assert isinstance(df_after, pd.DataFrame)
-        assert len(df_after) == 3
-        assert len(df_after.columns) == len(df_before.columns) + len(ls_input_cols)
-        assert df_after['experiment_name'].nunique() == 1
-
-        for s_col in ls_input_cols:
-            assert s_col in df_after.columns
-            assert df_after[s_col].dtype == 'float64'
-            assert df_after[s_col].nunique() == 1
-
-        assert df_after['duration_secs'].iloc[0] == 600
-        assert df_after['datalen_bytes'].iloc[0] == 100
-        assert df_after['pub_count'].iloc[0] == 15
-        assert df_after['sub_count'].iloc[0] == 15
-        assert df_after['use_reliable'].iloc[0] == 0
-        assert df_after['use_multicast'].iloc[0] == 1
-        assert df_after['durability'].iloc[0] == 3
-        assert df_after['latency_count'].iloc[0] == 100
-
-        # INFO: Error Case - No experiment name col
-        with pytest.raises(ValueError):
-            df_before = pd.DataFrame({
-                'latency_us': [1, 2, 3],
-                'avg_mbps': [4, 5, 6],
-                'total_mbps': [7, 8, 9],
-            })
-            df_after = o_c.add_input_cols(df_before.copy())
-
-        # INFO: Error Case - Diff experiment names
-        with pytest.raises(ValueError):
-            df_before = pd.DataFrame({
-                'experiment_name': [
-                    "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC",
-                    "600SEC_100B_10PUB_15SUB_BE_MC_3DUR_100LC",
-                    "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC",
-                ],
-                'latency_us': [1, 2, 3],
-                'avg_mbps': [4, 5, 6],
-                'total_mbps': [7, 8, 9],
-            })
-            df_after = o_c.add_input_cols(df_before.copy())
-
-    def test_get_qos_from_exp_name_with_normal_case(self):
-        o_c = Campaign(LD_DATASETS[0])
-
-        d_qos = o_c.get_qos_from_exp_name(
-            "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC"
-        )
-
-        assert d_qos is not None
-        assert isinstance(d_qos, dict)
-        assert d_qos == {
-            'duration_secs': 600,
-            'datalen_bytes': 100,
-            'pub_count': 15,
-            'sub_count': 15,
-            'use_reliable': 0,
-            'use_multicast': 1,
-            'durability': 3,
-            'latency_count': 100,
-        }
-
-    def test_get_qos_from_exp_name_with_invalid_cases(self):
-        o_c = Campaign(LD_DATASETS[0])
-
-        ls_invalid_exp_names = [
-            "100B_15PUB_15SUB_BE_MC_3DUR_100LC",
-            "600SEC_15PUB_15SUB_BE_MC_3DUR_100LC",
-            "600SEC_100B_15SUB_BE_MC_3DUR_100LC",
-            "600SEC_100B_15PUB_BE_MC_3DUR_100LC",
-            "600SEC_100B_15PUB_15SUB_MC_3DUR_100LC",
-            "600SEC_100B_15PUB_15SUB_BE_3DUR_100LC",
-            "600SEC_100B_15PUB_15SUB_BE_MC_100LC",
-        ]
-
-        for s_exp_name in ls_invalid_exp_names:
-            with pytest.raises(ValueError):
-                o_c.get_qos_from_exp_name(s_exp_name)
 
     def test_gather_experiments_with_csv(self):
         o_c = Campaign({
@@ -686,6 +584,11 @@ class TestCampaign:
         # INFO: Normal Case - name far from file
         assert o_c.get_experiment_name_from_fpath(
             "./300SEC_1B_1P_3S_BE_MC_0DUR_100LC/a/b/c/d/pub_0.csv"
+        ) == "300SEC_1B_1P_3S_BE_MC_0DUR_100LC"
+
+        # INFO: Normal Case - name in file
+        assert o_c.get_experiment_name_from_fpath(
+            "./300SEC_1B_1P_3S_BE_MC_0DUR_100LC.csv"
         ) == "300SEC_1B_1P_3S_BE_MC_0DUR_100LC"
 
         # INFO: Normal Case - no name

@@ -199,7 +199,11 @@ class Experiment:
                 raise ValueError("Unknown file type")
 
         df_summary = self.calculate_sub_metrics(df_summary)
-        df_summary['experiment_name'] = self.format_exp_name(self.s_name)
+
+        self.s_name = self.format_exp_name(self.s_name)
+
+        df_summary['experiment_name'] = self.s_name
+
         df_summary = df_summary[[
             'experiment_name',
             'latency_us',
@@ -307,7 +311,6 @@ class Experiment:
             return s_exp_name.upper()
 
         else:
-            
             ls_parts = s_exp_name.split("_")
             if len(ls_parts) != 8:
                 raise ValueError(
@@ -328,6 +331,13 @@ class Experiment:
                 ls_parts[3] = f"{ls_parts_nums[3]}sub"
 
             s_exp_name = "_".join(ls_parts).upper()
+
+            if not self.is_valid_experiment_name(s_exp_name):
+                raise ValueError(
+                    f"Experiment name is not valid: {s_exp_name}.\n"
+                    f"Tried to format it, but it is still not valid.\n"
+                    f"Expected 8 parts, got {len(ls_parts)}"
+                )
 
             return s_exp_name
 

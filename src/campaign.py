@@ -134,22 +134,7 @@ class Campaign:
             ignore_index=True
         )
         
-        # for i_summary, s_summary in enumerate(ls_summaries):
-        #     s_counter = f"[{i_summary + 1}/{len(ls_summaries)}]"
-        #     lg.debug(
-        #         f"{s_counter} "
-        #         f"Adding summary: {s_summary.split('.')[0]}"
-        #     )
-        #
-        #     if not s_summary.endswith(".parquet"):
-        #         lg.warning(f"Skipping non-parquet file: {s_summary}")
-        #         continue
-        #
-        #     df_temp = pd.read_parquet(s_summary)
-        #     df_ds = pd.concat([df_ds, df_temp], axis=0)
-            
         self.df_ds = df_ds
-
         self.write_dataset(df_ds)
 
     def write_dataset(
@@ -185,75 +170,6 @@ class Campaign:
 
         return ls_sub_mbps_cols
     
-    def add_input_cols(self, df: pd.DataFrame) -> pd.DataFrame:
-        if df.empty:
-            raise ValueError("Input dataframe is empty")
-
-        if 'experiment_name' not in df.columns:
-            raise ValueError("Input dataframe must have experiment_name column")
-
-        if df['experiment_name'].nunique() != 1:
-            raise ValueError("Input dataframe must have only one experiment name")
-
-        s_exp_name = df['experiment_name'].iloc[0]
-        if not self.follows_experiment_name_format(s_exp_name):
-            s_exp_name = self.try_format_experiment_name(s_exp_name)
-            if not self.follows_experiment_name_format(s_exp_name):
-                raise ValueError(
-                    f"Experiment name does not follow expected format: {s_exp_name}"
-                )
-
-        d_qos = self.get_qos_from_exp_name(s_exp_name)
-
-        for key, value in d_qos.items():
-            if key not in df.columns:
-                df[key] = value
-                df[key] = df[key].astype('float64')
-
-        return df
-
-    def get_qos_from_exp_name(
-        self, 
-        s_exp_name: str = ""
-    ) -> Dict[str, str]:
-        if s_exp_name == "":
-            raise Exception("No experiment name provided")
-
-        if "_" not in s_exp_name:
-            raise ValueError(f"Experiment name must have underscores: {s_exp_name}")
-
-        if not self.follows_experiment_name_format(s_exp_name):
-            raise ValueError(
-                f"Experiment name does not follow expected format: {s_exp_name}"
-            )
-
-        if not self.follows_experiment_name_format(s_exp_name):
-            s_exp_name = self.try_format_experiment_name(s_exp_name)
-            if not self.follows_experiment_name_format(s_exp_name):
-                raise ValueError(
-                    f"Experiment name does not follow expected format: {s_exp_name}"
-                )
-
-        ls_parts = s_exp_name.split("_")
-
-        d_qos = {
-            "duration_secs": ls_parts[0].split("SEC")[0],
-            "datalen_bytes": ls_parts[1].split("B")[0],
-            "pub_count": ls_parts[2].split("P")[0],
-            "sub_count": ls_parts[3].split("S")[0],
-            "use_reliable": 1 if "REL" in ls_parts[4] else 0,
-            "use_multicast": 1 if "MC" in ls_parts[5] else 0,
-            "durability": ls_parts[6].split("DUR")[0],
-            "latency_count": ls_parts[7].split("LC")[0]
-        }
-
-        # Convert to int
-        for key in d_qos.keys():
-            # Use regex to remove non-numeric characters
-            d_qos[key] = int(d_qos[key])
-
-        return d_qos
-
     def gather_experiments(
         self, 
         s_raw_datadir: str = ""
@@ -411,6 +327,8 @@ class Campaign:
         s_exp_name = ""
         ls_parts = s_fpath.split("/")
         for s_part in ls_parts:
+            if "" in s_part:
+                s_part = s_part.split(".")[0]
             if self.is_exp_name_in_str(s_part):
                 s_exp_name = s_part
                 break
@@ -527,7 +445,10 @@ class Campaign:
         """
         Checks for cases in dataset where mbps has more than 600 samples.
         """
-        df = pd.read_parquet(self.get_dataset_path())
+        df = self.df_ds
+
+        if df is None:
+            raise Exception("No dataset created yet")
 
         if df.empty:
             raise ValueError("Dataset is empty")
@@ -542,6 +463,9 @@ class Campaign:
         if len(ls_exp_names) == 0:
             raise ValueError("Dataset has no experiment names")
 
+        pprint(df.columns.tolist())
+
+        return 
         for i_exp, s_exp_name in ls_exp_names:
             s_counter = f"[{i_exp + 1:,.0f}/{len(ls_exp_names):,.0f}]"
 
