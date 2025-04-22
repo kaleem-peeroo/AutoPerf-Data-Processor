@@ -252,7 +252,7 @@ class Campaign:
 
             lg.debug(
                 f"{s_counter} "
-                f"Picking best run for {o_exp.s_name}"
+                f"Picking run for {o_exp.s_name}"
             )
 
             if not isinstance(o_exp, Experiment):
@@ -283,9 +283,10 @@ class Campaign:
         lo_exps = []
         for i_csv_path, s_csv_path in enumerate(ls_csv_paths):
             s_counter = f"[{i_csv_path + 1:,.0f}/{len(ls_csv_paths):,.0f}]"
-            lg.debug(
-                f"{s_counter} Processing path: {os.path.basename(s_csv_path)}"
-            )
+            if i_csv_path % 1000 == 0:
+                lg.debug(
+                    f"{s_counter} Processing path: {os.path.basename(s_csv_path)}"
+                )
 
             if not os.path.isfile(s_csv_path):
                 raise ValueError(f"CSV path is not a file: {s_csv_path}")
