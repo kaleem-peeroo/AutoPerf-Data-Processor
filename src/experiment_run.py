@@ -3,9 +3,9 @@ import logging
 
 from typing import List
 
-lg = logging.getLogger(__name__)
-
 from experiment_file import ExperimentFile
+
+lg = logging.getLogger(__name__)
 
 class ExperimentRun:
     def __init__(

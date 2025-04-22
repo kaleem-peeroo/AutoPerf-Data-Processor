@@ -33,7 +33,7 @@ LD_DATASETS = [
         "exp_folders": \
                 "/Users/kaleem/PhD/Datasets/ML/5PI_No_Noise",
         "dataset_path": \
-                "/Users/kaleem/PhD/Datasets/ML/5PI_No_Noise.parquetj"
+                "/Users/kaleem/PhD/Datasets/ML/5PI_No_Noise.parquet"
     },
     {
         "ap_config": "",

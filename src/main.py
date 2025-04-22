@@ -6,7 +6,6 @@ from rich.logging import RichHandler
 from rich.pretty import pprint
 from typing import Dict, List
 
-from app import App
 from campaign import Campaign
 from config import LD_DATASETS
 from utils import clear_screen
