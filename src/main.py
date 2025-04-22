@@ -1,5 +1,4 @@
 import logging
-import sys
 import os
 
 from rich.logging import RichHandler
@@ -8,7 +7,6 @@ from typing import Dict, List
 
 from campaign import Campaign
 from config import LD_DATASETS
-from utils import clear_screen
 
 lg = logging.getLogger(__name__)
 
@@ -101,5 +99,5 @@ def validate_config(
     return ld_config
     
 if __name__ == "__main__":
-    clear_screen()
+    os.system('cls' if os.name == 'nt' else 'clear')
     main()
