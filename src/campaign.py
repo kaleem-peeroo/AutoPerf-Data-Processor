@@ -133,7 +133,7 @@ class Campaign:
             s_counter = f"[{i_summary + 1}/{len(ls_summaries)}]"
             lg.debug(
                 f"{s_counter} "
-                f"Adding summary: {s_summary}"
+                f"Adding summary: {s_summary.split('.')[0]}"
             )
 
             if not s_summary.endswith(".parquet"):
