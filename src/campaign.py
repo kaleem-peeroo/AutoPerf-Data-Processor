@@ -86,8 +86,12 @@ class Campaign:
 
         os.makedirs(self.s_summaries_dpath, exist_ok=True)
 
-        for o_exp in lo_exps:
-            lg.info(f"Processing experiment: {o_exp.s_name}")
+        for i_exp, o_exp in enumerate(lo_exps):
+            s_counter = f"[{i_exp + 1}/{len(lo_exps)}]"
+            lg.info(
+                f"{s_counter} "
+                f"Processing experiment: {o_exp.s_name}"
+            )
             o_exp.process(s_dpath=self.s_summaries_dpath)
 
     def create_dataset(self):
@@ -263,8 +267,12 @@ class Campaign:
         if len(ls_csv_paths) == 0:
             raise ValueError(f"No csv files found in {s_raw_datadir}")
 
+        lg.debug(f"Found {len(ls_csv_paths)} csv files in {s_raw_datadir}")
+
         lo_exps = self.process_csv_paths_into_experiments(ls_csv_paths)
+
         lo_exps = self.process_exp_runs(lo_exps)
+
         lo_exps = self.pick_best_exp_run(lo_exps)
 
         return lo_exps
@@ -276,7 +284,14 @@ class Campaign:
         if len(lo_exps) == 0:
             raise ValueError("No experiments found")
 
-        for o_exp in lo_exps:
+        for i_exp, o_exp in enumerate(lo_exps):
+            s_counter = f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
+
+            lg.debug(
+                f"{s_counter} "
+                f"Processing runs for {o_exp.s_name}"
+            )
+
             if not isinstance(o_exp, Experiment):
                 raise ValueError(f"Experiment is not an Experiment object: {o_exp}")
 
@@ -291,7 +306,14 @@ class Campaign:
         if len(lo_exps) == 0:
             raise ValueError("No experiments found")
 
-        for o_exp in lo_exps:
+        for i_exp, o_exp in enumerate(lo_exps):
+            s_counter = f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
+
+            lg.debug(
+                f"{s_counter} "
+                f"Picking best run for {o_exp.s_name}"
+            )
+
             if not isinstance(o_exp, Experiment):
                 raise ValueError(f"Experiment is not an Experiment object: {o_exp}")
 
@@ -310,7 +332,12 @@ class Campaign:
             raise ValueError("No csv paths provided")
 
         lo_exps = []
-        for s_csv_path in ls_csv_paths:
+        for i_csv_path, s_csv_path in enumerate(ls_csv_paths):
+            s_counter = f"[{i_csv_path + 1:,.0f}/{len(ls_csv_paths):,.0f}]"
+            lg.debug(
+                f"{s_counter} Processing path: {os.path.basename(s_csv_path)}"
+            )
+
             if not os.path.isfile(s_csv_path):
                 raise ValueError(f"CSV path is not a file: {s_csv_path}")
 
@@ -389,7 +416,7 @@ class Campaign:
         Checks if the experiment name is in the string.
         """
         if s_value == "":
-            raise Exception("No experiment entry provided")
+            return False
 
         s_value = s_value.upper()
 

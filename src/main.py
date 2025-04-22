@@ -18,16 +18,19 @@ def main():
     ld_ds_config = validate_config(LD_DATASETS)
 
     for i_ds, d_ds in enumerate(ld_ds_config):
+        s_counter = f"[{i_ds + 1}/{len(ld_ds_config)}]"
         
-        lg.info("[{}/{}] Processing {}".format(
-            i_ds + 1, 
-            len(ld_ds_config), 
-            d_ds['name']
-        ))
+        lg.info(f"{s_counter} Processing dataset: {d_ds['name']}")
 
         campaign = Campaign(d_ds)
+        
+        lg.info(f"{s_counter} Summarising experiments: {d_ds['name']}")
         campaign.summarise_experiments()
+
+        lg.info(f"{s_counter} Creating dataset: {d_ds['name']}")
         campaign.create_dataset()
+
+        lg.info(f"{s_counter} Validating dataset: {d_ds['name']}")
         campaign.validate_dataset()
 
 def setup_logging():
