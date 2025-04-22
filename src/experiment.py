@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 import pandas as pd
 
@@ -198,6 +199,7 @@ class Experiment:
                 raise ValueError("Unknown file type")
 
         df_summary = self.calculate_sub_metrics(df_summary)
+        df_summary['experiment_name'] = self.format_exp_name(self.s_name)
 
         df_summary['experiment_name'] = self.s_name
 
@@ -288,3 +290,75 @@ class Experiment:
         df["total_mbps_over_subs"] = df[ls_mbps_cols].sum(axis=1)
 
         return df
+
+    def format_exp_name(self, s_exp_name: str) -> str:
+        if s_exp_name == "":
+            raise ValueError("Experiment name must not be empty")
+
+        s_exp_name = s_exp_name.strip().lower()
+
+        if self.is_valid_experiment_name(s_exp_name):
+            return s_exp_name.upper()
+
+        else:
+            
+            ls_parts = s_exp_name.split("_")
+            if len(ls_parts) != 8:
+                raise ValueError(
+                    f"Experiment name is not valid: {s_exp_name}.\n"
+                    f"Expected 8 parts, got {len(ls_parts)}"
+                )
+
+            ls_parts_no_nums = [re.sub(r'\d+', '', part) for part in ls_parts]
+            ls_parts_nums = [re.sub(r'\D+', '', part) for part in ls_parts]
+
+            if ls_parts_no_nums[0] != "sec":
+                ls_parts[0] = f"{ls_parts_nums[0]}sec"
+
+            if ls_parts_no_nums[2] != "pub":
+                ls_parts[2] = f"{ls_parts_nums[2]}pub"
+
+            if ls_parts_no_nums[3] != "sub":
+                ls_parts[3] = f"{ls_parts_nums[3]}sub"
+
+            s_exp_name = "_".join(ls_parts).upper()
+
+            return s_exp_name
+
+    def is_valid_experiment_name(self, s_exp_name: str) -> bool:
+        if s_exp_name == "":
+            raise ValueError("Experiment name must not be empty")
+
+        s_exp_name = s_exp_name.strip().lower()
+
+        ls_parts = s_exp_name.split("_")
+        if len(ls_parts) != 8:
+            lg.warning(
+                f"Experiment name is not valid: {s_exp_name}.\n"
+                f"Expected 8 parts, got {len(ls_parts)}"
+            )
+            return False
+
+        ls_parts_no_nums = [re.sub(r'\d+', '', part) for part in ls_parts]
+
+        ll_valid_matches = [
+            ["sec"],
+            ["b"],
+            ["pub"],
+            ["sub"],
+            ['rel', 'be'],
+            ['uc', 'mc'],
+            ['dur'],
+            ['lc']
+        ]
+
+        for i, ls_valid in enumerate(ll_valid_matches):
+            if ls_parts_no_nums[i] not in ls_valid:
+                lg.warning(
+                    f"Experiment name is not valid: {s_exp_name}.\n"
+                    f"Expected {ls_valid}, got {ls_parts[i]}"
+                )
+                return False
+
+        return True
+

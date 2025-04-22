@@ -267,3 +267,48 @@ class TestExperiment:
         assert len(df) > 0
         assert "avg_mbps_per_sub" in df.columns
         assert "total_mbps_over_subs" in df.columns
+
+    def test_format_exp_name(self):
+        s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
+        s_exp_name = "600S_100B_10P_1S_REL_MC_0DUR_100LC"
+        o_exp = Experiment(
+            s_name=s_exp_name,
+            ls_csv_paths=[
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/sub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/sub_0.csv",
+            ],
+        )
+
+        formatted_name = o_exp.format_exp_name(s_exp_name)
+        assert formatted_name == "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"
+
+    def test_is_valid_experiment_name(self):
+        s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
+        s_exp_name = "600S_100B_10P_1S_REL_MC_0DUR_100LC"
+        o_exp = Experiment(
+            s_name=s_exp_name,
+            ls_csv_paths=[
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/sub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/pub_0.csv",
+                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/sub_0.csv",
+            ],
+        )
+
+        # INFO: Normal Case - valid experiment name
+        assert o_exp.is_valid_experiment_name(
+            "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"
+        ) is True
+
+        # INFO: Normal Case - valid experiment name lower case
+        assert o_exp.is_valid_experiment_name(
+            "600sec_100b_10pub_1sub_rel_mc_0dur_100lc"
+        ) is True
+
+        # INFO: Normal Case - invalid experiment name
+        assert o_exp.is_valid_experiment_name(
+            "600S_100B_10P_1S_REL_MC_0DUR_100LC"
+        ) is False
+
