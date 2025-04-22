@@ -92,7 +92,15 @@ class Campaign:
                 f"{s_counter} "
                 f"Processing experiment: {o_exp.s_name}"
             )
-            o_exp.process(s_dpath=self.s_summaries_dpath)
+            try:
+                o_exp.process(s_dpath=self.s_summaries_dpath)
+            except Exception as e:
+                lg.error(
+                    f"{s_counter} "
+                    f"Error processing experiment: {o_exp.s_name}"
+                )
+                lg.error(e)
+                continue
 
     def create_dataset(self):
         """
@@ -295,7 +303,15 @@ class Campaign:
             if not isinstance(o_exp, Experiment):
                 raise ValueError(f"Experiment is not an Experiment object: {o_exp}")
 
-            o_exp.process_runs()
+            try:
+                o_exp.process_runs()
+            except Exception as e:
+                lg.error(
+                    f"{s_counter} "
+                    f"Error processing runs for {o_exp.s_name}"
+                )
+                lg.error(e)
+                continue
 
         return lo_exps
 
@@ -317,7 +333,15 @@ class Campaign:
             if not isinstance(o_exp, Experiment):
                 raise ValueError(f"Experiment is not an Experiment object: {o_exp}")
 
-            o_exp.pick_best_run()
+            try:
+                o_exp.pick_best_run()
+            except Exception as e:
+                lg.error(
+                    f"{s_counter} "
+                    f"Error picking best run for {o_exp.s_name}"
+                )
+                lg.error(e)
+                continue
 
         return lo_exps
 
