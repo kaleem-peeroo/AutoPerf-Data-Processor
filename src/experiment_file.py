@@ -354,7 +354,7 @@ class ExperimentFile:
                             break
 
             if end_index <= 0 and not b_found:
-                lg.warning(f"Couldn't find 'summary' in {s_path}. Using last line.")
+                # lg.warning(f"Couldn't find 'summary' in {s_path}. Using last line.")
                 end_index = i_file_line_count
                 
             return end_index - 2
