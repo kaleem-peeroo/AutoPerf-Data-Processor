@@ -9,6 +9,10 @@ from pathlib import Path
 from experiment import Experiment
 from experiment_file import ExperimentFile
 
+# Get the current working directory
+s_cwd = Path(__file__).parent.resolve()
+S_PROJECT_PATH = str(s_cwd.parent)
+
 class TestExperiment:
     def test_process_runs_with_trailing_zeros(self):
         s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
@@ -190,7 +194,7 @@ class TestExperiment:
         )
 
         # INFO: Normal Case - valid pub file
-        s_pub_file = "/Users/kaleem/PhD/Tools/AutoPerfDataProcessor/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run1_with_trailing_0/pub_0.csv"
+        s_pub_file = f"{S_PROJECT_PATH}/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run1_with_trailing_0/pub_0.csv"
         s_pub_file = ExperimentFile(
             s_exp_name,    
             s_pub_file,
@@ -214,7 +218,7 @@ class TestExperiment:
         )
 
         # INFO: Normal Case - valid pub file
-        s_pub_file = "/Users/kaleem/PhD/Tools/AutoPerfDataProcessor/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run1_with_trailing_0/sub_0.csv"
+        s_pub_file = f"{S_PROJECT_PATH}/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run1_with_trailing_0/sub_0.csv"
         s_pub_file = ExperimentFile(
             s_exp_name,    
             s_pub_file,
