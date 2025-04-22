@@ -8,28 +8,30 @@ from pathlib import Path
 
 from experiment_file import ExperimentFile
 
+S_PROJECT_PATH = str(Path().cwd())
+
 class TestExperimentFile:
     s_exp_fpath_valid = { 
         "s_exp_name": "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC",
-        "s_path": "/Users/kaleem/PhD/Tools/AutoPerfDataProcessor/tests/data/test_campaign_with_csv/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv" 
+        "s_path": f"{S_PROJECT_PATH}/tests/data/test_campaign_with_csv/600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv" 
     }
 
     s_pub_fpath_valid = {
         "s_exp_name": "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC",
-        "s_path": "/Users/kaleem/PhD/Tools/AutoPerfDataProcessor/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run2_with_good_data/pub_0.csv"
+        "s_path": f"{S_PROJECT_PATH}/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run2_with_good_data/pub_0.csv"
     }
     s_pub_fpath_invalid = {
         "s_exp_name": "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC",
-        "s_path": "/Users/kaleem/PhD/Tools/AutoPerfDataProcessor/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run4_with_trailing_0_bad_data_and_empty_pub/pub_0.csv"
+        "s_path": f"{S_PROJECT_PATH}/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run4_with_trailing_0_bad_data_and_empty_pub/pub_0.csv"
     }
 
     s_sub_fpath_valid = {
         "s_exp_name": "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC",
-        "s_path": "/Users/kaleem/PhD/Tools/AutoPerfDataProcessor/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run2_with_good_data/sub_0.csv"
+        "s_path": f"{S_PROJECT_PATH}/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run2_with_good_data/sub_0.csv"
     }
     s_sub_fpath_invalid = {
         "s_exp_name": "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC",
-        "s_path": "/Users/kaleem/PhD/Tools/AutoPerfDataProcessor/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run3_with_trailing_0_bad_data/sub_0.csv"
+        "s_path": f"{S_PROJECT_PATH}/tests/data/test_experiment_with_runs_with_raw/600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC/run3_with_trailing_0_bad_data/sub_0.csv"
     }
 
     def test_init_with_exp_file(self):
