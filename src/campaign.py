@@ -116,11 +116,17 @@ class Campaign:
         ls_summaries = os.listdir(self.s_summaries_dpath)
         lg.info(f"Found {len(ls_summaries)} summaries in {self.s_summaries_dpath}")
 
-        # TODO: Need to loop through lo_exp, get summary paths, read and glue together.
-        raise NotImplementedError(
-            "Need to implement"
-        )
-    
+        for s_summary in ls_summaries:
+            if not s_summary.endswith(".parquet"):
+                lg.warning(f"Skipping non-parquet file: {s_summary}")
+                continue
+
+            s_summary_path = os.path.join(self.s_summaries_dpath, s_summary)
+            lg.info(f"Reading summary file: {s_summary_path}")
+
+            df_temp = pd.read_parquet(s_summary_path)
+            df_ds = pd.concat([df_ds, df_temp], axis=0)
+            
         self.df_ds = df_ds
 
         self.write_dataset(df_ds)

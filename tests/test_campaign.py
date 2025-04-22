@@ -62,7 +62,7 @@ class TestCampaign:
 
         o_c = Campaign(d_config)
         s_raw_datadir = o_c.get_raw_datadir()
-        ld_exp_names_and_paths = o_c.gather_experiments(s_raw_datadir)
+        lo_exps = o_c.gather_experiments(s_raw_datadir)
 
         o_c.summarise_experiments()
         o_c.create_dataset()
@@ -87,8 +87,8 @@ class TestCampaign:
         df = o_c.get_df_ds()
         ls_exp_names = df['experiment_name'].unique().tolist()
 
-        for d_exp in ld_exp_names_and_paths:
-            s_exp_name = o_c.try_format_experiment_name( d_exp['name'] )
+        for o_exp in lo_exps:
+            s_exp_name = o_exp.get_name()
             assert s_exp_name in ls_exp_names, \
                     f"Experiment name {s_exp_name} not found in df: {ls_exp_names}"
 
@@ -140,7 +140,7 @@ class TestCampaign:
 
         o_c = Campaign(d_config)
         s_raw_datadir = o_c.get_raw_datadir()
-        ld_exp_names_and_paths = o_c.gather_experiments(s_raw_datadir)
+        lo_exps = o_c.gather_experiments(s_raw_datadir)
 
         o_c.summarise_experiments()
         o_c.create_dataset()
@@ -160,14 +160,14 @@ class TestCampaign:
             'total_mbps_over_subs',
         ]
         for s_col in ls_wanted_cols:
-            assert s_col in o_c.df_ds.columns
+            assert s_col in o_c.df_ds.columns, \
+                    f"Column {s_col} not found in df: {o_c.df_ds.columns}"
 
         df = o_c.get_df_ds()
         ls_exp_names = df['experiment_name'].unique().tolist()
 
-        for d_exp in ld_exp_names_and_paths:
-            s_exp_name = d_exp['name']
-            pprint(s_exp_name)
+        for o_exp in lo_exps:
+            s_exp_name = o_exp.get_name()
             assert s_exp_name in ls_exp_names
 
             df_exp = df[df['experiment_name'] == s_exp_name].copy()
