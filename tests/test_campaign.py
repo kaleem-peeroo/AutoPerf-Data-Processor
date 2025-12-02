@@ -52,6 +52,53 @@ class TestCampaign:
         # Delete the generates summaries folder at the end of the test
         shutil.rmtree(o_c.s_summaries_dpath)
 
+    def test_summarise_experiments_with_n_runs(self):
+        d_config = {
+            "name": "test campaign with n runs and dirs",
+            "exp_folders": "./tests/data/test_campaign_with_n_runs_dirs/",
+            "ap_config": "",
+            "dataset_path": "./tests/output/test_campaign_with_n_runs.parquet",
+        }
+
+        o_c = Campaign(d_config)
+        o_c.summarise_experiments()
+        assert os.path.exists(o_c.s_summaries_dpath)
+        assert os.path.isdir(o_c.s_summaries_dpath)
+        assert (
+            len(os.listdir(o_c.s_summaries_dpath)) == 2
+        ), f"Expected 2 summaries, got {len(os.listdir(o_c.s_summaries_dpath))}"
+
+        # INFO: Validate the summarised files
+        for s_summary_path in os.listdir(o_c.s_summaries_dpath):
+            s_summary_path = os.path.join(o_c.s_summaries_dpath, s_summary_path)
+            df_summary = pd.read_parquet(s_summary_path)
+
+            ls_existing_cols = sorted(list(df_summary.columns))
+            ls_wanted_cols = [
+                "experiment_name",
+                "run_n",
+                "latency_us",
+                "avg_mbps_per_sub",
+                "total_mbps_over_subs",
+                "duration_secs",
+                "datalen_bytes",
+                "pub_count",
+                "sub_count",
+                "use_reliable",
+                "use_multicast",
+                "durability",
+                "latency_count",
+            ]
+            for s_col in ls_wanted_cols:
+                assert (
+                    s_col in ls_existing_cols
+                ), f"{s_col} NOT found in summarised dataset: {ls_existing_cols}"
+
+            assert False
+
+        # INFO: Delete the generated summaries folder at the end of the test
+        shutil.rmtree(o_c.s_summaries_dpath)
+
     def test_create_dataset_with_dirs(self):
         d_config = {
             "name": "test campaign with dirs",
