@@ -2,6 +2,40 @@ import pytest
 
 
 class TestMain:
+    def test_main_with_n_runs(self):
+        from main import main
+        from campaign import Campaign
+        from tests.configs.n_runs import LD_DATASETS
+
+        for i_ds, d_ds in enumerate(LD_DATASETS):
+            campaign = Campaign(d_ds)
+            campaign.summarise_experiments()
+            campaign.create_dataset()
+
+            df_ds = campaign.df_ds
+
+            ls_columns = list(df_ds.columns)
+            ls_columns = sorted(ls_columns)
+            ls_wanted_cols = [
+                "run_n",
+                "experiment_name",
+                "latency_us",
+                "avg_mbps_per_sub",
+                "total_mbps_over_subs",
+                "duration_secs",
+                "datalen_bytes",
+                "pub_count",
+                "sub_count",
+                "use_reliable",
+                "use_multicast",
+                "durability",
+                "latency_count",
+            ]
+            for s_col in ls_wanted_cols:
+                assert (
+                    s_col in ls_columns
+                ), f"{s_col} NOT found in dataset: {ls_columns}."
+
     def test_validate_config_with_normal_case(self):
         from main import validate_config
         from tests.configs.normal import LD_DATASETS
