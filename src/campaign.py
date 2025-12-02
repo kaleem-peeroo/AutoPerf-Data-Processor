@@ -85,7 +85,7 @@ class Campaign:
             s_counter = f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
             lg.info(f"{s_counter} " f"Processing experiment: {o_exp.s_name}")
             try:
-                o_exp.process(s_dpath=self.s_summaries_dpath)
+                o_exp.summarise(s_dpath=self.s_summaries_dpath)
 
             except Exception as e:
                 lg.error(f"{s_counter} " f"Error processing experiment: {o_exp.s_name}")
@@ -197,7 +197,7 @@ class Campaign:
 
         lo_exps = self.process_exp_runs(lo_exps)
 
-        lo_exps = self.pick_best_exp_run(lo_exps)
+        # lo_exps = self.pick_best_exp_run(lo_exps)
 
         return lo_exps
 

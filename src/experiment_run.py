@@ -6,12 +6,13 @@ from experiment_file import ExperimentFile
 
 lg = logging.getLogger(__name__)
 
+
 class ExperimentRun:
     def __init__(
-        self, 
-        s_exp_name: str = "", 
-        s_run_name: str = "", 
-        ls_csv_paths = List[str],
+        self,
+        s_exp_name: str = "",
+        s_run_name: str = "",
+        ls_csv_paths: List[str] = [],
     ):
         if s_exp_name == "":
             raise ValueError("Experiment name must not be empty")
@@ -27,6 +28,9 @@ class ExperimentRun:
         self.lo_exp_files = [
             ExperimentFile(s_exp_name, s_csv_path) for s_csv_path in ls_csv_paths
         ]
+
+    def __repr__(self):
+        return f"{self.s_run_name} ({len(self.lo_exp_files)} Files)"
 
     def has_good_data(self):
         """

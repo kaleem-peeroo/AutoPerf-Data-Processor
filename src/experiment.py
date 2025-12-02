@@ -30,16 +30,19 @@ class Experiment:
         self.best_exp_run = None
 
     def __str__(self):
-        return "Experiment: {}, CSV Paths: {}".format(
+        return "Experiment: {}\n\tRuns: {}\n\tCSV Paths: {}".format(
             self.s_name,
+            [o_exp_run for o_exp_run in self.lo_exp_runs],
             [os.path.basename(s_csv_path) for s_csv_path in self.ls_csv_paths],
         )
 
     def __repr__(self):
-        return "Experiment: {}, CSV Paths: {}".format(
-            self.s_name,
-            [os.path.basename(s_csv_path) for s_csv_path in self.ls_csv_paths],
-        )
+        return f"{self.s_name}\nRuns: {[repr(o_exp_run) for o_exp_run in self.lo_exp_runs]}"
+        # return "Experiment: {}\n\tRuns: {}\n\tCSV Paths: {}".format(
+        #     self.s_name,
+        #     [repr(o_exp_run) for o_exp_run in self.lo_exp_runs],
+        #     [os.path.basename(s_csv_path) for s_csv_path in self.ls_csv_paths],
+        # )
 
     def get_name(self):
         if self.s_name == "":
@@ -73,11 +76,11 @@ class Experiment:
         ls_run_names = self.get_run_names()
         ls_csv_paths = self.get_csv_paths()
 
-        for s_run in ls_run_names:
-            ls_run_csvs = [_ for _ in ls_csv_paths if s_run in _]
+        for s_run_name in ls_run_names:
+            ls_run_csvs = [_ for _ in ls_csv_paths if s_run_name in _]
 
             o_exp_run = ExperimentRun(
-                s_exp_name=self.s_name, s_run_name=s_run, ls_csv_paths=ls_run_csvs
+                s_exp_name=self.s_name, s_run_name=s_run_name, ls_csv_paths=ls_run_csvs
             )
 
             self.lo_exp_runs.append(o_exp_run)
@@ -90,8 +93,7 @@ class Experiment:
 
         for s_csv_path in self.ls_csv_paths:
             s_fname = os.path.basename(s_csv_path)
-            s_run_name = os.path.dirname(s_csv_path)
-
+            s_run_name = os.path.basename(os.path.dirname(s_csv_path))
             if s_run_name not in ls_run_names:
                 ls_run_names.append(s_run_name)
 
@@ -151,7 +153,7 @@ class Experiment:
 
         return lo_raw_runs
 
-    def process(self, s_dpath: str = ""):
+    def summarise(self, s_dpath: str = ""):
         """
         1. Summarise.
         2. Write summary file to s_dpath as {exp_name}.parquet.
@@ -164,49 +166,70 @@ class Experiment:
         s_output_path = os.path.join(s_dpath, f"{self.s_name}.parquet")
 
         if os.path.exists(s_output_path):
-            lg.info(f"Skipping {self.s_name}")
+            lg.info(f"Skipping {self.s_name} because path exists:\n\t{s_output_path}")
             return
 
-        if self.best_exp_run is None:
-            raise ValueError("No best experiment run found")
+        df_exp_summary = pd.DataFrame()
 
-        df_summary = pd.DataFrame()
-        for o_file in self.best_exp_run.lo_exp_files:
+        s_lg_prefix = f"[{self.s_name}]"
 
-            if not o_file.is_raw():
-                df = o_file.get_df()
-                df_summary = pd.concat([df_summary, df], axis=0)
+        for i_run, o_run in enumerate(self.lo_exp_runs):
+            i_run_count = len(self.lo_exp_runs)
 
-            elif o_file.is_pub():
-                df_lat = self.get_lat_df(o_file)
-                df_summary = pd.concat([df_summary, df_lat], axis=1)
+            s_run_prefix = f"{s_lg_prefix} [Run {i_run + 1}/{i_run_count}]"
 
-            elif o_file.is_sub():
-                df_mbps = self.get_mbps_df(o_file)
-                df_summary = pd.concat([df_summary, df_mbps], axis=1)
+            df_exp_run_summary = pd.DataFrame()
 
-            else:
-                raise ValueError("Unknown file type")
+            for i_file, o_file in enumerate(o_run.lo_exp_files):
+                i_file_count = len(o_run.lo_exp_files)
 
-        df_summary = self.calculate_sub_metrics(df_summary)
+                s_file_prefix = f"{s_run_prefix} [File {i_file + 1}/{i_file_count}]"
+
+                lg.debug(
+                    f"{s_file_prefix} Processing {os.path.basename(o_file.s_path)}..."
+                )
+
+                if not o_file.is_raw():
+                    df = o_file.get_df()
+                    df_exp_run_summary = pd.concat([df_exp_run_summary, df], axis=0)
+
+                elif o_file.is_pub():
+                    df_lat = self.get_lat_df(o_file)
+                    df_exp_run_summary = pd.concat([df_exp_run_summary, df_lat], axis=1)
+
+                elif o_file.is_sub():
+                    df_mbps = self.get_mbps_df(o_file)
+                    df_exp_run_summary = pd.concat(
+                        [df_exp_run_summary, df_mbps], axis=1
+                    )
+
+                else:
+                    raise ValueError("Unknown file type")
+
+            df_exp_run_summary = self.calculate_sub_metrics(df_exp_run_summary)
+            df_exp_run_summary["run_n"] = o_run.s_run_name
+            df_exp_summary = pd.concat([df_exp_summary, df_exp_run_summary])
+
+        # df_exp_summary = self.calculate_sub_metrics(df_exp_summary)
 
         self.s_name = self.format_exp_name(self.s_name)
 
-        df_summary["experiment_name"] = self.s_name
+        df_exp_summary["experiment_name"] = self.s_name
 
-        df_summary = df_summary[
+        df_exp_summary = df_exp_summary[
             [
                 "experiment_name",
+                "run_n",
                 "latency_us",
                 "avg_mbps_per_sub",
                 "total_mbps_over_subs",
             ]
         ]
 
-        df_summary = self.add_input_cols(df_summary)
+        df_exp_summary = self.add_input_cols(df_exp_summary)
 
-        df_summary.reset_index(drop=True, inplace=True)
-        df_summary.to_parquet(s_output_path, index=False)
+        df_exp_summary.reset_index(drop=True, inplace=True)
+        df_exp_summary.to_parquet(s_output_path, index=False)
         lg.info(f"Summary file written to {s_output_path}")
 
     def get_lat_df(self, o_file):

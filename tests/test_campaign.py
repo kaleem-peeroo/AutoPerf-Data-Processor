@@ -60,6 +60,12 @@ class TestCampaign:
             "dataset_path": "./tests/output/test_campaign_with_n_runs.parquet",
         }
 
+        if os.path.exists(d_config["dataset_path"]):
+            os.remove(d_config["dataset_path"])
+
+        if os.path.exists(d_config["dataset_path"].replace(".parquet", "_summaries/")):
+            shutil.rmtree(d_config["dataset_path"].replace(".parquet", "_summaries/"))
+
         o_c = Campaign(d_config)
         o_c.summarise_experiments()
         assert os.path.exists(o_c.s_summaries_dpath)
@@ -93,8 +99,6 @@ class TestCampaign:
                 assert (
                     s_col in ls_existing_cols
                 ), f"{s_col} NOT found in summarised dataset: {ls_existing_cols}"
-
-            assert False
 
         # INFO: Delete the generated summaries folder at the end of the test
         shutil.rmtree(o_c.s_summaries_dpath)
