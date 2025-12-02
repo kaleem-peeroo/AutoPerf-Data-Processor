@@ -10,18 +10,20 @@ from typing import Dict, List
 from experiment import Experiment
 
 import warnings
+
 warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 
 lg = logging.getLogger(__name__)
 
+
 class Campaign:
     def __init__(self, d_config):
-        self.raw_datadir = d_config['exp_folders']
-        self.apconf_path = d_config['ap_config']
-        self.ds_output_path = d_config['dataset_path']
+        self.raw_datadir = d_config["exp_folders"]
+        self.apconf_path = d_config["ap_config"]
+        self.ds_output_path = d_config["dataset_path"]
         self.s_summaries_dpath = os.path.join(
             os.path.dirname(self.ds_output_path),
-            f"{os.path.basename(self.ds_output_path).split('.')[0]}_summaries"
+            f"{os.path.basename(self.ds_output_path).split('.')[0]}_summaries",
         )
         self.df_ds = None
 
@@ -81,18 +83,12 @@ class Campaign:
 
         for i_exp, o_exp in enumerate(lo_exps):
             s_counter = f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
-            lg.info(
-                f"{s_counter} "
-                f"Processing experiment: {o_exp.s_name}"
-            )
+            lg.info(f"{s_counter} " f"Processing experiment: {o_exp.s_name}")
             try:
                 o_exp.process(s_dpath=self.s_summaries_dpath)
 
             except Exception as e:
-                lg.error(
-                    f"{s_counter} "
-                    f"Error processing experiment: {o_exp.s_name}"
-                )
+                lg.error(f"{s_counter} " f"Error processing experiment: {o_exp.s_name}")
                 lg.error(e)
                 continue
 
@@ -121,7 +117,8 @@ class Campaign:
 
         ls_summaries = os.listdir(self.s_summaries_dpath)
         ls_summaries = [
-            os.path.join(self.s_summaries_dpath, s_summary) for s_summary in ls_summaries
+            os.path.join(self.s_summaries_dpath, s_summary)
+            for s_summary in ls_summaries
         ]
         ls_summaries = [
             s_summary for s_summary in ls_summaries if s_summary.endswith(".parquet")
@@ -131,16 +128,13 @@ class Campaign:
 
         df_ds = pd.concat(
             (pd.read_parquet(s_summary) for s_summary in ls_summaries),
-            ignore_index=True
+            ignore_index=True,
         )
-        
+
         self.df_ds = df_ds
         self.write_dataset(df_ds)
 
-    def write_dataset(
-        self,
-        df: pd.DataFrame = pd.DataFrame()
-    ) -> None:
+    def write_dataset(self, df: pd.DataFrame = pd.DataFrame()) -> None:
         if df.empty:
             lg.warning("Input dataframe is empty")
 
@@ -169,11 +163,8 @@ class Campaign:
                 ls_sub_mbps_cols.append(col)
 
         return ls_sub_mbps_cols
-    
-    def gather_experiments(
-        self, 
-        s_raw_datadir: str = ""
-    ) -> List[Experiment]:
+
+    def gather_experiments(self, s_raw_datadir: str = "") -> List[Experiment]:
         """
         1. Get list of csv paths.
         2. Group into experiments (use experiment_name).
@@ -210,20 +201,14 @@ class Campaign:
 
         return lo_exps
 
-    def process_exp_runs(
-        self,
-        lo_exps: List[Experiment] = []
-    ) -> List[Experiment]:
+    def process_exp_runs(self, lo_exps: List[Experiment] = []) -> List[Experiment]:
         if len(lo_exps) == 0:
             raise ValueError("No experiments found")
 
         for i_exp, o_exp in enumerate(lo_exps):
             s_counter = f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
 
-            lg.debug(
-                f"{s_counter} "
-                f"Processing runs for {o_exp.s_name}"
-            )
+            lg.debug(f"{s_counter} " f"Processing runs for {o_exp.s_name}")
 
             if not isinstance(o_exp, Experiment):
                 raise ValueError(f"Experiment is not an Experiment object: {o_exp}")
@@ -231,29 +216,20 @@ class Campaign:
             try:
                 o_exp.process_runs()
             except Exception as e:
-                lg.error(
-                    f"{s_counter} "
-                    f"Error processing runs for {o_exp.s_name}"
-                )
+                lg.error(f"{s_counter} " f"Error processing runs for {o_exp.s_name}")
                 lg.error(e)
                 continue
 
         return lo_exps
 
-    def pick_best_exp_run(
-        self,
-        lo_exps: List[Experiment] = []
-    ) -> List[Experiment]:
+    def pick_best_exp_run(self, lo_exps: List[Experiment] = []) -> List[Experiment]:
         if len(lo_exps) == 0:
             raise ValueError("No experiments found")
 
         for i_exp, o_exp in enumerate(lo_exps):
             s_counter = f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
 
-            lg.debug(
-                f"{s_counter} "
-                f"Picking run for {o_exp.s_name}"
-            )
+            lg.debug(f"{s_counter} " f"Picking run for {o_exp.s_name}")
 
             if not isinstance(o_exp, Experiment):
                 raise ValueError(f"Experiment is not an Experiment object: {o_exp}")
@@ -261,18 +237,14 @@ class Campaign:
             try:
                 o_exp.pick_best_run()
             except Exception as e:
-                lg.error(
-                    f"{s_counter} "
-                    f"Error picking best run for {o_exp.s_name}"
-                )
+                lg.error(f"{s_counter} " f"Error picking best run for {o_exp.s_name}")
                 lg.error(e)
                 continue
 
         return lo_exps
 
     def process_csv_paths_into_experiments(
-        self,
-        ls_csv_paths: List[str] = []
+        self, ls_csv_paths: List[str] = []
     ) -> List[Experiment]:
         if not isinstance(ls_csv_paths, list):
             raise ValueError(f"CSV paths must be a list: {ls_csv_paths}")
@@ -284,9 +256,7 @@ class Campaign:
         for i_csv_path, s_csv_path in enumerate(ls_csv_paths):
             s_counter = f"[{i_csv_path + 1:,.0f}/{len(ls_csv_paths):,.0f}]"
             if i_csv_path % 1000 == 0:
-                lg.debug(
-                    f"{s_counter} Processing path: {os.path.basename(s_csv_path)}"
-                )
+                lg.debug(f"{s_counter} Processing path: {os.path.basename(s_csv_path)}")
 
             if not os.path.isfile(s_csv_path):
                 raise ValueError(f"CSV path is not a file: {s_csv_path}")
@@ -302,10 +272,7 @@ class Campaign:
                 o_exp.add_csv_path(s_csv_path)
 
             else:
-                o_exp = Experiment(
-                    s_name=s_exp_name,
-                    ls_csv_paths=[ s_csv_path ]
-                )
+                o_exp = Experiment(s_name=s_exp_name, ls_csv_paths=[s_csv_path])
                 lo_exps.append(o_exp)
 
         if len(lo_exps) == 0:
@@ -321,9 +288,7 @@ class Campaign:
             raise ValueError(f"Experiment entry must be a string: {s_fpath}")
 
         if not self.is_experiment_name_in_fpath(s_fpath):
-            raise ValueError(
-                f"No experiment name found in file path: {s_fpath}"
-            )
+            raise ValueError(f"No experiment name found in file path: {s_fpath}")
 
         s_exp_name = ""
         ls_parts = s_fpath.split("/")
@@ -335,12 +300,10 @@ class Campaign:
                 break
 
         if s_exp_name == "":
-            raise ValueError(
-                f"No experiment name found in file path: {s_fpath}"
-            )
+            raise ValueError(f"No experiment name found in file path: {s_fpath}")
 
         return s_exp_name
-        
+
     def is_experiment_name_in_fpath(self, s_fpath: str = "") -> bool:
         """
         Checks if the experiment name is in the file path.
@@ -362,7 +325,7 @@ class Campaign:
                 break
 
         return b_exp_in_dir
-        
+
     def is_exp_name_in_str(self, s_value: str = "") -> bool:
         """
         Checks if the experiment name is in the string.
@@ -386,6 +349,7 @@ class Campaign:
             return True
 
         return False
+
     def follows_experiment_name_format(self, s_filename: str = "") -> bool:
         """
         Checks if filename follows following format:
@@ -421,9 +385,9 @@ class Campaign:
 
             if not b_match:
                 return False
-                                        
+
         return True
-        
+
     def recursively_get_fpaths(self, s_exp_entry: str = "") -> List[str]:
         if s_exp_entry == "":
             raise Exception("No experiment entry provided")
@@ -457,40 +421,33 @@ class Campaign:
         if len(df.columns) == 0:
             raise ValueError("Dataset has no columns")
 
-        if 'experiment_name' not in df.columns:
+        if "experiment_name" not in df.columns:
             raise ValueError("Dataset must have experiment_name column")
 
-        ls_exp_names = df['experiment_name'].unique().tolist()
+        ls_exp_names = df["experiment_name"].unique().tolist()
         if len(ls_exp_names) == 0:
             raise ValueError("Dataset has no experiment names")
 
         pprint(df.columns.tolist())
 
-        return 
+        return
         for i_exp, s_exp_name in ls_exp_names:
             s_counter = f"[{i_exp + 1:,.0f}/{len(ls_exp_names):,.0f}]"
 
-            lg.debug(
-                f"{s_counter} "
-                f"Validating {s_exp_name}"
-            )
+            lg.debug(f"{s_counter} " f"Validating {s_exp_name}")
 
-            df_exp = df[df['experiment_name'] == s_exp_name].copy()
+            df_exp = df[df["experiment_name"] == s_exp_name].copy()
 
-            df_avg_mbps = df_exp['avg_mbps_per_sub'].copy()
+            df_avg_mbps = df_exp["avg_mbps_per_sub"].copy()
             df_avg_mbps.dropna(inplace=True)
 
             if len(df_avg_mbps) > 600:
-                lg.warning(
-                    f"Experiment {s_exp_name} has more than 600 samples. "
-                )
+                lg.warning(f"Experiment {s_exp_name} has more than 600 samples. ")
                 continue
 
-            df_total_mbps = df_exp['total_mbps_over_subs'].copy()
+            df_total_mbps = df_exp["total_mbps_over_subs"].copy()
             df_total_mbps.dropna(inplace=True)
 
             if len(df_total_mbps) > 600:
-                lg.warning(
-                    f"Experiment {s_exp_name} has more than 600 samples. "
-                )
+                lg.warning(f"Experiment {s_exp_name} has more than 600 samples. ")
                 continue

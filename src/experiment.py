@@ -10,11 +10,12 @@ from experiment_run import ExperimentRun
 
 lg = logging.getLogger(__name__)
 
+
 class Experiment:
     def __init__(
-        self, 
-        s_name: str = "", 
-        ls_csv_paths = List[str],
+        self,
+        s_name: str = "",
+        ls_csv_paths=List[str],
     ):
         if s_name == "":
             raise ValueError("Experiment name must not be empty")
@@ -27,17 +28,17 @@ class Experiment:
 
         self.lo_exp_runs = []
         self.best_exp_run = None
-        
+
     def __str__(self):
         return "Experiment: {}, CSV Paths: {}".format(
             self.s_name,
-            [os.path.basename(s_csv_path) for s_csv_path in self.ls_csv_paths]
+            [os.path.basename(s_csv_path) for s_csv_path in self.ls_csv_paths],
         )
 
     def __repr__(self):
         return "Experiment: {}, CSV Paths: {}".format(
             self.s_name,
-            [os.path.basename(s_csv_path) for s_csv_path in self.ls_csv_paths]
+            [os.path.basename(s_csv_path) for s_csv_path in self.ls_csv_paths],
         )
 
     def get_name(self):
@@ -71,14 +72,12 @@ class Experiment:
         """
         ls_run_names = self.get_run_names()
         ls_csv_paths = self.get_csv_paths()
-        
+
         for s_run in ls_run_names:
             ls_run_csvs = [_ for _ in ls_csv_paths if s_run in _]
 
             o_exp_run = ExperimentRun(
-                s_exp_name=self.s_name,
-                s_run_name=s_run,
-                ls_csv_paths=ls_run_csvs
+                s_exp_name=self.s_name, s_run_name=s_run, ls_csv_paths=ls_run_csvs
             )
 
             self.lo_exp_runs.append(o_exp_run)
@@ -106,12 +105,12 @@ class Experiment:
         if len(lo_good_runs) > 0:
             self.best_exp_run = lo_good_runs[0]
 
-        # If no good runs, pick the one with raw files
+        # If no good runs, pick the one with raw files
         lo_raw_runs = self.get_raw_exp_runs()
         if len(lo_raw_runs) > 0:
             self.best_exp_run = lo_raw_runs[0]
 
-        # If no raw runs, pick the first one
+        # If no raw runs, pick the first one
         self.best_exp_run = self.lo_exp_runs[0]
 
     def get_good_exp_runs(self) -> List[ExperimentRun]:
@@ -124,21 +123,17 @@ class Experiment:
             if o_exp_run.has_good_data():
                 lo_good_runs.append(o_exp_run)
 
-        # Sort by total sample count decreasing
+        # Sort by total sample count decreasing
         lo_good_runs = self.sort_by_total_sample_count(lo_good_runs)
         return lo_good_runs
 
     def sort_by_total_sample_count(
-        self, 
-        lo_exp_runs: List[ExperimentRun]
+        self, lo_exp_runs: List[ExperimentRun]
     ) -> List[ExperimentRun]:
         """
         Sort experiment runs by total sample count.
         """
-        lo_exp_runs.sort(
-            key=lambda x: x.get_total_sample_count(), 
-            reverse=True
-        )
+        lo_exp_runs.sort(key=lambda x: x.get_total_sample_count(), reverse=True)
         return lo_exp_runs
 
     def get_raw_exp_runs(self) -> List[ExperimentRun]:
@@ -151,11 +146,11 @@ class Experiment:
             if o_exp_run.has_raw_data():
                 lo_raw_runs.append(o_exp_run)
 
-        # Sort by total sample count decreasing
+        # Sort by total sample count decreasing
         lo_raw_runs = self.sort_by_total_sample_count(lo_raw_runs)
 
         return lo_raw_runs
-        
+
     def process(self, s_dpath: str = ""):
         """
         1. Summarise.
@@ -166,23 +161,18 @@ class Experiment:
             raise ValueError("Output path must not be empty")
 
         os.makedirs(s_dpath, exist_ok=True)
-        s_output_path = os.path.join(
-            s_dpath,
-            f"{self.s_name}.parquet"
-        )
+        s_output_path = os.path.join(s_dpath, f"{self.s_name}.parquet")
 
         if os.path.exists(s_output_path):
-            lg.info(
-                f"Skipping {self.s_name}"
-            )
+            lg.info(f"Skipping {self.s_name}")
             return
 
-        if self.best_exp_run is None:    
+        if self.best_exp_run is None:
             raise ValueError("No best experiment run found")
 
         df_summary = pd.DataFrame()
         for o_file in self.best_exp_run.lo_exp_files:
-            
+
             if not o_file.is_raw():
                 df = o_file.get_df()
                 df_summary = pd.concat([df_summary, df], axis=0)
@@ -202,24 +192,22 @@ class Experiment:
 
         self.s_name = self.format_exp_name(self.s_name)
 
-        df_summary['experiment_name'] = self.s_name
+        df_summary["experiment_name"] = self.s_name
 
-        df_summary = df_summary[[
-            'experiment_name',
-            'latency_us',
-            'avg_mbps_per_sub',
-            'total_mbps_over_subs',
-        ]]
+        df_summary = df_summary[
+            [
+                "experiment_name",
+                "latency_us",
+                "avg_mbps_per_sub",
+                "total_mbps_over_subs",
+            ]
+        ]
 
         df_summary = self.add_input_cols(df_summary)
 
         df_summary.reset_index(drop=True, inplace=True)
         df_summary.to_parquet(s_output_path, index=False)
-        lg.info(
-            f"Summary file written to {s_output_path}"
-        )
-
-        return df_summary
+        lg.info(f"Summary file written to {s_output_path}")
 
     def get_lat_df(self, o_file):
         """
@@ -254,8 +242,9 @@ class Experiment:
 
         df = o_file.get_df()
         ls_mbps_cols = [
-            col for col in df.columns if "mbps" in col.lower() \
-                    and 'avg' not in col.lower()
+            col
+            for col in df.columns
+            if "mbps" in col.lower() and "avg" not in col.lower()
         ]
         if len(ls_mbps_cols) == 0:
             raise ValueError("No mbps columns found in file")
@@ -271,11 +260,8 @@ class Experiment:
         s_sub_name = s_sub_name.split(".")[0]
 
         # Rename and prepend with sub_n
-        sr.rename(
-            f"{s_sub_name}_mbps",
-            inplace=True
-        )
-        
+        sr.rename(f"{s_sub_name}_mbps", inplace=True)
+
         return sr
 
     def calculate_sub_metrics(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -283,15 +269,12 @@ class Experiment:
         Calculate subscriber metrics.
         """
         if not isinstance(df, pd.DataFrame):
-            raise ValueError(
-                "Input is not a dataframe"
-                f"It is a {type(df)}"
-            )
+            raise ValueError("Input is not a dataframe" f"It is a {type(df)}")
 
         if df.empty:
             raise ValueError("Dataframe is empty")
 
-        # Calculate avg mbps per sub
+        # Calculate avg mbps per sub
         ls_mbps_cols = [col for col in df.columns if "mbps" in col.lower()]
         if len(ls_mbps_cols) == 0:
             raise ValueError("No mbps columns found in dataframe")
@@ -318,8 +301,8 @@ class Experiment:
                     f"Expected 8 parts, got {len(ls_parts)}"
                 )
 
-            ls_parts_no_nums = [re.sub(r'\d+', '', part) for part in ls_parts]
-            ls_parts_nums = [re.sub(r'\D+', '', part) for part in ls_parts]
+            ls_parts_no_nums = [re.sub(r"\d+", "", part) for part in ls_parts]
+            ls_parts_nums = [re.sub(r"\D+", "", part) for part in ls_parts]
 
             if ls_parts_no_nums[0] != "sec":
                 ls_parts[0] = f"{ls_parts_nums[0]}sec"
@@ -351,17 +334,17 @@ class Experiment:
         if len(ls_parts) != 8:
             return False
 
-        ls_parts_no_nums = [re.sub(r'\d+', '', part) for part in ls_parts]
+        ls_parts_no_nums = [re.sub(r"\d+", "", part) for part in ls_parts]
 
         ll_valid_matches = [
             ["sec"],
             ["b"],
             ["pub"],
             ["sub"],
-            ['rel', 'be'],
-            ['uc', 'mc'],
-            ['dur'],
-            ['lc']
+            ["rel", "be"],
+            ["uc", "mc"],
+            ["dur"],
+            ["lc"],
         ]
 
         for i, ls_valid in enumerate(ll_valid_matches):
@@ -375,10 +358,7 @@ class Experiment:
         Add input columns to dataframe.
         """
         if not isinstance(df, pd.DataFrame):
-            raise ValueError(
-                "Input is not a dataframe"
-                f"It is a {type(df)}"
-            )
+            raise ValueError("Input is not a dataframe" f"It is a {type(df)}")
 
         if df.empty:
             raise ValueError("Dataframe is empty")
@@ -396,7 +376,7 @@ class Experiment:
                     f"Column {key} already exists in dataframe. "
                     f"Skipping adding column."
                 )
-                    
+
         return df
 
     def get_input_cols(self, s_exp_name: str = "") -> List[Dict[str, str]]:
@@ -411,8 +391,8 @@ class Experiment:
 
         s_exp_name = s_exp_name.strip().lower()
         ls_parts = s_exp_name.split("_")
-        ls_parts_no_nums = [re.sub(r'\d+', '', part) for part in ls_parts]
-        ls_parts_nums = [re.sub(r'\D+', '', part) for part in ls_parts]
+        ls_parts_no_nums = [re.sub(r"\d+", "", part) for part in ls_parts]
+        ls_parts_nums = [re.sub(r"\D+", "", part) for part in ls_parts]
         ls_parts_nums = [int(part) for part in ls_parts_nums if part.isdigit()]
 
         ld_input_cols = [
@@ -423,7 +403,7 @@ class Experiment:
             {"use_reliable": ls_parts_no_nums[4] == "rel"},
             {"use_multicast": ls_parts_no_nums[5] == "mc"},
             {"durability": ls_parts_nums[-2]},
-            {"latency_count": ls_parts_nums[-1]}
+            {"latency_count": ls_parts_nums[-1]},
         ]
 
         return ld_input_cols
