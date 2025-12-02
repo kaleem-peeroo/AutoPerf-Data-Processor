@@ -1,3 +1,5 @@
+import os
+import shutil
 import pytest
 
 
@@ -6,6 +8,13 @@ class TestMain:
         from main import main
         from campaign import Campaign
         from tests.configs.n_runs import LD_DATASETS
+
+        # INFO: Delete if already exists before the test
+        if os.path.exists("./tests/output/test_campaign_with_n_runs.parquet"):
+            os.remove("./tests/output/test_campaign_with_n_runs.parquet")
+
+        if os.path.exists("./tests/output/test_campaign_with_n_runs_summaries"):
+            shutil.rmtree("./tests/output/test_campaign_with_n_runs_summaries")
 
         for i_ds, d_ds in enumerate(LD_DATASETS):
             campaign = Campaign(d_ds)
