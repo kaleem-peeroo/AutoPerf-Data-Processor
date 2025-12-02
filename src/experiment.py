@@ -189,22 +189,28 @@ class Experiment:
                     f"{s_file_prefix} Processing {os.path.basename(o_file.s_path)}..."
                 )
 
+                df_file = pd.DataFrame()
+
                 if not o_file.is_raw():
-                    df = o_file.get_df()
-                    df_exp_run_summary = pd.concat([df_exp_run_summary, df], axis=0)
+                    lg.debug(f"{s_file_prefix} File is NOT raw.")
+                    df_file = o_file.get_df()
+                    axis = 0
 
                 elif o_file.is_pub():
-                    df_lat = self.get_lat_df(o_file)
-                    df_exp_run_summary = pd.concat([df_exp_run_summary, df_lat], axis=1)
+                    lg.debug(f"{s_file_prefix} File is a pub.")
+                    df_file = self.get_lat_df(o_file)
+                    axis = 1
 
                 elif o_file.is_sub():
-                    df_mbps = self.get_mbps_df(o_file)
-                    df_exp_run_summary = pd.concat(
-                        [df_exp_run_summary, df_mbps], axis=1
-                    )
+                    lg.debug(f"{s_file_prefix} File is a sub.")
+                    df_filef = self.get_mbps_df(o_file)
+                    axis = 1
 
                 else:
-                    raise ValueError("Unknown file type")
+                    raise ValueError(f"Unknown file type: {o_file}")
+
+                df_exp_run_summary = pd.concat([df_exp_run_summary, df_file], axis=axis)
+                lg.debug("ello m8")
 
             df_exp_run_summary = self.calculate_sub_metrics(df_exp_run_summary)
             df_exp_run_summary["run_n"] = o_run.s_run_name
@@ -267,12 +273,16 @@ class Experiment:
         ls_mbps_cols = [
             col
             for col in df.columns
-            if "mbps" in col.lower() and "avg" not in col.lower()
+            if "mbps" in col.lower()
+            and "avg" not in col.lower()
+            and "ave" not in col.lower()
         ]
+
         if len(ls_mbps_cols) == 0:
             raise ValueError("No mbps columns found in file")
+
         if len(ls_mbps_cols) > 1:
-            raise ValueError("Multiple mbps columns found in file")
+            raise ValueError(f"Multiple mbps columns found in file: {ls_mbps_cols}")
 
         s_mbps_col = ls_mbps_cols[0]
 
@@ -296,6 +306,8 @@ class Experiment:
 
         if df.empty:
             raise ValueError("Dataframe is empty")
+
+        lg.debug("Calculating avg and total mbps...")
 
         # Calculate avg mbps per sub
         ls_mbps_cols = [col for col in df.columns if "mbps" in col.lower()]
