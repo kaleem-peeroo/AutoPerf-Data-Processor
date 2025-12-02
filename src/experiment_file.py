@@ -8,36 +8,23 @@ from rich.pretty import pprint
 
 lg = logging.getLogger(__name__)
 
+
 class ExperimentFile:
-    def __init__(
-        self, 
-        s_exp_name: str = "",
-        s_path: str = ""
-    ):
+    def __init__(self, s_exp_name: str = "", s_path: str = ""):
         if s_path == "":
-            raise ValueError(
-                "Experiment file path must not be empty"
-            )
+            raise ValueError("Experiment file path must not be empty")
 
         if not os.path.exists(s_path):
-            raise ValueError(
-                f"Experiment file path does not exist: {s_path}"
-            )
+            raise ValueError(f"Experiment file path does not exist: {s_path}")
 
         if not s_path.endswith(".csv"):
-            raise ValueError(
-                f"Experiment file path must be a .csv file: {s_path}"
-            )
+            raise ValueError(f"Experiment file path must be a .csv file: {s_path}")
 
         if s_exp_name == "":
-            raise ValueError(
-                "Experiment name must not be empty"
-            )
+            raise ValueError("Experiment name must not be empty")
 
         if s_exp_name.lower() not in s_path.lower():
-            raise ValueError(
-                f"Experiment name must be in the file path: {s_path}"
-            )
+            raise ValueError(f"Experiment name must be in the file path: {s_path}")
 
         self.s_exp_name = s_exp_name
         self.s_path = s_path
@@ -47,19 +34,13 @@ class ExperimentFile:
 
     def get_s_path(self):
         if self.s_path == "":
-            raise ValueError(
-                "Experiment file path must not be empty"
-            )
+            raise ValueError("Experiment file path must not be empty")
 
         if not os.path.exists(self.s_path):
-            raise ValueError(
-                f"Experiment file path does not exist: {self.s_path}"
-            )
+            raise ValueError(f"Experiment file path does not exist: {self.s_path}")
 
         if not self.s_path.endswith(".csv"):
-            raise ValueError(
-                f"Experiment file path must be a .csv file: {self.s_path}"
-            )
+            raise ValueError(f"Experiment file path must be a .csv file: {self.s_path}")
 
         return self.s_path
 
@@ -67,34 +48,48 @@ class ExperimentFile:
         s_path = self.get_s_path()
         s_file_name = os.path.basename(s_path)
 
-        # Check if file contains *pub_0.csv or *sub_n.csv
+        lg.debug(f"Checking if {s_file_name} is raw...")
 
-        if re.search(r"pub_0\.csv|sub_\d+\.csv", s_file_name):
+        # INFO: Check if file contains *pub_0.csv or *sub_n.csv
+
+        if re.search(r"(?:pub_0|sub_\d+)(?:_output)?\.csv", s_file_name):
+
+            lg.debug("It's RAW")
             return True
 
         else:
+
+            lg.debug("It's NOT RAW")
             return False
-        
+
     def is_pub(self):
         s_path = self.get_s_path()
         s_file_name = os.path.basename(s_path)
 
+        lg.debug(f"Checking if {s_file_name} is a pub...")
+
         # Check if file contains *pub_0.csv
-        if re.search(r"pub_0\.csv", s_file_name):
+        if re.search(r"(?:pub_0)(?:_output)?\.csv", s_file_name):
+            lg.debug("It's a pub! Congratulations!")
             return True
 
         else:
+            lg.debug("It's not a pub! My condolences...")
             return False
 
     def is_sub(self):
         s_path = self.get_s_path()
         s_file_name = os.path.basename(s_path)
 
+        lg.debug(f"Checking if {s_file_name} is a sub...")
+
         # Check if file contains *sub_n.csv
-        if re.search(r"sub_\d+\.csv", s_file_name):
+        if re.search(r"(?:sub_\d+)(?:_output)?\.csv", s_file_name):
+            lg.debug("It's a sub! Congratulations!")
             return True
 
         else:
+            lg.debug("It's not a sub! My condolences...")
             return False
 
     def is_valid(self):
@@ -147,9 +142,7 @@ class ExperimentFile:
                 lg.warning(f"{self.s_path} is empty")
                 return False
 
-            ls_sub_cols = [
-                col for col in df.columns if re.search(r"sub_\d+", col)
-            ]
+            ls_sub_cols = [col for col in df.columns if re.search(r"sub_\d+", col)]
             if len(ls_sub_cols) == 0:
                 lg.warning(f"{self.s_path} has no sub columns")
                 return False
@@ -190,14 +183,17 @@ class ExperimentFile:
         s_duration_part = re.sub(r"\D", "", s_duration_part)
         i_duration = int(s_duration_part)
         return i_duration
-                            
+
     def get_df(self):
         s_path = self.get_s_path()
 
         if not self.is_raw():
+            lg.debug("Getting df for NOT raw file.")
             df = pd.read_csv(s_path)
 
         else:
+            lg.debug("Trying to manually parse raw file")
+
             i_start = self.get_start_index()
             i_end = self.get_end_index()
 
@@ -213,9 +209,7 @@ class ExperimentFile:
                 df[s_mbps_col] = self.remove_trailing_zeroes(df[s_mbps_col])
 
         if df.empty:
-            raise ValueError(
-                f"Experiment file is empty: {s_path}"
-            )
+            raise ValueError(f"Experiment file is empty: {s_path}")
 
         return df
 
@@ -225,9 +219,7 @@ class ExperimentFile:
         """
         s_mbps_col = [col for col in df.columns if "mbps" in col.lower()]
         if len(s_mbps_col) == 0:
-            raise ValueError(
-                f"Could not find mbps column in {self.s_path}"
-            )
+            raise ValueError(f"Could not find mbps column in {self.s_path}")
 
         return s_mbps_col[0]
 
@@ -235,9 +227,7 @@ class ExperimentFile:
         s_path = self.get_s_path()
 
         if not self.is_raw():
-            raise ValueError(
-                f"Can only get start index for raw files: {s_path}"
-            )
+            raise ValueError(f"Can only get start index for raw files: {s_path}")
 
         if self.is_pub():
             with open(s_path, "r") as o_file:
@@ -255,9 +245,7 @@ class ExperimentFile:
                     break
 
             if start_index == 0:
-                raise ValueError(
-                    f"Could not find start index for raw file: {s_path}"
-                )
+                raise ValueError(f"Could not find start index for raw file: {s_path}")
 
             return start_index
 
@@ -268,9 +256,9 @@ class ExperimentFile:
 
             li_interval_lines = []
             with open(s_path, "rb") as o_file:
-                for i_chunk, chunk in enumerate(iter(
-                    lambda: tuple(islice(o_file, i_chunk_size)), ()
-                )):
+                for i_chunk, chunk in enumerate(
+                    iter(lambda: tuple(islice(o_file, i_chunk_size)), ())
+                ):
                     for i_line, s_line in enumerate(chunk):
                         i_line_count = i_chunk * i_chunk_size + i_line
 
@@ -278,26 +266,20 @@ class ExperimentFile:
                             li_interval_lines.append(i_line_count)
 
             if len(li_interval_lines) == 0:
-                raise ValueError(
-                    f"Could not find start index for raw file: {s_path}"
-                )
+                raise ValueError(f"Could not find start index for raw file: {s_path}")
 
             i_last_interval = li_interval_lines[-1]
 
             return i_last_interval + 1
 
         else:
-            raise ValueError(
-                f"Can only get start index for raw files: {s_path}"
-            )
+            raise ValueError(f"Can only get start index for raw files: {s_path}")
 
     def get_end_index(self):
         s_path = self.get_s_path()
 
         if not self.is_raw():
-            raise ValueError(
-                f"Can only get end index for raw files: {s_path}"
-            )
+            raise ValueError(f"Can only get end index for raw files: {s_path}")
 
         if self.is_pub():
             i_file_line_count = sum(1 for _ in open(s_path))
@@ -306,9 +288,9 @@ class ExperimentFile:
             b_found = False
             end_index = 0
             with open(s_path, "rb") as o_file:
-                for i_chunk, chunk in enumerate(iter(
-                    lambda: tuple(islice(o_file, i_chunk_size)), ()
-                )):
+                for i_chunk, chunk in enumerate(
+                    iter(lambda: tuple(islice(o_file, i_chunk_size)), ())
+                ):
                     if b_found:
                         break
 
@@ -319,17 +301,17 @@ class ExperimentFile:
                             b_found = True
                             break
 
-                        elif b"interval" in s_line.lower() and \
-                                not b_found and \
-                                i_line_count > 10:
+                        elif (
+                            b"interval" in s_line.lower()
+                            and not b_found
+                            and i_line_count > 10
+                        ):
                             end_index = i_line_count
                             b_found = True
                             break
 
             if end_index <= 0 and not b_found:
-                raise ValueError(
-                    f"Could not find end index for raw file: {s_path}"
-                )
+                raise ValueError(f"Could not find end index for raw file: {s_path}")
 
             return end_index - 2
 
@@ -340,9 +322,9 @@ class ExperimentFile:
             b_found = False
             end_index = 0
             with open(s_path, "rb") as o_file:
-                for i_chunk, chunk in enumerate(iter(
-                    lambda: tuple(islice(o_file, i_chunk_size)), ()
-                )):
+                for i_chunk, chunk in enumerate(
+                    iter(lambda: tuple(islice(o_file, i_chunk_size)), ())
+                ):
                     if b_found:
                         break
 
@@ -356,7 +338,7 @@ class ExperimentFile:
             if end_index <= 0 and not b_found:
                 # lg.warning(f"Couldn't find 'summary' in {s_path}. Using last line.")
                 end_index = i_file_line_count
-                
+
             return end_index - 2
 
     def remove_trailing_zeroes(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -379,14 +361,10 @@ class ExperimentFile:
         df = self.get_df()
 
         if df is None:
-            raise ValueError(
-                f"DataFrame is None: {self.s_path}"
-            )
+            raise ValueError(f"DataFrame is None: {self.s_path}")
 
         if df.empty:
-            raise ValueError(
-                f"DataFrame is empty: {self.s_path}"
-            )
+            raise ValueError(f"DataFrame is empty: {self.s_path}")
 
         if self.is_pub():
             return df.shape[0] * df.shape[1]
@@ -403,9 +381,7 @@ class ExperimentFile:
 
             ls_latency_col = [col for col in df.columns if "latency" in col.lower()]
             if len(ls_latency_col) == 0:
-                raise ValueError(
-                    f"Could not find latency column in {self.s_path}"
-                )
+                raise ValueError(f"Could not find latency column in {self.s_path}")
 
             s_latency_col = ls_latency_col[0]
 
@@ -414,20 +390,16 @@ class ExperimentFile:
 
             ls_mbps_col = [col for col in df.columns if "mbps" in col.lower()]
             if len(ls_mbps_col) == 0:
-                raise ValueError(
-                    f"Could not find mbps column in {self.s_path}"
-                )
+                raise ValueError(f"Could not find mbps column in {self.s_path}")
 
             for s_mbps_col in ls_mbps_col:
                 df_mbps = df[s_mbps_col]
                 df_mbps = self.remove_trailing_zeroes(df_mbps)
                 df_mbps = df_mbps.dropna()
 
-                i_total_samples += (df_mbps.shape[0] * df_mbps.shape[1])
+                i_total_samples += df_mbps.shape[0] * df_mbps.shape[1]
 
             return i_total_samples
 
         else:
-            raise ValueError(
-                f"Cannot get total sample count for {self.s_path}"
-            )
+            raise ValueError(f"Cannot get total sample count for {self.s_path}")
