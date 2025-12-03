@@ -49,7 +49,7 @@ class TestCampaign:
             len(os.listdir(o_c.s_summaries_dpath)) == 2
         ), f"Expected 2 summaries, got {len(os.listdir(o_c.s_summaries_dpath))}"
 
-        # Delete the generates summaries folder at the end of the test
+        # Delete the generated summaries folder at the end of the test
         shutil.rmtree(o_c.s_summaries_dpath)
 
     def test_summarise_experiments_with_n_runs(self):
