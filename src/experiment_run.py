@@ -32,16 +32,6 @@ class ExperimentRun:
     def __repr__(self):
         return f"{self.s_run_name} ({len(self.lo_exp_files)} Files)"
 
-    def has_good_data(self):
-        """
-        Check if the run has good data.
-        """
-        for o_exp_file in self.lo_exp_files:
-            if not o_exp_file.is_valid():
-                return False
-
-        return True
-
     def has_raw_data(self):
         """
         Check if the run has raw data.
