@@ -401,8 +401,10 @@ class Campaign:
         if not os.path.isdir(s_exp_entry):
             raise Exception(f"Experiment entry is not a directory: {s_exp_entry}")
 
+        lg.debug(f"Getting all fpaths in {s_exp_entry}")
         ls_fpaths = list(Path(s_exp_entry).rglob("*.*"))
         ls_fpaths = [str(fpath) for fpath in ls_fpaths]
+        lg.debug(f"Found {len(ls_fpaths)} paths.")
 
         return ls_fpaths
 
