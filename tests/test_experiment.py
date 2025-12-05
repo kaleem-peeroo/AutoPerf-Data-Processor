@@ -1,3 +1,4 @@
+from campaign import Campaign
 import pytest
 import os
 import shutil
@@ -153,6 +154,24 @@ class TestExperiment:
         o_exp.process_runs()
         lo_raw_runs = o_exp.get_raw_exp_runs()
         assert len(lo_raw_runs) == 2
+
+    def test_summarise(self):
+        o_campaign = Campaign(
+            {
+                "exp_folders": "./tests/data/test_campaign_with_dirs_simple/",
+                "ap_config": "",
+                "dataset_path": "./tests/output/test_campaign_with_dirs_simple.parquet",
+            }
+        )
+        o_exp = o_campaign.gather_experiments(o_campaign.get_raw_datadir())[0]
+        o_exp.summarise(o_campaign.s_summaries_dpath)
+
+        assert os.path.exists(
+            os.path.join(
+                o_campaign.s_summaries_dpath,
+                "300SEC_1B_1PUB_3SUB_BE_MC_0DUR_100LC.parquet",
+            )
+        )
 
     def test_sort_by_total_sample_count(self):
         s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
