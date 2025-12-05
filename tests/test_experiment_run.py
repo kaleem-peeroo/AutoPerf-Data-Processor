@@ -77,3 +77,13 @@ class TestExperimentRun:
 
         df_summary = o_run.summarise()
         assert df_summary is not None
+        assert len(df_summary.columns) > 0, "No columns found in DF."
+        ls_wanted_cols = [
+            "Mbps",
+        ]
+        ls_actual_cols = list(sorted(df_summary.columns))
+
+        for s_wanted_col in ls_wanted_cols:
+            assert (
+                s_wanted_col in df_summary.columns
+            ), f"{s_wanted_col} not found in DF: {df_summary.columns}"
