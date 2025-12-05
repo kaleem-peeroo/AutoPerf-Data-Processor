@@ -385,7 +385,7 @@ class TestExperimentFile:
         )
         df_after = o_file.clean_df_col_names(df_before)
         assert len(df_after.columns) == 2
-        assert set(df_after.columns) == set(["sub_0 Mbps", "sub_0 Samples/s"])
+        assert set(df_after.columns) == set(["sub_0_mbps", "sub_0_sample_rate"])
 
         o_file = ExperimentFile(
             "300SEC_32B_1P_3S_BE_MC_0DUR_100LC",
@@ -398,4 +398,4 @@ class TestExperimentFile:
         )
         df_after = o_file.clean_df_col_names(df_before)
         assert len(df_after.columns) == 1
-        assert set(df_after.columns) == set(["Latency (us)"])
+        assert set(df_after.columns) == set(["latency_us"])

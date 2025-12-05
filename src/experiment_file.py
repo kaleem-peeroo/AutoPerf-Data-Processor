@@ -187,6 +187,7 @@ class ExperimentFile:
         else:
             df = self.parse_raw_file()
 
+        lg.debug(f"Got the DF ({df.shape})")
         return df
 
     def parse_raw_file(self) -> pd.DataFrame:
@@ -228,8 +229,27 @@ class ExperimentFile:
         ls_wanted_cols = list(set(ls_wanted_cols))
         df = df[ls_wanted_cols]
 
+        # INFO: Rename the metric columns
+        for s_col in df.columns:
+            if "latency" in s_col.lower():
+                s_new_name = "latency_us"
+
+            elif "mbps" in s_col.lower():
+                s_new_name = "mbps"
+
+            elif "lost samples (%)" in s_col.lower():
+                s_new_name = "lost_samples_percent"
+
+            elif "lost samples" in s_col.lower():
+                s_new_name = "lost_samples"
+
+            elif "samples/s" in s_col.lower():
+                s_new_name = "sample_rate"
+
+            df = df.rename(columns={s_col: s_new_name})
+
         if self.is_sub():
-            s_sub_name = os.path.basename(self.s_path).replace(".csv", " ")
+            s_sub_name = os.path.basename(self.s_path).replace(".csv", "_")
             df = df.add_prefix(s_sub_name)
             s_mbps_col = self.get_mbps_col(df)
             df[s_mbps_col] = self.remove_trailing_zeroes(df[s_mbps_col])
