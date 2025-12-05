@@ -78,13 +78,14 @@ class TestExperimentRun:
         df_summary = o_run.summarise()
         assert df_summary is not None
         assert len(df_summary.columns) > 0, "No columns found in DF."
-        assert len(df_summary.columns) == 5, "Did NOT find 5 columns in DF."
+        assert len(df_summary.columns) == 6, "Did NOT find 5 columns in DF."
         ls_wanted_cols = [
             "sub_0 Mbps",
             "Latency (μs)",
             "sub_0 Lost Samples",
             "sub_0 Lost Samples (%)",
             "sub_0 Samples/s",
+            "run_n",
         ]
         ls_actual_cols = list(sorted(df_summary.columns))
 

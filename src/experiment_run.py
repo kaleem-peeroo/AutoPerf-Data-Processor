@@ -67,4 +67,6 @@ class ExperimentRun:
                 index=range(max(len(df_summary), len(df_file)))
             )
 
+        df_summary["run_n"] = self.s_run_name
+
         return df_summary
