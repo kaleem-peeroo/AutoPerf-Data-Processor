@@ -47,17 +47,6 @@ class ExperimentRun:
 
         return True
 
-    def get_total_sample_count(self):
-        if len(self.lo_exp_files) == 0:
-            raise ValueError("Experiment files must not be empty")
-
-        total_sample_count = 0
-
-        for o_exp_file in self.lo_exp_files:
-            total_sample_count += o_exp_file.get_total_sample_count()
-
-        return total_sample_count
-
     def summarise(self):
         df_summary = pd.DataFrame()
 

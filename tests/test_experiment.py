@@ -81,23 +81,6 @@ class TestExperiment:
         assert len(ls_run_names) == 3
         assert ls_run_names == ["run1", "run2", "run3"]
 
-    def test_get_raw_exp_runs(self):
-        s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
-        s_exp_name = "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"
-        o_exp = Experiment(
-            s_name=s_exp_name,
-            ls_csv_paths=[
-                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/pub_0.csv",
-                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/sub_0.csv",
-                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/pub_0.csv",
-                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/sub_0.csv",
-            ],
-        )
-
-        o_exp.process_runs()
-        lo_raw_runs = o_exp.get_raw_exp_runs()
-        assert len(lo_raw_runs) == 2
-
     def test_summarise(self):
         o_campaign = Campaign(
             {
@@ -114,28 +97,6 @@ class TestExperiment:
                 o_campaign.s_summaries_dpath,
                 "300SEC_1B_1PUB_3SUB_BE_MC_0DUR_100LC.parquet",
             )
-        )
-
-    def test_sort_by_total_sample_count(self):
-        s_test_dir = "./tests/data/test_experiment_with_runs_with_raw"
-        s_exp_name = "600SEC_100B_10PUB_1SUB_REL_MC_0DUR_100LC"
-        o_exp = Experiment(
-            s_name=s_exp_name,
-            ls_csv_paths=[
-                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/pub_0.csv",
-                f"{s_test_dir}/{s_exp_name}/run1_with_trailing_0/sub_0.csv",
-                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/pub_0.csv",
-                f"{s_test_dir}/{s_exp_name}/run2_with_good_data/sub_0.csv",
-            ],
-        )
-
-        o_exp.process_runs()
-        lo_sorted_runs = o_exp.sort_by_total_sample_count(o_exp.lo_exp_runs)
-
-        assert len(lo_sorted_runs) == 2
-        assert (
-            lo_sorted_runs[0].get_total_sample_count()
-            >= lo_sorted_runs[1].get_total_sample_count()
         )
 
     def test_format_exp_name(self):

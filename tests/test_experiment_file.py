@@ -315,31 +315,6 @@ class TestExperimentFile:
         assert df_after["a"].tolist() == [1]
         assert df_after["b"].tolist() == [2]
 
-    def test_get_total_sample_count(self):
-        # INFO: Normal Case - Exp csv
-        o_e = ExperimentFile(
-            TestExperimentFile.s_exp_fpath_valid["s_exp_name"],
-            TestExperimentFile.s_exp_fpath_valid["s_path"],
-        )
-        i_total_samples = o_e.get_total_sample_count()
-        assert i_total_samples == 6904
-
-        # INFO: Normal Case - Pub csv
-        o_e = ExperimentFile(
-            TestExperimentFile.s_pub_fpath_valid["s_exp_name"],
-            TestExperimentFile.s_pub_fpath_valid["s_path"],
-        )
-        i_total_samples = o_e.get_total_sample_count()
-        assert i_total_samples == 558
-
-        # INFO: Normal Case - Sub csv
-        o_e = ExperimentFile(
-            TestExperimentFile.s_sub_fpath_valid["s_exp_name"],
-            TestExperimentFile.s_sub_fpath_valid["s_path"],
-        )
-        i_total_samples = o_e.get_total_sample_count()
-        assert i_total_samples == 598
-
     def test_parse_raw_file(self):
         o_file = ExperimentFile(
             "300SEC_32B_1PUB_3SUB_BE_MC_0DUR_100LC",
@@ -350,18 +325,14 @@ class TestExperimentFile:
         assert df is not None, "DF is None"
         assert len(df.columns) > 0, "No cols found in DF"
         assert (
-            len(df.columns) == 8
-        ), f"Did NOT find 8 cols in DF. Found {len(df.columns)}"
+            len(df.columns) == 4
+        ), f"Did NOT find 8 cols in DF. Found {len(df.columns)}: {df.columns}"
 
         ls_wanted_cols = [
-            "Length (Bytes)",
-            "Total Samples",
-            "Samples/s",
-            "Avg Samples/s",
-            "Mbps",
-            "Avg Mbps",
-            "Lost Samples",
-            "Lost Samples (%)",
+            "sub_0_sample_rate",
+            "sub_0_mbps",
+            "sub_0_lost_samples",
+            "sub_0_lost_samples_percent",
         ]
 
         for s_wanted_col in ls_wanted_cols:

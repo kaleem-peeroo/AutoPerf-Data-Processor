@@ -99,30 +99,6 @@ class Experiment:
 
         return ls_run_names
 
-    def sort_by_total_sample_count(
-        self, lo_exp_runs: List[ExperimentRun]
-    ) -> List[ExperimentRun]:
-        """
-        Sort experiment runs by total sample count.
-        """
-        lo_exp_runs.sort(key=lambda x: x.get_total_sample_count(), reverse=True)
-        return lo_exp_runs
-
-    def get_raw_exp_runs(self) -> List[ExperimentRun]:
-        """
-        Get all experiment runs that have raw data.
-        """
-        lo_raw_runs = []
-
-        for o_exp_run in self.lo_exp_runs:
-            if o_exp_run.has_raw_data():
-                lo_raw_runs.append(o_exp_run)
-
-        # Sort by total sample count decreasing
-        lo_raw_runs = self.sort_by_total_sample_count(lo_raw_runs)
-
-        return lo_raw_runs
-
     def summarise(self, s_dpath: str = ""):
         """
         1. Summarise.
