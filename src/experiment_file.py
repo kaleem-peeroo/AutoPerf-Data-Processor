@@ -272,18 +272,20 @@ class ExperimentFile:
         if not self.is_raw():
             raise ValueError(f"Can only get start index for raw files: {s_path}")
 
+        i_lines = self.get_line_count()
+
         if self.is_pub():
             with open(s_path, "r") as o_file:
-                ls_first_5_lines = []
-                for i in range(5):
+                ls_first_10_percent_of_lines = []
+                for i in range(int(i_lines * 0.1)):
                     line = o_file.readline()
                     if not line:
                         break
-                    ls_first_5_lines.append(line)
+                    ls_first_10_percent_of_lines.append(line)
 
             start_index = 0
-            for i, line in enumerate(ls_first_5_lines):
-                if "Length (Bytes)" in line:
+            for i, line in enumerate(ls_first_10_percent_of_lines):
+                if "length (bytes)" in line.lower() and "latency" in line.lower():
                     start_index = i
                     break
 
