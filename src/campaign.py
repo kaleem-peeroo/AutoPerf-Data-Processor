@@ -216,27 +216,6 @@ class Campaign:
 
         return lo_exps
 
-    def pick_best_exp_run(self, lo_exps: List[Experiment] = []) -> List[Experiment]:
-        if len(lo_exps) == 0:
-            raise ValueError("No experiments found")
-
-        for i_exp, o_exp in enumerate(lo_exps):
-            s_counter = f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
-
-            lg.debug(f"{s_counter} " f"Picking run for {o_exp.s_name}")
-
-            if not isinstance(o_exp, Experiment):
-                raise ValueError(f"Experiment is not an Experiment object: {o_exp}")
-
-            try:
-                o_exp.pick_best_run()
-            except Exception as e:
-                lg.error(f"{s_counter} " f"Error picking best run for {o_exp.s_name}")
-                lg.error(e)
-                continue
-
-        return lo_exps
-
     def process_csv_paths_into_experiments(
         self, ls_csv_paths: List[str] = []
     ) -> List[Experiment]:

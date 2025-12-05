@@ -99,36 +99,6 @@ class Experiment:
 
         return ls_run_names
 
-    def pick_best_run(self):
-        if len(self.lo_exp_runs) == 0:
-            raise ValueError("No experiment runs found")
-
-        lo_good_runs = self.get_good_exp_runs()
-        if len(lo_good_runs) > 0:
-            self.best_exp_run = lo_good_runs[0]
-
-        # If no good runs, pick the one with raw files
-        lo_raw_runs = self.get_raw_exp_runs()
-        if len(lo_raw_runs) > 0:
-            self.best_exp_run = lo_raw_runs[0]
-
-        # If no raw runs, pick the first one
-        self.best_exp_run = self.lo_exp_runs[0]
-
-    def get_good_exp_runs(self) -> List[ExperimentRun]:
-        """
-        Get all experiment runs that have good data.
-        """
-        lo_good_runs = []
-
-        for o_exp_run in self.lo_exp_runs:
-            if o_exp_run.has_good_data():
-                lo_good_runs.append(o_exp_run)
-
-        # Sort by total sample count decreasing
-        lo_good_runs = self.sort_by_total_sample_count(lo_good_runs)
-        return lo_good_runs
-
     def sort_by_total_sample_count(
         self, lo_exp_runs: List[ExperimentRun]
     ) -> List[ExperimentRun]:
