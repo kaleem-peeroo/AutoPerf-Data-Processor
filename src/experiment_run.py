@@ -51,6 +51,13 @@ class ExperimentRun:
         df_summary = pd.DataFrame()
 
         for o_exp_file in self.lo_exp_files:
+            # INFO: Skip pubs that are not pub_0
+            if "pub" in o_exp_file.s_path and "pub_0" not in o_exp_file.s_path:
+                lg.debug(
+                    f"Skipping {os.path.basename(o_exp_file.s_path)} because its not first pub"
+                )
+                continue
+
             df_file = o_exp_file.get_df()
             df_summary = pd.concat([df_summary, df_file], axis=1).reindex(
                 index=range(max(len(df_summary), len(df_file)))
