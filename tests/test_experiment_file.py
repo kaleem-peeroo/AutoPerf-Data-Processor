@@ -339,6 +339,36 @@ class TestExperimentFile:
         )
         i_total_samples = o_e.get_total_sample_count()
         assert i_total_samples == 598
+
+    def test_parse_raw_file(self):
+        o_file = ExperimentFile(
+            "300SEC_32B_1P_3S_BE_MC_0DUR_100LC",
+            "./tests/data/test_campaign_with_n_runs_dirs/300SEC_32B_1P_3S_BE_MC_0DUR_100LC/run2/sub_0.csv",
+        )
+
+        df = o_file.parse_raw_file()
+        assert df is not None, "DF is None"
+        assert len(df.columns) > 0, "No cols found in DF"
+        assert (
+            len(df.columns) == 8
+        ), f"Did NOT find 8 cols in DF. Found {len(df.columns)}"
+
+        ls_wanted_cols = [
+            "Length (Bytes)",
+            "Total Samples",
+            "Samples/s",
+            "Avg Samples/s",
+            "Mbps",
+            "Avg Mbps",
+            "Lost Samples",
+            "Lost Samples (%)",
+        ]
+
+        for s_wanted_col in ls_wanted_cols:
+            assert (
+                s_wanted_col in df.columns
+            ), f"{s_wanted_col} not found in DF: {list(sorted(df.columns))}"
+
     def test_clean_df_col_names(self):
         o_file = ExperimentFile(
             "300SEC_32B_1P_3S_BE_MC_0DUR_100LC",
