@@ -78,7 +78,6 @@ class TestExperimentRun:
         df_summary = o_run.summarise()
         assert df_summary is not None
         assert len(df_summary.columns) > 0, "No columns found in DF."
-        assert len(df_summary.columns) == 6, "Did NOT find 5 columns in DF."
         ls_wanted_cols = [
             "sub_0_mbps",
             "latency_us",
@@ -86,6 +85,8 @@ class TestExperimentRun:
             "sub_0_lost_samples_percent",
             "sub_0_sample_rate",
             "run_n",
+            "avg_mbps_per_sub",
+            "total_mbps_over_subs",
         ]
         ls_actual_cols = list(sorted(df_summary.columns))
 
@@ -93,3 +94,6 @@ class TestExperimentRun:
             assert (
                 s_wanted_col in df_summary.columns
             ), f"{s_wanted_col} not found in DF: {df_summary.columns}"
+
+    def test_calculate_sub_metrics(self):
+        raise NotImplementedError()

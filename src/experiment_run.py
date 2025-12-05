@@ -68,5 +68,30 @@ class ExperimentRun:
             )
 
         df_summary["run_n"] = self.s_run_name
+        df_summary = self.calculate_sub_metrics(df_summary)
 
         return df_summary
+
+    def calculate_sub_metrics(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate subscriber metrics.
+        """
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError("Input is not a dataframe" f"It is a {type(df)}")
+
+        if df.empty:
+            raise ValueError("Dataframe is empty")
+
+        lg.debug("Calculating avg and total mbps...")
+
+        # Calculate avg mbps per sub
+        ls_mbps_cols = [col for col in df.columns if "mbps" in col.lower()]
+        if len(ls_mbps_cols) == 0:
+            raise ValueError(f"No mbps columns found in dataframe: {df.columns}")
+
+        df["avg_mbps_per_sub"] = df[ls_mbps_cols].mean(axis=1)
+        lg.debug("Calculated average mbps")
+        df["total_mbps_over_subs"] = df[ls_mbps_cols].sum(axis=1)
+        lg.debug("Calculated total mbps")
+
+        return df
