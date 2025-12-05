@@ -213,6 +213,10 @@ class ExperimentFile:
 
         return df
 
+    def clean_df_col_names(self, df: pd.DataFrame) -> pd.DataFrame:
+        df.columns = df.columns.str.strip()
+        return df
+
     def get_mbps_col(self, df: pd.DataFrame) -> str:
         """
         Get the mbps column name from the DataFrame.
