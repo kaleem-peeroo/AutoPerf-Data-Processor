@@ -184,6 +184,12 @@ class ExperimentFile:
         i_duration = int(s_duration_part)
         return i_duration
 
+    def get_line_count(self):
+        with open(self.s_path, "rb") as f:
+            i_lines = sum(1 for _ in f)
+
+        return i_lines
+
     def get_df(self):
         s_path = self.get_s_path()
 
