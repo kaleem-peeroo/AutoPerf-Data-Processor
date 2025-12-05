@@ -374,10 +374,15 @@ class TestExperimentFile:
             "300SEC_32B_1P_3S_BE_MC_0DUR_100LC",
             "./tests/data/test_campaign_with_n_runs_dirs/300SEC_32B_1P_3S_BE_MC_0DUR_100LC/run2/sub_0.csv",
         )
-        df_before = pd.DataFrame({"    Mbps": [1, 2, 3]})
+        df_before = pd.DataFrame(
+            {
+                "    Mbps": [1, 2, 3],
+                " Avg Samples/s": [1, 1, 1],
+                "Length (Bytes)": [2, 2, 2],
+                "Ave (μs)": [2, 2, 2],
+                "Latency (μs)": [2, 2, 2],
+            }
+        )
         df_after = o_file.clean_df_col_names(df_before)
-        assert len(df_before.columns) == len(
-            df_after.columns
-        ), f"Mismatch between df before with {len(df_before.columns)} columns vs df after with {len(df_after.columns)} columns"
-
-        assert df_after.columns == ["Mbps"]
+        assert len(df_after.columns) == 2
+        assert set(df_after.columns) == set(["Mbps", "Latency (μs)"])

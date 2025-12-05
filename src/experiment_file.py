@@ -215,7 +215,27 @@ class ExperimentFile:
         return df
 
     def clean_df_col_names(self, df: pd.DataFrame) -> pd.DataFrame:
+        lg.debug(f"Cleaning {len(df.columns)} columns: {list(sorted(df.columns))}")
         df.columns = df.columns.str.strip()
+
+        ls_cols = list(sorted(df.columns))
+        ls_wanted_cols = []
+
+        ls_wanted_metrics = ["mbps", "latency", "samples/s", "lost samples"]
+        for s_col in ls_cols:
+            if "avg" in s_col.lower() or "ave" in s_col.lower():
+                lg.debug(f"Skipping {s_col} because its average")
+                continue
+
+            for s_metric in ls_wanted_metrics:
+                if s_metric in s_col.lower():
+                    lg.debug(f"Adding {s_col}")
+                    ls_wanted_cols.append(s_col)
+
+        ls_wanted_cols = list(set(ls_wanted_cols))
+
+        df = df[ls_wanted_cols]
+
         return df
 
     def get_mbps_col(self, df: pd.DataFrame) -> str:
