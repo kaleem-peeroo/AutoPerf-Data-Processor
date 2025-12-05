@@ -66,3 +66,14 @@ class TestExperimentRun:
             ls_csv_paths=self.d_run_with_trailing_0_bad["csv_paths"],
         )
         assert o_e.has_raw_data() is True
+
+    def test_summarise(self):
+        # INFO: Normal Case - good data
+        o_run = ExperimentRun(
+            s_exp_name=self.d_run_with_good_data["exp_name"],
+            s_run_name=self.d_run_with_good_data["run_name"],
+            ls_csv_paths=self.d_run_with_good_data["csv_paths"],
+        )
+
+        df_summary = o_run.summarise()
+        assert df_summary is not None
