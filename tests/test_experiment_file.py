@@ -99,15 +99,15 @@ class TestExperimentFile:
 
         # INFO: Normal Case - pub csv with _output
         o_e = ExperimentFile(
-            "300SEC_32B_1P_3S_BE_MC_0DUR_100LC",
-            "./tests/data/test_campaign_with_n_runs_dirs/300SEC_32B_1P_3S_BE_MC_0DUR_100LC/run1/pub_0_output.csv",
+            "300SEC_32B_1PUB_3SUB_BE_MC_0DUR_100LC",
+            "./tests/data/test_campaign_with_n_runs_dirs/300SEC_32B_1PUB_3SUB_BE_MC_0DUR_100LC/run1/pub_0_output.csv",
         )
         assert o_e.is_raw() is True
 
         # INFO: Normal Case - sub csv with _output
         o_e = ExperimentFile(
-            "300SEC_32B_1P_3S_BE_MC_0DUR_100LC",
-            "./tests/data/test_campaign_with_n_runs_dirs/300SEC_32B_1P_3S_BE_MC_0DUR_100LC/run1/sub_0_output.csv",
+            "300SEC_32B_1PUB_3SUB_BE_MC_0DUR_100LC",
+            "./tests/data/test_campaign_with_n_runs_dirs/300SEC_32B_1PUB_3SUB_BE_MC_0DUR_100LC/run1/sub_0_output.csv",
         )
         assert o_e.is_raw() is True
 
@@ -211,7 +211,7 @@ class TestExperimentFile:
         df = o_e.get_df()
         assert isinstance(df, pd.DataFrame)
         assert df.shape[0] == 93
-        assert df.shape[1] == 6
+        assert df.shape[1] == 1
 
         # INFO: Normal Case - Sub csv
         o_e = ExperimentFile(
@@ -221,7 +221,7 @@ class TestExperimentFile:
         df = o_e.get_df()
         assert isinstance(df, pd.DataFrame)
         assert df.shape[0] == 598
-        assert df.shape[1] == 8
+        assert df.shape[1] == 4
 
     def test_get_start_index(self):
         # INFO: Normal Case - Pub csv
@@ -342,8 +342,8 @@ class TestExperimentFile:
 
     def test_parse_raw_file(self):
         o_file = ExperimentFile(
-            "300SEC_32B_1P_3S_BE_MC_0DUR_100LC",
-            "./tests/data/test_campaign_with_n_runs_dirs/300SEC_32B_1P_3S_BE_MC_0DUR_100LC/run2/sub_0.csv",
+            "300SEC_32B_1PUB_3SUB_BE_MC_0DUR_100LC",
+            "./tests/data/test_campaign_with_n_runs_dirs/300SEC_32B_1PUB_3SUB_BE_MC_0DUR_100LC/run2/sub_0.csv",
         )
 
         df = o_file.parse_raw_file()
@@ -371,8 +371,8 @@ class TestExperimentFile:
 
     def test_clean_df_col_names(self):
         o_file = ExperimentFile(
-            "300SEC_32B_1P_3S_BE_MC_0DUR_100LC",
-            "./tests/data/test_campaign_with_n_runs_dirs/300SEC_32B_1P_3S_BE_MC_0DUR_100LC/run2/sub_0.csv",
+            "300SEC_32B_1PUB_3SUB_BE_MC_0DUR_100LC",
+            "./tests/data/test_campaign_with_n_runs_dirs/300SEC_32B_1PUB_3SUB_BE_MC_0DUR_100LC/run2/sub_0.csv",
         )
         df_before = pd.DataFrame(
             {
@@ -388,8 +388,8 @@ class TestExperimentFile:
         assert set(df_after.columns) == set(["sub_0_mbps", "sub_0_sample_rate"])
 
         o_file = ExperimentFile(
-            "300SEC_32B_1P_3S_BE_MC_0DUR_100LC",
-            "./tests/data/test_campaign_with_n_runs_dirs/300SEC_32B_1P_3S_BE_MC_0DUR_100LC/run2/pub_0.csv",
+            "300SEC_32B_1PUB_3SUB_BE_MC_0DUR_100LC",
+            "./tests/data/test_campaign_with_n_runs_dirs/300SEC_32B_1PUB_3SUB_BE_MC_0DUR_100LC/run2/pub_0.csv",
         )
         df_before = pd.DataFrame(
             {
