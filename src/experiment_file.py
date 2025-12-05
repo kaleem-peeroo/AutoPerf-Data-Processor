@@ -272,40 +272,44 @@ class ExperimentFile:
         return s_mbps_col[0]
 
     def get_start_index(self):
-        s_path = self.get_s_path()
+        i_total_lines = self.get_line_count()
 
-        if not self.is_raw():
-            raise ValueError(f"Can only get start index for raw files: {s_path}")
+        i_min_lines = 50
+        i_first_n_lines = i_min_lines if i_total_lines > i_min_lines else i_total_lines
 
-        i_lines = self.get_line_count()
+        lg.debug(f"Searching first {i_first_n_lines} lines for the start...")
 
         if self.is_pub():
-            with open(s_path, "r") as o_file:
-                ls_first_10_percent_of_lines = []
-                for i in range(int(i_lines * 0.1)):
+            with open(self.get_s_path(), "r") as o_file:
+                ls_first_portion_of_lines = []
+
+                for i in range(i_first_n_lines):
                     line = o_file.readline()
                     if not line:
                         break
-                    ls_first_10_percent_of_lines.append(line)
+                    ls_first_portion_of_lines.append(line)
 
             start_index = 0
-            for i, line in enumerate(ls_first_10_percent_of_lines):
+            for i, line in enumerate(ls_first_portion_of_lines):
+                print(line.lower())
                 if "length (bytes)" in line.lower() and "latency" in line.lower():
                     start_index = i
                     break
 
             if start_index == 0:
-                raise ValueError(f"Could not find start index for raw file: {s_path}")
+                raise ValueError(
+                    f"Could not find start index for raw file: {self.get_s_path()}"
+                )
 
             return start_index
 
         elif self.is_sub():
 
-            i_file_line_count = sum(1 for _ in open(s_path))
+            i_file_line_count = sum(1 for _ in open(self.get_s_path()))
             i_chunk_size = i_file_line_count // 10
 
             li_interval_lines = []
-            with open(s_path, "rb") as o_file:
+            with open(self.get_s_path(), "rb") as o_file:
                 for i_chunk, chunk in enumerate(
                     iter(lambda: tuple(islice(o_file, i_chunk_size)), ())
                 ):
@@ -316,14 +320,18 @@ class ExperimentFile:
                             li_interval_lines.append(i_line_count)
 
             if len(li_interval_lines) == 0:
-                raise ValueError(f"Could not find start index for raw file: {s_path}")
+                raise ValueError(
+                    f"Could not find start index for raw file: {self.get_s_path()}"
+                )
 
             i_last_interval = li_interval_lines[-1]
 
             return i_last_interval + 1
 
         else:
-            raise ValueError(f"Can only get start index for raw files: {s_path}")
+            raise ValueError(
+                f"Can only get start index for raw files: {self.get_s_path()}"
+            )
 
     def get_end_index(self):
         s_path = self.get_s_path()
