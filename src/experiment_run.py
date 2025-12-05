@@ -55,3 +55,6 @@ class ExperimentRun:
             total_sample_count += o_exp_file.get_total_sample_count()
 
         return total_sample_count
+
+    def summarise(self):
+        raise NotImplemented("Should return a df represnting the dataset of the run")
