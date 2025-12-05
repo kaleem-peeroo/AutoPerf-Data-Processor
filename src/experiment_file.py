@@ -48,48 +48,34 @@ class ExperimentFile:
         s_path = self.get_s_path()
         s_file_name = os.path.basename(s_path)
 
-        lg.debug(f"Checking if {s_file_name} is raw...")
-
-        # INFO: Check if file contains *pub_0.csv or *sub_n.csv
+        # INFO: Check if file contains *pub_0*.csv or *sub_n*.csv
 
         if re.search(r"(?:pub_0|sub_\d+)(?:_output)?\.csv", s_file_name):
-
-            lg.debug("It's RAW")
             return True
 
         else:
-
-            lg.debug("It's NOT RAW")
             return False
 
     def is_pub(self):
         s_path = self.get_s_path()
         s_file_name = os.path.basename(s_path)
 
-        lg.debug(f"Checking if {s_file_name} is a pub...")
-
-        # Check if file contains *pub_0.csv
+        # Check if file contains *pub_0*.csv
         if re.search(r"(?:pub_0)(?:_output)?\.csv", s_file_name):
-            lg.debug("It's a pub! Congratulations!")
             return True
 
         else:
-            lg.debug("It's not a pub! My condolences...")
             return False
 
     def is_sub(self):
         s_path = self.get_s_path()
         s_file_name = os.path.basename(s_path)
 
-        lg.debug(f"Checking if {s_file_name} is a sub...")
-
-        # Check if file contains *sub_n.csv
+        # Check if file contains *sub_n*.csv
         if re.search(r"(?:sub_\d+)(?:_output)?\.csv", s_file_name):
-            lg.debug("It's a sub! Congratulations!")
             return True
 
         else:
-            lg.debug("It's not a sub! My condolences...")
             return False
 
     def is_valid(self):
@@ -191,24 +177,15 @@ class ExperimentFile:
         return i_lines
 
     def get_df(self):
-        s_path = self.get_s_path()
+        lg.debug(
+            f"Getting DF for {os.path.basename(self.s_path)} ({self.get_line_count()} lines)"
+        )
 
         if not self.is_raw():
-            lg.debug("Getting df for NOT raw file.")
-            df = pd.read_csv(s_path)
+            df = pd.read_csv(self.get_s_path())
 
         else:
-            lg.debug("Trying to manually parse raw file")
-
-            i_start = self.get_start_index()
-            i_end = self.get_end_index()
-
-            df = pd.read_csv(
-                s_path,
-                skiprows=i_start,
-                nrows=i_end - i_start,
-                on_bad_lines="skip",
-            )
+            df = self.parse_raw_file()
 
             if self.is_sub():
                 s_mbps_col = self.get_mbps_col(df)
@@ -216,6 +193,24 @@ class ExperimentFile:
 
         if df.empty:
             raise ValueError(f"Experiment file is empty: {s_path}")
+
+        return df
+
+    def parse_raw_file(self) -> pd.DataFrame:
+
+        i_start = self.get_start_index()
+        i_end = self.get_end_index()
+
+        lg.debug(f"Parsing raw file between {i_start} to {i_end}...")
+
+        df = pd.read_csv(
+            self.get_s_path(),
+            skiprows=i_start,
+            nrows=i_end - i_start,
+            on_bad_lines="skip",
+        )
+
+        df = self.clean_df_col_names(df)
 
         return df
 
