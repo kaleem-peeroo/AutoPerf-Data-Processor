@@ -84,13 +84,7 @@ class Campaign:
         for i_exp, o_exp in enumerate(lo_exps):
             s_counter = f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
             lg.info(f"{s_counter} " f"Processing experiment: {o_exp.s_name}")
-            try:
-                o_exp.summarise(s_dpath=self.s_summaries_dpath)
-
-            except Exception as e:
-                lg.error(f"{s_counter} " f"Error processing experiment: {o_exp.s_name}")
-                lg.error(e)
-                continue
+            o_exp.summarise(s_dpath=self.s_summaries_dpath)
 
     def create_dataset(self):
         """
