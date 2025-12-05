@@ -248,10 +248,17 @@ class TestExperimentFile:
         with pytest.raises(ValueError):
             o_e.get_start_index()
 
-        # INFO: This specific case broke the code in prod mode
+        # INFO: These cases broke the code in prod mode
         o_e = ExperimentFile(
             "21600SEC_100B_75PUB_75SUB_REL_MC_0DUR_1000LC",
             "./tests/data/start_index_case/21600SEC_100B_75PUB_75SUB_REL_MC_0DUR_1000LC/pub_0_output.csv",
+        )
+        i_start = o_e.get_start_index()
+        assert i_start > 10, f"Start is less than 10: {i_start}"
+
+        o_e = ExperimentFile(
+            "900SEC_100B_75PUB_75SUB_REL_UC_0DUR_1000LC",
+            "./tests/data/start_index_case/900SEC_100B_75PUB_75SUB_REL_UC_0DUR_1000LC/pub_0_output.csv",
         )
         i_start = o_e.get_start_index()
         assert i_start > 10, f"Start is less than 10: {i_start}"
