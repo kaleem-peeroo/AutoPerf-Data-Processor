@@ -1,4 +1,6 @@
 import logging
+import os
+import pandas as pd
 
 from typing import List
 
@@ -57,4 +59,12 @@ class ExperimentRun:
         return total_sample_count
 
     def summarise(self):
-        raise NotImplemented("Should return a df represnting the dataset of the run")
+        df_summary = pd.DataFrame()
+
+        for o_exp_file in self.lo_exp_files:
+            df_file = o_exp_file.get_df()
+            df_summary = pd.concat([df_summary, df_file], axis=1).reindex(
+                index=range(max(len(df_summary), len(df_file)))
+            )
+
+        return df_summary
