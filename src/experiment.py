@@ -170,58 +170,14 @@ class Experiment:
             return
 
         df_exp_summary = pd.DataFrame()
-
-        s_lg_prefix = f"[{self.s_name}]"
-
         for i_run, o_run in enumerate(self.lo_exp_runs):
-            i_run_count = len(self.lo_exp_runs)
+            df_run_summary = o_run.summarise()
 
-            s_run_prefix = f"{s_lg_prefix} [Run {i_run + 1}/{i_run_count}]"
+            df_exp_summary = pd.concat(
+                [df_exp_summary, df_run_summary], axis=0, ignore_index=True
+            )
 
-            df_exp_run_summary = pd.DataFrame()
-
-            for i_file, o_file in enumerate(o_run.lo_exp_files):
-                i_file_count = len(o_run.lo_exp_files)
-
-                s_file_prefix = f"{s_run_prefix} [File {i_file + 1}/{i_file_count}]"
-
-                lg.debug(
-                    f"{s_file_prefix} Processing {os.path.basename(o_file.s_path)}..."
-                )
-
-                df_file = pd.DataFrame()
-
-                if not o_file.is_raw():
-                    lg.debug(f"{s_file_prefix} File is NOT raw.")
-                    df_file = o_file.get_df()
-                    axis = 0
-
-                elif o_file.is_pub():
-                    lg.debug(f"{s_file_prefix} File is a pub.")
-                    df_file = self.get_lat_df(o_file)
-                    axis = 1
-
-                elif o_file.is_sub():
-                    lg.debug(f"{s_file_prefix} File is a sub.")
-                    df_filef = self.get_mbps_df(o_file)
-                    axis = 1
-
-                else:
-                    raise ValueError(f"Unknown file type: {o_file}")
-
-                df_exp_run_summary = pd.concat([df_exp_run_summary, df_file], axis=axis)
-                lg.debug("ello m8")
-
-            df_exp_run_summary = self.calculate_sub_metrics(df_exp_run_summary)
-            df_exp_run_summary["run_n"] = o_run.s_run_name
-            df_exp_summary = pd.concat([df_exp_summary, df_exp_run_summary])
-
-        # df_exp_summary = self.calculate_sub_metrics(df_exp_summary)
-
-        self.s_name = self.format_exp_name(self.s_name)
-
-        df_exp_summary["experiment_name"] = self.s_name
-
+        df_exp_summary["experiment_name"] = self.format_exp_name(self.s_name)
         df_exp_summary = df_exp_summary[
             [
                 "experiment_name",
@@ -237,87 +193,6 @@ class Experiment:
         df_exp_summary.reset_index(drop=True, inplace=True)
         df_exp_summary.to_parquet(s_output_path, index=False)
         lg.info(f"Summary file written to {s_output_path}")
-
-    def get_lat_df(self, o_file):
-        """
-        Get latency dataframe.
-        """
-        if not o_file.is_pub():
-            raise ValueError("File is not a publisher file")
-
-        df = o_file.get_df()
-
-        ls_lat_cols = [col for col in df.columns if "latency" in col.lower()]
-
-        if len(ls_lat_cols) == 0:
-            raise ValueError("No latency columns found in file")
-        if len(ls_lat_cols) > 1:
-            raise ValueError("Multiple latency columns found in file")
-
-        s_lat_col = ls_lat_cols[0]
-
-        sr = df[s_lat_col]
-        sr = sr.dropna()
-        sr.rename("latency_us", inplace=True)
-
-        return sr
-
-    def get_mbps_df(self, o_file):
-        """
-        Get mbps dataframe.
-        """
-        if not o_file.is_sub():
-            raise ValueError("File is not a subscriber file")
-
-        df = o_file.get_df()
-        ls_mbps_cols = [
-            col
-            for col in df.columns
-            if "mbps" in col.lower()
-            and "avg" not in col.lower()
-            and "ave" not in col.lower()
-        ]
-
-        if len(ls_mbps_cols) == 0:
-            raise ValueError("No mbps columns found in file")
-
-        if len(ls_mbps_cols) > 1:
-            raise ValueError(f"Multiple mbps columns found in file: {ls_mbps_cols}")
-
-        s_mbps_col = ls_mbps_cols[0]
-
-        sr = df[s_mbps_col]
-        sr = sr.dropna()
-
-        s_sub_name = os.path.basename(o_file.s_path)
-        s_sub_name = s_sub_name.split(".")[0]
-
-        # Rename and prepend with sub_n
-        sr.rename(f"{s_sub_name}_mbps", inplace=True)
-
-        return sr
-
-    def calculate_sub_metrics(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Calculate subscriber metrics.
-        """
-        if not isinstance(df, pd.DataFrame):
-            raise ValueError("Input is not a dataframe" f"It is a {type(df)}")
-
-        if df.empty:
-            raise ValueError("Dataframe is empty")
-
-        lg.debug("Calculating avg and total mbps...")
-
-        # Calculate avg mbps per sub
-        ls_mbps_cols = [col for col in df.columns if "mbps" in col.lower()]
-        if len(ls_mbps_cols) == 0:
-            raise ValueError("No mbps columns found in dataframe")
-
-        df["avg_mbps_per_sub"] = df[ls_mbps_cols].mean(axis=1)
-        df["total_mbps_over_subs"] = df[ls_mbps_cols].sum(axis=1)
-
-        return df
 
     def format_exp_name(self, s_exp_name: str) -> str:
         if s_exp_name == "":
@@ -422,7 +297,7 @@ class Experiment:
             raise ValueError("Experiment name must not be empty")
 
         if not self.is_valid_experiment_name(s_exp_name):
-            raise ValueError("Experiment name is not valid")
+            raise ValueError(f"Experiment name is not valid: {s_exp_name}")
 
         s_exp_name = s_exp_name.strip().lower()
         ls_parts = s_exp_name.split("_")
