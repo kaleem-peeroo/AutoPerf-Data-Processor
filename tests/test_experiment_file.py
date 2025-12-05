@@ -380,9 +380,22 @@ class TestExperimentFile:
                 " Avg Samples/s": [1, 1, 1],
                 "Length (Bytes)": [2, 2, 2],
                 "Ave (μs)": [2, 2, 2],
-                "Latency (μs)": [2, 2, 2],
+                "Samples/s": [2, 2, 2],
             }
         )
         df_after = o_file.clean_df_col_names(df_before)
         assert len(df_after.columns) == 2
-        assert set(df_after.columns) == set(["Mbps", "Latency (μs)"])
+        assert set(df_after.columns) == set(["sub_0 Mbps", "sub_0 Samples/s"])
+
+        o_file = ExperimentFile(
+            "300SEC_32B_1P_3S_BE_MC_0DUR_100LC",
+            "./tests/data/test_campaign_with_n_runs_dirs/300SEC_32B_1P_3S_BE_MC_0DUR_100LC/run2/pub_0.csv",
+        )
+        df_before = pd.DataFrame(
+            {
+                "Latency (us)": [1, 2, 3],
+            }
+        )
+        df_after = o_file.clean_df_col_names(df_before)
+        assert len(df_after.columns) == 1
+        assert set(df_after.columns) == set(["Latency (us)"])

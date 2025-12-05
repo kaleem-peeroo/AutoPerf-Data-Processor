@@ -187,13 +187,6 @@ class ExperimentFile:
         else:
             df = self.parse_raw_file()
 
-            if self.is_sub():
-                s_mbps_col = self.get_mbps_col(df)
-                df[s_mbps_col] = self.remove_trailing_zeroes(df[s_mbps_col])
-
-        if df.empty:
-            raise ValueError(f"Experiment file is empty: {s_path}")
-
         return df
 
     def parse_raw_file(self) -> pd.DataFrame:
@@ -233,8 +226,13 @@ class ExperimentFile:
                     ls_wanted_cols.append(s_col)
 
         ls_wanted_cols = list(set(ls_wanted_cols))
-
         df = df[ls_wanted_cols]
+
+        if self.is_sub():
+            s_sub_name = os.path.basename(self.s_path).replace(".csv", " ")
+            df = df.add_prefix(s_sub_name)
+            s_mbps_col = self.get_mbps_col(df)
+            df[s_mbps_col] = self.remove_trailing_zeroes(df[s_mbps_col])
 
         return df
 
