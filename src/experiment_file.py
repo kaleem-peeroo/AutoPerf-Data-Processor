@@ -195,6 +195,11 @@ class ExperimentFile:
         i_start = self.get_start_index()
         i_end = self.get_end_index()
 
+        if i_start > i_end:
+            raise ValueError(
+                f"Somehow the start ({i_start}) is after the end ({i_end})..."
+            )
+
         lg.debug(f"Parsing raw file between {i_start} to {i_end}...")
 
         df = pd.read_csv(
@@ -349,7 +354,7 @@ class ExperimentFile:
                         elif (
                             b"interval" in s_line.lower()
                             and not b_found
-                            and i_line_count > 10
+                            and i_line_count > int(0.1 * self.get_line_count())
                         ):
                             end_index = i_line_count
                             b_found = True
