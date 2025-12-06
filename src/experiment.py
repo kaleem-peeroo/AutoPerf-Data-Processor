@@ -50,12 +50,6 @@ class Experiment:
 
         return self.s_name
 
-    def get_csv_paths(self) -> List[str]:
-        if len(self.ls_csv_paths) == 0:
-            raise ValueError("Experiment csv paths must not be empty")
-
-        return self.ls_csv_paths
-
     def add_csv_path(self, s_csv_path: str = ""):
         if s_csv_path == "":
             raise ValueError("CSV path must not be empty")
@@ -74,22 +68,37 @@ class Experiment:
         Differentiate between csv paths and run names.
         """
         ls_run_names = self.get_run_names()
-        ls_csv_paths = self.get_csv_paths()
-
-        for s_run_name in ls_run_names:
-            ls_run_csvs = [_ for _ in ls_csv_paths if s_run_name in _]
-
-            o_exp_run = ExperimentRun(
-                s_exp_name=self.s_name, s_run_name=s_run_name, ls_csv_paths=ls_run_csvs
+        if len(ls_run_names) == 1:
+            self.lo_exp_runs.append(
+                ExperimentRun(
+                    s_exp_name=self.s_name,
+                    s_run_name="run1",
+                    ls_csv_paths=self.ls_csv_paths,
+                )
             )
+        else:
+            for s_run_name in ls_run_names:
+                ls_run_csvs = [_ for _ in self.ls_csv_paths if s_run_name in _]
 
-            self.lo_exp_runs.append(o_exp_run)
+                o_exp_run = ExperimentRun(
+                    s_exp_name=self.s_name,
+                    s_run_name=s_run_name,
+                    ls_csv_paths=ls_run_csvs,
+                )
+
+                self.lo_exp_runs.append(o_exp_run)
 
     def get_run_names(self) -> List[str]:
         """
         Get unique run names from the CSV paths.
         """
+
+        if len(self.ls_csv_paths) == 0:
+            lg.error(f"No CSV paths found for this experiment: {self.get_name()}")
+
         ls_run_names = []
+
+        lg.debug("Getting run names...")
 
         for s_csv_path in self.ls_csv_paths:
             s_fname = os.path.basename(s_csv_path)
@@ -103,6 +112,8 @@ class Experiment:
 
         if len(ls_run_names) == 0:
             ls_run_names = ["run1"]
+
+        lg.debug(f"Found {len(ls_run_names)} runs: {ls_run_names}")
 
         return ls_run_names
 

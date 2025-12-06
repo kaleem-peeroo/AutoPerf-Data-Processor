@@ -45,6 +45,49 @@ class TestMain:
                     s_col in ls_columns
                 ), f"{s_col} NOT found in dataset: {ls_columns}."
 
+    def test_main_with_vm_with_n_runs(self):
+        from main import main
+        from campaign import Campaign
+        from tests.configs.vm_n_runs import LD_DATASETS
+
+        # INFO: Delete if already exists before the test
+        if os.path.exists("./tests/output/vm_n_runs_0_base_case.parquet"):
+            os.remove("./tests/output/vm_n_runs_0_base_case.parquet")
+
+        if os.path.exists("./tests/output/vm_n_runs_0_base_case_summaries"):
+            shutil.rmtree("./tests/output/vm_n_runs_0_base_case_summaries")
+
+        d_ds = LD_DATASETS[0]
+        campaign = Campaign(d_ds)
+        campaign.summarise_experiments()
+        campaign.create_dataset()
+
+        df_ds = campaign.df_ds
+
+        ls_columns = list(df_ds.columns)
+        ls_columns = sorted(ls_columns)
+        ls_wanted_cols = [
+            "run_n",
+            "experiment_name",
+            "latency_us",
+            "avg_mbps_per_sub",
+            "total_mbps_over_subs",
+            "duration_secs",
+            "datalen_bytes",
+            "pub_count",
+            "sub_count",
+            "use_reliable",
+            "use_multicast",
+            "durability",
+            "latency_count",
+        ]
+        for s_col in ls_wanted_cols:
+            assert s_col in ls_columns, f"{s_col} NOT found in dataset: {ls_columns}."
+
+        assert (
+            df_ds["run_n"].nunique() == 4
+        ), f"Found {df_ds['run_n'].nunique()} runs instead of 4: {df_ds['run_n'].unique()}"
+
     def test_validate_config_with_normal_case(self):
         from main import validate_config
         from tests.configs.normal import LD_DATASETS

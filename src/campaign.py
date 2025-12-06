@@ -211,12 +211,7 @@ class Campaign:
             if not isinstance(o_exp, Experiment):
                 raise ValueError(f"Experiment is not an Experiment object: {o_exp}")
 
-            try:
-                o_exp.process_runs()
-            except Exception as e:
-                lg.error(f"{s_counter} " f"Error processing runs for {o_exp.s_name}")
-                lg.error(e)
-                continue
+            o_exp.process_runs()
 
         return lo_exps
 
