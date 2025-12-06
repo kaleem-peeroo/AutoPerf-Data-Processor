@@ -134,8 +134,13 @@ class Experiment:
             ]
         ]
 
-        df_exp_summary = self.add_input_cols(df_exp_summary)
+        ls_numeric_cols = ["latency_us", "avg_mbps_per_sub", "total_mbps_over_subs"]
+        for s_num_col in ls_numeric_cols:
+            df_exp_summary[s_num_col] = pd.to_numeric(
+                df_exp_summary[s_num_col], errors="coerce"
+            )
 
+        df_exp_summary = self.add_input_cols(df_exp_summary)
         df_exp_summary.reset_index(drop=True, inplace=True)
         df_exp_summary.to_parquet(s_output_path, index=False)
         lg.info(f"Summary file written to {s_output_path}")

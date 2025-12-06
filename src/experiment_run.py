@@ -48,6 +48,8 @@ class ExperimentRun:
         return True
 
     def summarise(self):
+        lg.debug(f"Summarising run: {self.s_run_name}...")
+
         df_summary = pd.DataFrame()
 
         for o_exp_file in self.lo_exp_files:
