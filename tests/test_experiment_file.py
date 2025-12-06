@@ -263,6 +263,13 @@ class TestExperimentFile:
         i_start = o_e.get_start_index()
         assert i_start > 10, f"Start is less than 10: {i_start}"
 
+        o_e = ExperimentFile(
+            "900SEC_100B_50PUB_50SUB_REL_MC_0DUR_1000LC",
+            "./tests/data/start_index_case/900SEC_100B_50PUB_50SUB_REL_MC_0DUR_1000LC/run2//sub_31_output.csv",
+        )
+        i_start = o_e.get_start_index()
+        assert i_start == 0, f"Start is not 0: {i_start}"
+
     def test_get_end_index(self):
         # INFO: Normal Case - Pub csv
         o_e = ExperimentFile(

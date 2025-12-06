@@ -296,11 +296,6 @@ class ExperimentFile:
                     start_index = i
                     break
 
-            if start_index == 0:
-                raise ValueError(
-                    f"Could not find start index for raw file: {self.get_s_path()}"
-                )
-
             return start_index
 
         elif self.is_sub():
@@ -308,25 +303,13 @@ class ExperimentFile:
             i_file_line_count = sum(1 for _ in open(self.get_s_path()))
             i_chunk_size = i_file_line_count // 10
 
-            li_interval_lines = []
-            with open(self.get_s_path(), "rb") as o_file:
-                for i_chunk, chunk in enumerate(
-                    iter(lambda: tuple(islice(o_file, i_chunk_size)), ())
-                ):
-                    for i_line, s_line in enumerate(chunk):
-                        i_line_count = i_chunk * i_chunk_size + i_line
+            start_index = 0
+            with open(self.get_s_path(), encoding="utf-8") as o_file:
+                for i_line, s_line in enumerate(o_file, 1):
+                    if "interval" in s_line.lower():
+                        return i_line
 
-                        if b"interval" in s_line.lower():
-                            li_interval_lines.append(i_line_count)
-
-            if len(li_interval_lines) == 0:
-                raise ValueError(
-                    f"Could not find start index for raw file: {self.get_s_path()}"
-                )
-
-            i_last_interval = li_interval_lines[-1]
-
-            return i_last_interval + 1
+            return 0
 
         else:
             raise ValueError(
