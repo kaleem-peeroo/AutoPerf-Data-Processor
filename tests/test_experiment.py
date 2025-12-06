@@ -54,7 +54,7 @@ class TestExperiment:
         ls_run_names = o_exp.get_run_names()
 
         assert len(ls_run_names) == 1
-        assert ls_run_names == ["600SEC_1B_1PUB_1SUB_BE_MC_100LC"]
+        assert ls_run_names == ["run1"]
 
     def test_get_run_names(self):
         o_exp = Experiment(

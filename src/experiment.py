@@ -89,7 +89,7 @@ class Experiment:
         """
         Get unique run names from the CSV paths.
         """
-        ls_run_names = [os.path.basename(os.path.dirname(self.ls_csv_paths[0]))]
+        ls_run_names = []
 
         for s_csv_path in self.ls_csv_paths:
             s_fname = os.path.basename(s_csv_path)
@@ -100,6 +100,9 @@ class Experiment:
 
             if s_run_name not in ls_run_names:
                 ls_run_names.append(s_run_name)
+
+        if len(ls_run_names) == 0:
+            ls_run_names = ["run1"]
 
         return ls_run_names
 
