@@ -170,7 +170,6 @@ class Campaign:
         1. Get list of csv paths.
         2. Group into experiments (use experiment_name).
         3. Create Experiment objects.
-        4. Find best run per o_exp
         5. Store experiment objects in a list as self.lo_exps
         """
 
@@ -197,8 +196,6 @@ class Campaign:
         lo_exps = self.process_csv_paths_into_experiments(ls_csv_paths)
 
         lo_exps = self.process_exp_runs(lo_exps)
-
-        # lo_exps = self.pick_best_exp_run(lo_exps)
 
         return lo_exps
 

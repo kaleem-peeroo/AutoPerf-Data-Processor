@@ -41,6 +41,21 @@ class TestExperiment:
             ]
             assert len(o_exp_run.lo_exp_files) == 2
 
+    def test_get_run_names_without_runs(self):
+        o_exp = Experiment(
+            s_name="600SEC_1B_1PUB_1SUB_BE_MC_100LC",
+            ls_csv_paths=[
+                "600SEC_1B_1PUB_1SUB_BE_MC_100LC/pub_0.csv",
+                "600SEC_1B_1PUB_1SUB_BE_MC_100LC/sub_0.csv",
+                "600SEC_1B_1PUB_1SUB_BE_MC_100LC/sub_1.csv",
+            ],
+        )
+
+        ls_run_names = o_exp.get_run_names()
+
+        assert len(ls_run_names) == 1
+        assert ls_run_names == ["600SEC_1B_1PUB_1SUB_BE_MC_100LC"]
+
     def test_get_run_names(self):
         o_exp = Experiment(
             s_name="600SEC_1B_1PUB_1SUB_BE_MC_100LC",
