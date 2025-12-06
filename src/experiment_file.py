@@ -191,6 +191,7 @@ class ExperimentFile:
         return df
 
     def parse_raw_file(self) -> pd.DataFrame:
+        lg.debug(f"Parsing raw file:\n\t{self.s_path}")
 
         i_start = self.get_start_index()
         i_end = self.get_end_index()
@@ -291,7 +292,6 @@ class ExperimentFile:
 
             start_index = 0
             for i, line in enumerate(ls_first_portion_of_lines):
-                print(line.lower())
                 if "length (bytes)" in line.lower() and "latency" in line.lower():
                     start_index = i
                     break
@@ -343,35 +343,12 @@ class ExperimentFile:
             i_file_line_count = sum(1 for _ in open(s_path))
             i_chunk_size = i_file_line_count // 10
 
-            b_found = False
-            end_index = 0
-            with open(s_path, "rb") as o_file:
-                for i_chunk, chunk in enumerate(
-                    iter(lambda: tuple(islice(o_file, i_chunk_size)), ())
-                ):
-                    if b_found:
-                        break
+            with open(s_path, encoding="utf-8") as f:
+                for i_line, s_line in enumerate(reversed(f.readlines()[-50_000:]), 1):
+                    if "latency summary" in s_line.lower():
+                        return sum(1 for _ in open(s_path)) - i_line - 1
 
-                    for i_line, s_line in enumerate(chunk):
-                        i_line_count = i_chunk * i_chunk_size + i_line
-                        if b"summary" in s_line.lower() and not b_found:
-                            end_index = i_line_count
-                            b_found = True
-                            break
-
-                        elif (
-                            b"interval" in s_line.lower()
-                            and not b_found
-                            and i_line_count > int(0.1 * self.get_line_count())
-                        ):
-                            end_index = i_line_count
-                            b_found = True
-                            break
-
-            if end_index <= 0 and not b_found:
-                raise ValueError(f"Could not find end index for raw file: {s_path}")
-
-            return end_index - 2
+            return 0
 
         elif self.is_sub():
             i_file_line_count = sum(1 for _ in open(s_path))

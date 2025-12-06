@@ -270,7 +270,7 @@ class TestExperimentFile:
             TestExperimentFile.s_pub_fpath_valid["s_path"],
         )
         i_end_index = o_e.get_end_index()
-        assert i_end_index == 95
+        assert i_end_index == 96
 
         # INFO: Normal Case - Sub csv
         o_e = ExperimentFile(
@@ -287,6 +287,27 @@ class TestExperimentFile:
         )
         with pytest.raises(ValueError):
             o_e.get_end_index()
+
+        # INFO: These cases broke in prod
+        o_e = ExperimentFile(
+            "900SEC_100B_75PUB_75SUB_REL_UC_0DUR_1000LC",
+            "./tests/data/end_index_case/900SEC_100B_75PUB_75SUB_REL_UC_0DUR_1000LC/run2/pub_0_output.csv",
+        )
+        i_start = o_e.get_start_index()
+        i_end = o_e.get_end_index()
+
+        assert i_end > 10, f"End is less than 10: {i_end}"
+        assert i_end > i_start, f"End ({i_end}) is before start ({i_start})"
+
+        o_e = ExperimentFile(
+            "900SEC_100B_75PUB_75SUB_REL_UC_0DUR_1000LC",
+            "./tests/data/end_index_case/900SEC_100B_75PUB_75SUB_REL_UC_0DUR_1000LC/run3/pub_0_output.csv",
+        )
+        i_start = o_e.get_start_index()
+        i_end = o_e.get_end_index()
+
+        assert i_end > 10, f"End is less than 10: {i_end}"
+        assert i_end > i_start, f"End ({i_end}) is before start ({i_start})"
 
     def test_get_expected_sample_count(self):
         # INFO: Normal Case - Exp csv

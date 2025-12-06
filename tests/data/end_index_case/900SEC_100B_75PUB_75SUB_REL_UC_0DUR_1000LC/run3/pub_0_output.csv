@@ -1,0 +1,64 @@
+RTI Perftest 3.3.0 22373c6 (HEAD) (RTI Connext DDS 6.1.0)
+
+Mode: THROUGHPUT TEST
+      (Use "-latencyTest" for Latency Mode)
+
+Perftest Configuration:
+	Reliability: Reliable
+	Keyed: No
+	Publisher ID: 0
+	Latency count: 1 latency sample every 1000 samples
+	Data Size: 100
+	Batching: No (Use "-batchSize" to setup batching)
+	Publication Rate: Unlimited (Not set)
+	Execution time: 900 seconds
+	Receive using: Listeners
+	Domain: 1
+	Dynamic Data: No
+	FlatData: No
+	Zero Copy: No
+	Asynchronous Publishing: No
+	XML File: perftest_qos_profiles.xml
+	Network capture: No
+Transport Configuration:
+	Kind: UDPv4
+	Use Multicast: False
+
+Waiting to discover 75 subscribers ...
+Waiting for subscribers announcement ...
+Sending 50 initialization pings ...
+Sending data ...
+Finishing test due to timer...
+Test ended.
+RTI Connext DDS Research License issued to City University of London (CULONDON02-UP) ... For non-production use only.
+Expires on 01-nov-2022 See www.rti.com for more information.
+
+Length (Bytes), Latency (us), Ave (us), Std (us), Min (us), Max (us)
+           100,       227199,100982980,100755780.5,   227199,201738760
+           100,       268162, 67411374,94983807.2,   227199,201738760
+           100,        92409, 50581632,87270632.5,    92409,201738760
+           100,       289562, 40523218,80607799.9,    92409,201738760
+           100,        10881, 33771162,75117458.0,    10881,201738760
+           100,       205998, 28976139,70530104.5,    10881,201738760
+           100,       123106, 25369510,66661368.8,    10881,201738760
+           100,       217480, 22574840,63344067.3,    10881,201738760
+           100,        78530, 20325209,60471243.8,    10881,201738760
+           100,       281689, 18503071,57944278.8,    10881,201738760
+           100,        88005, 16968482,55710403.7,    10881,201738760
+           100,       132562, 15673411,53712506.4,    10881,201738760
+           100,       269527, 14573134,51910475.5,    10881,201738760
+           100,         2401, 13601751,50281817.2,     2401,201738760
+           100,       250994, 12767329,48792301.9,     2401,201738760
+           100,        12270, 12017031,47430531.9,     2401,201738760
+           100,       233142, 11362371,46173156.4,     2401,201738760
+           100,       231543, 10776538,45010327.0,     2401,201738760
+           100,        73170, 10241370,43932616.1,     2401,201738760
+           100,        54262,  9756269,42928695.3,     2401,201738760
+           100,        30667,  9314196,41990593.4,     2401,201738760
+           100,       220305,  8918810,41109462.4,     2401,201738760
+           100,        69749,  8550099,40282732.5,     2401,201738760
+           100,         5853,  8208329,39504353.6,     2401,201738760
+
+One-way Latency Summary:
+Length (Bytes), Ave (us), Std (us), Min (us), Max (us), 50% (us), 90% (us), 99% (us), 99.99% (us), 99.9999% (us)
+           100,  8208329,39504353.6,     2401,201738760,   132562,   281689,201738760,   201738760,     201738760
