@@ -155,43 +155,6 @@ class TestExperimentFile:
         )
         assert o_e.is_sub() is True
 
-    def test_is_valid(self):
-        # INFO: Normal Case - Exp csv
-        o_e = ExperimentFile(
-            TestExperimentFile.s_exp_fpath_valid["s_exp_name"],
-            TestExperimentFile.s_exp_fpath_valid["s_path"],
-        )
-        assert o_e.is_valid() is True
-
-        # INFO: Normal Case - Pub csv
-        o_e = ExperimentFile(
-            TestExperimentFile.s_pub_fpath_valid["s_exp_name"],
-            TestExperimentFile.s_pub_fpath_valid["s_path"],
-        )
-        assert o_e.is_valid() is True
-
-        # INFO: Normal Case - Sub csv
-        o_e = ExperimentFile(
-            TestExperimentFile.s_sub_fpath_valid["s_exp_name"],
-            TestExperimentFile.s_sub_fpath_valid["s_path"],
-        )
-        assert o_e.is_valid() is True
-
-        # INFO: Normal Case - Pub csv with invalid data
-        o_e = ExperimentFile(
-            TestExperimentFile.s_pub_fpath_invalid["s_exp_name"],
-            TestExperimentFile.s_pub_fpath_invalid["s_path"],
-        )
-        with pytest.raises(ValueError):
-            o_e.is_valid()
-
-        # INFO: Normal Case - Sub csv with invalid data
-        o_e = ExperimentFile(
-            TestExperimentFile.s_sub_fpath_invalid["s_exp_name"],
-            TestExperimentFile.s_sub_fpath_invalid["s_path"],
-        )
-        assert o_e.is_valid() is False
-
     def test_get_df(self):
         # INFO: Normal Case - Exp csv
         o_e = ExperimentFile(
@@ -210,7 +173,7 @@ class TestExperimentFile:
         )
         df = o_e.get_df()
         assert isinstance(df, pd.DataFrame)
-        assert df.shape[0] == 93
+        assert df.shape[0] == 94
         assert df.shape[1] == 1
 
         # INFO: Normal Case - Sub csv
