@@ -83,7 +83,10 @@ class Campaign:
 
         for i_exp, o_exp in enumerate(lo_exps):
             s_counter = f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
-            lg.info(f"{s_counter} " f"Processing experiment: {o_exp.s_name}")
+            lg.info(
+                f"{s_counter} "
+                f"Processing experiment:\n\t{o_exp.s_name}\n\t{s_raw_datadir}"
+            )
             o_exp.summarise(s_dpath=self.s_summaries_dpath)
 
     def create_dataset(self):
