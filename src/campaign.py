@@ -141,6 +141,10 @@ class Campaign:
         s_ds_output = self.get_dataset_path()
         os.makedirs(os.path.dirname(s_ds_output), exist_ok=True)
 
+        ls_num_cols = ["latency_us", "avg_mbps_per_sub", "total_mbps_over_subs"]
+        for s_num_col in ls_num_cols:
+            df[s_num_col] = pd.to_numeric(df[s_num_col], errors="coerce")
+
         df.to_parquet(s_ds_output, index=False)
         lg.info(f"Dataset written to {self.ds_output_path}")
 
