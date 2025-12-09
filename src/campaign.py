@@ -18,44 +18,46 @@ lg = logging.getLogger(__name__)
 
 class Campaign:
     def __init__(self, d_config):
-        self.raw_datadir = d_config["exp_folders"]
-        self.apconf_path = d_config["ap_config"]
-        self.ds_output_path = d_config["dataset_path"]
-        self.s_summaries_dpath = os.path.join(
-            os.path.dirname(self.ds_output_path),
-            f"{os.path.basename(self.ds_output_path).split('.')[0]}_summaries",
+        self._s_raw_datadir = d_config["exp_folders"]
+        self._s_apconf_path = d_config["ap_config"]
+        self._s_ds_output_path = d_config["dataset_path"]
+        self._s_summaries_dpath = os.path.join(
+            os.path.dirname(self._s_ds_output_path),
+            f"{os.path.basename(self._s_ds_output_path).split('.')[0]}_summaries",
         )
         self.df_ds = None
 
     def get_raw_datadir(self):
-        if not self.raw_datadir:
+        if not self._raw_datadir:
             raise Exception("No raw data directory provided")
 
-        if not isinstance(self.raw_datadir, str):
-            raise ValueError(f"Raw data directory must be a string: {self.raw_datadir}")
+        if not isinstance(self._raw_datadir, str):
+            raise ValueError(
+                f"Raw data directory must be a string: {self._raw_datadir}"
+            )
 
-        if self.raw_datadir == "":
+        if self._raw_datadir == "":
             raise ValueError("Raw data directory must not be empty")
 
-        if "~" in self.raw_datadir:
-            self.raw_datadir = os.path.expanduser(self.raw_datadir)
+        if "~" in self._raw_datadir:
+            self._raw_datadir = os.path.expanduser(self._raw_datadir)
 
-        return self.raw_datadir
+        return self._raw_datadir
 
     def get_dataset_path(self):
-        if not self.ds_output_path:
+        if not self._s_ds_output_path:
             raise Exception("No dataset path provided")
 
-        if not isinstance(self.ds_output_path, str):
-            raise ValueError(f"Dataset path must be a string: {self.ds_output_path}")
+        if not isinstance(self._s_ds_output_path, str):
+            raise ValueError(f"Dataset path must be a string: {self._ds_output_path}")
 
-        if self.ds_output_path == "":
+        if self._s_ds_output_path == "":
             raise ValueError("Dataset path must not be empty")
 
-        if "~" in self.ds_output_path:
-            self.ds_output_path = os.path.expanduser(self.ds_output_path)
+        if "~" in self._s_ds_output_path:
+            self._ds_output_path = os.path.expanduser(self._ds_output_path)
 
-        return self.ds_output_path
+        return self._s_ds_output_path
 
     def get_df_ds(self):
         if self.df_ds is None:
@@ -76,27 +78,26 @@ class Campaign:
         Writes the df to a parquet file.
         Stores the parquet file summaries_dpath.
         """
-        s_raw_datadir = self.get_raw_datadir()
-        lo_exps = self.gather_experiments(s_raw_datadir)
+        lo_exps = self.gather_experiments(self._s_raw_datadir)
 
-        os.makedirs(self.s_summaries_dpath, exist_ok=True)
+        os.makedirs(self._s_summaries_dpath, exist_ok=True)
 
         for i_exp, o_exp in enumerate(lo_exps):
             s_counter = f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
             lg.info(
                 f"{s_counter} "
-                f"Processing experiment:\n\t{o_exp.s_name}\n\t{s_raw_datadir}"
+                f"Processing experiment:\n\t{o_exp.s_name}\n\t{self._s_raw_datadir}"
             )
-            o_exp.summarise(s_dpath=self.s_summaries_dpath)
+            o_exp.summarise(s_dpath=self._s_summaries_dpath)
 
     def create_dataset(self):
         """
         Read all experiment summaries and stick into one big dataset.
         """
 
-        if not os.path.exists(self.s_summaries_dpath):
+        if not os.path.exists(self._s_summaries_dpath):
             raise Exception(
-                f"Summaries directory does not exist: {self.s_summaries_dpath}. "
+                f"Summaries directory does not exist: {self._s_summaries_dpath}. "
                 f"You need to run summarise_experiments() first."
             )
 
@@ -112,16 +113,16 @@ class Campaign:
 
         df_ds = pd.DataFrame()
 
-        ls_summaries = os.listdir(self.s_summaries_dpath)
+        ls_summaries = os.listdir(self._s_summaries_dpath)
         ls_summaries = [
-            os.path.join(self.s_summaries_dpath, s_summary)
+            os.path.join(self._s_summaries_dpath, s_summary)
             for s_summary in ls_summaries
         ]
         ls_summaries = [
             s_summary for s_summary in ls_summaries if s_summary.endswith(".parquet")
         ]
 
-        lg.info(f"Found {len(ls_summaries)} summaries in {self.s_summaries_dpath}")
+        lg.info(f"Found {len(ls_summaries)} summaries in {self._s_summaries_dpath}")
 
         df_ds = pd.concat(
             (pd.read_parquet(s_summary) for s_summary in ls_summaries),
@@ -146,7 +147,7 @@ class Campaign:
             df[s_num_col] = pd.to_numeric(df[s_num_col], errors="coerce")
 
         df.to_parquet(s_ds_output, index=False)
-        lg.info(f"Dataset written to {self.ds_output_path}")
+        lg.info(f"Dataset written to {self._s_ds_output_path}")
 
     def get_sub_mbps_cols(self, df: pd.DataFrame = pd.DataFrame()) -> List[str]:
         """
