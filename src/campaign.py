@@ -26,29 +26,22 @@ class Campaign:
             f"{os.path.basename(self._s_ds_output_path).split('.')[0]}_summaries",
         )
         self._df_ds = None
+        self._lo_exps = self.gather_experiments(self._s_raw_dpath)
 
     def summarise_experiments(self):
-        """
-        Goes through each experiment.
-        Gathers all the data and puts it into a single dataframe.
-        Writes the df to a parquet file.
-        Stores the parquet file summaries_dpath.
-        """
-        lo_exps = self.gather_experiments(self._s_raw_dpath)
+        lg.debug("Summarising experiments...")
 
         os.makedirs(self._s_summaries_dpath, exist_ok=True)
 
-        for i_exp, o_exp in enumerate(lo_exps):
+        for i_exp, o_exp in enumerate(self._lo_exps):
             lg.info(
-                f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
+                f"[{i_exp + 1:,.0f}/{len(self._lo_exps):,.0f}]"
                 f"Processing \n\t{o_exp.s_name}..."
             )
             o_exp.summarise(s_dpath=self._s_summaries_dpath)
 
     def create_dataset(self):
-        """
-        Read all experiment summaries and stick into one big dataset.
-        """
+        lg.debug("Creating dataset...")
 
         if not os.path.exists(self._s_summaries_dpath):
             raise Exception(
@@ -56,16 +49,8 @@ class Campaign:
                 f"You need to run summarise_experiments() first."
             )
 
-        lg.debug("Creating dataset...")
-
         if os.path.exists(self._s_ds_output_path):
-            lg.warning("Dataset already exists. Renaming with timestamp...")
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            new_ds_output = self._s_ds_output_path.replace(
-                ".parquet", f"_{timestamp}.parquet"
-            )
-            os.rename(self._s_ds_output_path, new_ds_output)
-            lg.warning(f"Dataset renamed to {new_ds_output}")
+            self.rename_existing_dataset()
 
         df_ds = pd.DataFrame()
 
@@ -87,6 +72,19 @@ class Campaign:
 
         self._df_ds = df_ds
         self.write_dataset(df_ds)
+
+    def rename_existing_dataset(self):
+        lg.warning("Dataset already exists. Renaming with timestamp...")
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        new_ds_output = self._s_ds_output_path.replace(
+            ".parquet", f"_{timestamp}.parquet"
+        )
+
+        os.rename(self._s_ds_output_path, new_ds_output)
+
+        lg.warning(f"Dataset renamed to {new_ds_output}")
 
     def write_dataset(self, df: pd.DataFrame = pd.DataFrame()) -> None:
         if df.empty:

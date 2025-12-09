@@ -257,6 +257,47 @@ class TestCampaign:
         # Delete the dataset
         Path(o_c._s_ds_output_path).unlink()
 
+    def test_rename_existing_dataset(self):
+        d_config = {
+            "name": "test campaign with csv",
+            "exp_folders": "./tests/data/test_campaign_with_csv/",
+            "ap_config": "",
+            "dataset_path": "./tests/output/test_campaign_with_csv_small.parquet",
+        }
+
+        # INFO: Build
+        s_existing_ds_path = "./tests/output/existing_test_campaign.parquet"
+        if not os.path.exists(s_existing_ds_path):
+            pd.DataFrame({}).to_parquet(s_existing_ds_path)
+
+        # INFO: Operate
+        o_c = Campaign(d_config)
+        s_existing_summaries_dpath = "./tests/output/existing_test_campaign.parquet"
+        o_c._s_ds_output_path = s_existing_summaries_dpath
+        o_c.rename_existing_dataset()
+
+        # INFO: Check
+        ls_ds_paths = os.listdir(os.path.dirname(o_c._s_ds_output_path))
+        ls_ds_paths = [
+            os.path.join(os.path.dirname(o_c._s_ds_output_path), _) for _ in ls_ds_paths
+        ]
+        ls_ds_matching_paths = [
+            _
+            for _ in ls_ds_paths
+            if os.path.basename(_).startswith("existing_test_campaign")
+        ]
+        assert (
+            len(ls_ds_matching_paths) == 1
+        ), f"More than one 'existing_test_campaign' dataset found in {s_existing_summaries_dpath}"
+        assert (
+            not os.path.basename(ls_ds_matching_paths[0])
+            == "existing_test_campaign.parquet"
+        )
+
+        # INFO: Clean
+        for s_ds_matching_path in ls_ds_matching_paths:
+            os.remove(s_ds_matching_path)
+
     def test_get_sub_mbps_cols(self):
         o_c = Campaign(LD_DATASETS[0])
 
