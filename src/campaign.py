@@ -39,10 +39,9 @@ class Campaign:
         os.makedirs(self._s_summaries_dpath, exist_ok=True)
 
         for i_exp, o_exp in enumerate(lo_exps):
-            s_counter = f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
             lg.info(
-                f"{s_counter} "
-                f"Processing experiment:\n\t{o_exp.s_name}\n\t{self._s_raw_dpath}"
+                f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
+                f"Processing \n\t{o_exp.s_name}..."
             )
             o_exp.summarise(s_dpath=self._s_summaries_dpath)
 
