@@ -21,7 +21,7 @@ class TestMain:
             campaign.summarise_experiments()
             campaign.create_dataset()
 
-            df_ds = campaign.df_ds
+            df_ds = campaign._df_ds
 
             ls_columns = list(df_ds.columns)
             ls_columns = sorted(ls_columns)
@@ -62,7 +62,7 @@ class TestMain:
         campaign.summarise_experiments()
         campaign.create_dataset()
 
-        df_ds = campaign.df_ds
+        df_ds = campaign._df_ds
 
         ls_columns = list(df_ds.columns)
         ls_columns = sorted(ls_columns)

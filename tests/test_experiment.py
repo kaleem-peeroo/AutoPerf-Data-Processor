@@ -104,12 +104,12 @@ class TestExperiment:
                 "dataset_path": "./tests/output/test_campaign_with_dirs_simple.parquet",
             }
         )
-        o_exp = o_campaign.gather_experiments(o_campaign.get_raw_datadir())[0]
-        o_exp.summarise(o_campaign.s_summaries_dpath)
+        o_exp = o_campaign.gather_experiments(o_campaign._s_raw_dpath)[0]
+        o_exp.summarise(o_campaign._s_summaries_dpath)
 
         assert os.path.exists(
             os.path.join(
-                o_campaign.s_summaries_dpath,
+                o_campaign._s_summaries_dpath,
                 "300SEC_1B_1PUB_3SUB_BE_MC_0DUR_100LC.parquet",
             )
         )
