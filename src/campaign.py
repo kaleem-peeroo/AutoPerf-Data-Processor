@@ -18,58 +18,14 @@ lg = logging.getLogger(__name__)
 
 class Campaign:
     def __init__(self, d_config):
-        self._s_raw_datadir = d_config["exp_folders"]
-        self._s_apconf_path = d_config["ap_config"]
+        self._s_raw_dpath = d_config["exp_folders"]
+        self._s_ap_conf_path = d_config["ap_config"]
         self._s_ds_output_path = d_config["dataset_path"]
         self._s_summaries_dpath = os.path.join(
             os.path.dirname(self._s_ds_output_path),
             f"{os.path.basename(self._s_ds_output_path).split('.')[0]}_summaries",
         )
         self.df_ds = None
-
-    def get_raw_datadir(self):
-        if not self._raw_datadir:
-            raise Exception("No raw data directory provided")
-
-        if not isinstance(self._raw_datadir, str):
-            raise ValueError(
-                f"Raw data directory must be a string: {self._raw_datadir}"
-            )
-
-        if self._raw_datadir == "":
-            raise ValueError("Raw data directory must not be empty")
-
-        if "~" in self._raw_datadir:
-            self._raw_datadir = os.path.expanduser(self._raw_datadir)
-
-        return self._raw_datadir
-
-    def get_dataset_path(self):
-        if not self._s_ds_output_path:
-            raise Exception("No dataset path provided")
-
-        if not isinstance(self._s_ds_output_path, str):
-            raise ValueError(f"Dataset path must be a string: {self._ds_output_path}")
-
-        if self._s_ds_output_path == "":
-            raise ValueError("Dataset path must not be empty")
-
-        if "~" in self._s_ds_output_path:
-            self._ds_output_path = os.path.expanduser(self._ds_output_path)
-
-        return self._s_ds_output_path
-
-    def get_df_ds(self):
-        if self.df_ds is None:
-            raise Exception("No dataset created yet")
-
-        if not isinstance(self.df_ds, pd.DataFrame):
-            raise ValueError(f"Dataset is not a dataframe: {self.df_ds}")
-
-        if self.df_ds.empty:
-            raise ValueError("Dataset is empty")
-
-        return self.df_ds
 
     def summarise_experiments(self):
         """
@@ -78,7 +34,7 @@ class Campaign:
         Writes the df to a parquet file.
         Stores the parquet file summaries_dpath.
         """
-        lo_exps = self.gather_experiments(self._s_raw_datadir)
+        lo_exps = self.gather_experiments(self._s_raw_dpath)
 
         os.makedirs(self._s_summaries_dpath, exist_ok=True)
 
@@ -86,7 +42,7 @@ class Campaign:
             s_counter = f"[{i_exp + 1:,.0f}/{len(lo_exps):,.0f}]"
             lg.info(
                 f"{s_counter} "
-                f"Processing experiment:\n\t{o_exp.s_name}\n\t{self._s_raw_datadir}"
+                f"Processing experiment:\n\t{o_exp.s_name}\n\t{self._s_raw_dpath}"
             )
             o_exp.summarise(s_dpath=self._s_summaries_dpath)
 
@@ -103,12 +59,13 @@ class Campaign:
 
         lg.debug("Creating dataset...")
 
-        ds_output = self.get_dataset_path()
-        if os.path.exists(ds_output):
+        if os.path.exists(self._s_ds_output_path):
             lg.warning("Dataset already exists. Renaming with timestamp...")
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            new_ds_output = ds_output.replace(".parquet", f"_{timestamp}.parquet")
-            os.rename(ds_output, new_ds_output)
+            new_ds_output = self._s_ds_output_path.replace(
+                ".parquet", f"_{timestamp}.parquet"
+            )
+            os.rename(self._s_ds_output_path, new_ds_output)
             lg.warning(f"Dataset renamed to {new_ds_output}")
 
         df_ds = pd.DataFrame()
@@ -139,14 +96,13 @@ class Campaign:
         if not isinstance(df, pd.DataFrame):
             raise ValueError(f"Input must be a dataframe: {df}")
 
-        s_ds_output = self.get_dataset_path()
-        os.makedirs(os.path.dirname(s_ds_output), exist_ok=True)
+        os.makedirs(os.path.dirname(self._s_ds_output_path), exist_ok=True)
 
         ls_num_cols = ["latency_us", "avg_mbps_per_sub", "total_mbps_over_subs"]
         for s_num_col in ls_num_cols:
             df[s_num_col] = pd.to_numeric(df[s_num_col], errors="coerce")
 
-        df.to_parquet(s_ds_output, index=False)
+        df.to_parquet(self._s_ds_output_path, index=False)
         lg.info(f"Dataset written to {self._s_ds_output_path}")
 
     def get_sub_mbps_cols(self, df: pd.DataFrame = pd.DataFrame()) -> List[str]:
