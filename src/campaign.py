@@ -58,9 +58,7 @@ class Campaign:
         ls_summaries = [
             os.path.join(self._s_summaries_dpath, s_summary)
             for s_summary in ls_summaries
-        ]
-        ls_summaries = [
-            s_summary for s_summary in ls_summaries if s_summary.endswith(".parquet")
+            if s_summary.endswith(".parquet")
         ]
 
         lg.info(f"Found {len(ls_summaries)} summaries in {self._s_summaries_dpath}")
