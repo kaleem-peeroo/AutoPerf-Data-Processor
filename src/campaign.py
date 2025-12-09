@@ -69,7 +69,7 @@ class Campaign:
         )
 
         self._df_ds = df_ds
-        self.write_dataset(df_ds)
+        self.write_dataset()
 
     def rename_existing_dataset(self):
         lg.warning("Dataset already exists. Renaming with timestamp...")
@@ -84,20 +84,21 @@ class Campaign:
 
         lg.warning(f"Dataset renamed to {new_ds_output}")
 
-    def write_dataset(self, df: pd.DataFrame = pd.DataFrame()) -> None:
-        if df.empty:
-            lg.warning("Input dataframe is empty")
-
-        if not isinstance(df, pd.DataFrame):
-            raise ValueError(f"Input must be a dataframe: {df}")
+    def write_dataset(self) -> None:
+        if self._df_ds is None:
+            raise ValueError("No dataset DF set.")
+        if self._df_ds.empty:
+            raise ValueError("Empty dataset DF.")
 
         os.makedirs(os.path.dirname(self._s_ds_output_path), exist_ok=True)
 
         ls_num_cols = ["latency_us", "avg_mbps_per_sub", "total_mbps_over_subs"]
         for s_num_col in ls_num_cols:
-            df[s_num_col] = pd.to_numeric(df[s_num_col], errors="coerce")
+            self._df_ds[s_num_col] = pd.to_numeric(
+                self._df_ds[s_num_col], errors="coerce"
+            )
 
-        df.to_parquet(self._s_ds_output_path, index=False)
+        self._df_ds.to_parquet(self._s_ds_output_path, index=False)
         lg.info(f"Dataset written to {self._s_ds_output_path}")
 
     def get_sub_mbps_cols(self, df: pd.DataFrame = pd.DataFrame()) -> List[str]:

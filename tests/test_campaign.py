@@ -298,6 +298,27 @@ class TestCampaign:
         for s_ds_matching_path in ls_ds_matching_paths:
             os.remove(s_ds_matching_path)
 
+    def test_write_dataset(self):
+        o_c = Campaign(
+            {
+                "name": "test campaign with csv",
+                "exp_folders": "./tests/data/test_campaign_with_csv",
+                "ap_config": "",
+                "dataset_path": "./tests/output/test_write_dataset.parquet",
+            }
+        )
+
+        o_c._df_ds = pd.DataFrame(
+            {
+                "latency_us": [1, 2, 4, 5],
+                "avg_mbps_per_sub": [1, 2, 3, 4],
+                "total_mbps_over_subs": [1, 2, 3, 4],
+            }
+        )
+        o_c.write_dataset()
+
+        assert os.path.exists("./tests/output/test_write_dataset.parquet")
+
     def test_get_sub_mbps_cols(self):
         o_c = Campaign(LD_DATASETS[0])
 
