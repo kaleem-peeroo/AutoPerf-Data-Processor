@@ -25,7 +25,7 @@ class Campaign:
             os.path.dirname(self._s_ds_output_path),
             f"{os.path.basename(self._s_ds_output_path).split('.')[0]}_summaries",
         )
-        self.df_ds = None
+        self._df_ds = None
 
     def summarise_experiments(self):
         """
@@ -85,7 +85,7 @@ class Campaign:
             ignore_index=True,
         )
 
-        self.df_ds = df_ds
+        self._df_ds = df_ds
         self.write_dataset(df_ds)
 
     def write_dataset(self, df: pd.DataFrame = pd.DataFrame()) -> None:
@@ -340,7 +340,7 @@ class Campaign:
         """
         Checks for cases in dataset where mbps has more than 600 samples.
         """
-        df = self.df_ds
+        df = self._df_ds
 
         if df is None:
             raise Exception("No dataset created yet")
