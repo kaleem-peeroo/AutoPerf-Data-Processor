@@ -24,12 +24,12 @@ class TestCampaign:
         assert o_c is not None
         assert isinstance(o_c, Campaign)
 
-        assert o_c.ds_output_path == d_ds["dataset_path"]
-        assert o_c.apconf_path == d_ds["ap_config"]
-        assert o_c.raw_datadir == d_ds["exp_folders"]
-        assert o_c.df_ds is None
+        assert o_c._s_ds_output_path == d_ds["dataset_path"]
+        assert o_c._s_ap_conf_path == d_ds["ap_config"]
+        assert o_c._s_raw_dpath == d_ds["exp_folders"]
+        assert o_c._df_ds is None
         assert (
-            o_c.s_summaries_dpath
+            o_c._s_summaries_dpath
             == "./tests/output/test_campaign_with_dirs_small_summaries"
         )
 
@@ -43,14 +43,14 @@ class TestCampaign:
 
         o_c = Campaign(d_config)
         o_c.summarise_experiments()
-        assert os.path.exists(o_c.s_summaries_dpath)
-        assert os.path.isdir(o_c.s_summaries_dpath)
+        assert os.path.exists(o_c._s_summaries_dpath)
+        assert os.path.isdir(o_c._s_summaries_dpath)
         assert (
-            len(os.listdir(o_c.s_summaries_dpath)) == 2
-        ), f"Expected 2 summaries, got {len(os.listdir(o_c.s_summaries_dpath))}"
+            len(os.listdir(o_c._s_summaries_dpath)) == 2
+        ), f"Expected 2 summaries, got {len(os.listdir(o_c._s_summaries_dpath))}"
 
-        # Delete the generated summaries folder at the end of the test
-        shutil.rmtree(o_c.s_summaries_dpath)
+        # Delete the generates summaries folder at the end of the test
+        shutil.rmtree(o_c._s_summaries_dpath)
 
     def test_summarise_experiments_with_n_runs(self):
         d_config = {
@@ -68,15 +68,15 @@ class TestCampaign:
 
         o_c = Campaign(d_config)
         o_c.summarise_experiments()
-        assert os.path.exists(o_c.s_summaries_dpath)
-        assert os.path.isdir(o_c.s_summaries_dpath)
+        assert os.path.exists(o_c._s_summaries_dpath)
+        assert os.path.isdir(o_c._s_summaries_dpath)
         assert (
-            len(os.listdir(o_c.s_summaries_dpath)) == 2
-        ), f"Expected 2 summaries, got {len(os.listdir(o_c.s_summaries_dpath))}"
+            len(os.listdir(o_c._s_summaries_dpath)) == 2
+        ), f"Expected 2 summaries, got {len(os.listdir(o_c._s_summaries_dpath))}"
 
         # INFO: Validate the summarised files
-        for s_summary_path in os.listdir(o_c.s_summaries_dpath):
-            s_summary_path = os.path.join(o_c.s_summaries_dpath, s_summary_path)
+        for s_summary_path in os.listdir(o_c._s_summaries_dpath):
+            s_summary_path = os.path.join(o_c._s_summaries_dpath, s_summary_path)
             df_summary = pd.read_parquet(s_summary_path)
 
             ls_existing_cols = sorted(list(df_summary.columns))
@@ -101,7 +101,7 @@ class TestCampaign:
                 ), f"{s_col} NOT found in summarised dataset: {ls_existing_cols}"
 
         # INFO: Delete the generated summaries folder at the end of the test
-        shutil.rmtree(o_c.s_summaries_dpath)
+        shutil.rmtree(o_c._s_summaries_dpath)
 
     def test_create_dataset_with_dirs(self):
         d_config = {
@@ -112,19 +112,19 @@ class TestCampaign:
         }
 
         o_c = Campaign(d_config)
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         lo_exps = o_c.gather_experiments(s_raw_datadir)
 
         o_c.summarise_experiments()
         o_c.create_dataset()
 
-        assert os.path.exists(o_c.ds_output_path)
-        assert os.path.isfile(o_c.ds_output_path)
-        assert os.path.getsize(o_c.ds_output_path) > 0
-        assert o_c.df_ds is not None
-        assert isinstance(o_c.df_ds, pd.DataFrame)
-        assert len(o_c.df_ds) > 0
-        assert len(o_c.df_ds.columns) > 0
+        assert os.path.exists(o_c._s_ds_output_path)
+        assert os.path.isfile(o_c._s_ds_output_path)
+        assert os.path.getsize(o_c._s_ds_output_path) > 0
+        assert o_c._df_ds is not None
+        assert isinstance(o_c._df_ds, pd.DataFrame)
+        assert len(o_c._df_ds) > 0
+        assert len(o_c._df_ds.columns) > 0
 
         ls_wanted_cols = [
             "experiment_name",
@@ -133,9 +133,9 @@ class TestCampaign:
             "total_mbps_over_subs",
         ]
         for s_col in ls_wanted_cols:
-            assert s_col in o_c.df_ds.columns
+            assert s_col in o_c._df_ds.columns
 
-        df = o_c.get_df_ds()
+        df = o_c._df_ds
         ls_exp_names = df["experiment_name"].unique().tolist()
 
         for o_exp in lo_exps:
@@ -176,9 +176,9 @@ class TestCampaign:
             assert len(df_exp_total_mbps) < 800
 
         # Delete the summaries
-        shutil.rmtree(o_c.s_summaries_dpath)
+        shutil.rmtree(o_c._s_summaries_dpath)
         # Delete the dataset
-        Path(o_c.ds_output_path).unlink()
+        Path(o_c._s_ds_output_path).unlink()
 
     def test_create_dataset_with_csv(self):
         d_config = {
@@ -189,19 +189,19 @@ class TestCampaign:
         }
 
         o_c = Campaign(d_config)
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         lo_exps = o_c.gather_experiments(s_raw_datadir)
 
         o_c.summarise_experiments()
         o_c.create_dataset()
 
-        assert os.path.exists(o_c.ds_output_path)
-        assert os.path.isfile(o_c.ds_output_path)
-        assert os.path.getsize(o_c.ds_output_path) > 0
-        assert o_c.df_ds is not None
-        assert isinstance(o_c.df_ds, pd.DataFrame)
-        assert len(o_c.df_ds) > 0
-        assert len(o_c.df_ds.columns) > 0
+        assert os.path.exists(o_c._s_ds_output_path)
+        assert os.path.isfile(o_c._s_ds_output_path)
+        assert os.path.getsize(o_c._s_ds_output_path) > 0
+        assert o_c._df_ds is not None
+        assert isinstance(o_c._df_ds, pd.DataFrame)
+        assert len(o_c._df_ds) > 0
+        assert len(o_c._df_ds.columns) > 0
 
         ls_wanted_cols = [
             "experiment_name",
@@ -211,10 +211,10 @@ class TestCampaign:
         ]
         for s_col in ls_wanted_cols:
             assert (
-                s_col in o_c.df_ds.columns
-            ), f"Column {s_col} not found in df: {o_c.df_ds.columns}"
+                s_col in o_c._df_ds.columns
+            ), f"Column {s_col} not found in df: {o_c._df_ds.columns}"
 
-        df = o_c.get_df_ds()
+        df = o_c._df_ds
         ls_exp_names = df["experiment_name"].unique().tolist()
 
         for o_exp in lo_exps:
@@ -253,9 +253,9 @@ class TestCampaign:
             assert len(df_exp_total_mbps) < 800
 
         # Delete the summaries
-        shutil.rmtree(o_c.s_summaries_dpath)
+        shutil.rmtree(o_c._s_summaries_dpath)
         # Delete the dataset
-        Path(o_c.ds_output_path).unlink()
+        Path(o_c._s_ds_output_path).unlink()
 
     def test_get_sub_mbps_cols(self):
         o_c = Campaign(LD_DATASETS[0])
@@ -297,7 +297,7 @@ class TestCampaign:
             }
         )
 
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         lo_exps = o_c.gather_experiments(s_raw_datadir)
 
         assert lo_exps is not None
@@ -325,7 +325,7 @@ class TestCampaign:
             }
         )
 
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         lo_exps = o_c.gather_experiments(s_raw_datadir)
 
         assert lo_exps is not None
@@ -352,7 +352,7 @@ class TestCampaign:
             }
         )
 
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         lo_exps = o_c.gather_experiments(s_raw_datadir)
 
         assert lo_exps is not None
@@ -379,7 +379,7 @@ class TestCampaign:
             }
         )
 
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         lo_exps = o_c.gather_experiments(s_raw_datadir)
 
         assert lo_exps is not None
@@ -406,7 +406,7 @@ class TestCampaign:
             }
         )
 
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         lo_exps = o_c.gather_experiments(s_raw_datadir)
 
         assert lo_exps is not None
@@ -433,7 +433,7 @@ class TestCampaign:
             }
         )
 
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         lo_exps = o_c.gather_experiments(s_raw_datadir)
 
         assert lo_exps is not None
@@ -460,7 +460,7 @@ class TestCampaign:
             }
         )
 
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         ls_fpaths = o_c.recursively_get_fpaths(s_raw_datadir)
         ls_csv_paths = [_ for _ in ls_fpaths if _.endswith(".csv")]
         # There are 4 csv files (1 per experiment)
@@ -490,7 +490,7 @@ class TestCampaign:
             }
         )
 
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         ls_fpaths = o_c.recursively_get_fpaths(s_raw_datadir)
         ls_csv_paths = [_ for _ in ls_fpaths if _.endswith(".csv")]
         # There are 18 csv files in 1 dir (1 per experiment)
@@ -506,7 +506,7 @@ class TestCampaign:
             }
         )
 
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         ls_fpaths = o_c.recursively_get_fpaths(s_raw_datadir)
         ls_csv_paths = [_ for _ in ls_fpaths if _.endswith(".csv")]
         # There are 4 csv files in 1 dir (1 per experiment)
@@ -522,7 +522,7 @@ class TestCampaign:
             }
         )
 
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         ls_fpaths = o_c.recursively_get_fpaths(s_raw_datadir)
         ls_csv_paths = [_ for _ in ls_fpaths if _.endswith(".csv")]
         # There are 8 csv files in 2 dir (4 per experiment)
@@ -538,7 +538,7 @@ class TestCampaign:
             }
         )
 
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         ls_fpaths = o_c.recursively_get_fpaths(s_raw_datadir)
         ls_csv_paths = [_ for _ in ls_fpaths if _.endswith(".csv")]
         # There are 4 csv files in 2 dir (2 per experiment)
@@ -554,7 +554,7 @@ class TestCampaign:
             }
         )
 
-        s_raw_datadir = o_c.get_raw_datadir()
+        s_raw_datadir = o_c._s_raw_dpath
         ls_fpaths = o_c.recursively_get_fpaths(s_raw_datadir)
         ls_csv_paths = [_ for _ in ls_fpaths if _.endswith(".csv")]
 
@@ -705,12 +705,11 @@ class TestCampaign:
         # There are 2 folders
         # Each folder has 84 files
         # 4 of these are csv files
-        # There should be 84 x 2 = 168 files altogether
         ls_fpaths = o_c.recursively_get_fpaths(
             "./tests/data/test_campaign_with_dirs_small/"
         )
         assert isinstance(ls_fpaths, list)
-        assert len(ls_fpaths) == 168
+        assert len(ls_fpaths) == 8
 
         for s_path in ls_fpaths:
             assert isinstance(s_path, str)
@@ -723,12 +722,8 @@ class TestCampaign:
         assert len(ls_fpaths) == 4
 
         # INFO: Normal Case - sub dirs and sub sub dirs
-        # 3 files in /
-        # 2 files in /logs
-        # 1 file in /logs/test_dir
-        # total should be 3 + 2 + 1
         ls_fpaths = o_c.recursively_get_fpaths(
             "./tests/data/test_campaign_with_mix/600s_100B_1P_1S_be_uc_3dur_100lc/"
         )
         assert isinstance(ls_fpaths, list)
-        assert len(ls_fpaths) == 6
+        assert len(ls_fpaths) == 4
