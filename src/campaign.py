@@ -101,23 +101,6 @@ class Campaign:
         self._df_ds.to_parquet(self._s_ds_output_path, index=False)
         lg.info(f"Dataset written to {self._s_ds_output_path}")
 
-    def get_sub_mbps_cols(self, df: pd.DataFrame = pd.DataFrame()) -> List[str]:
-        """
-        Gets all sub_n_mbps columns from the dataframe.
-        """
-        if df.empty:
-            raise ValueError("Dataframe is empty")
-
-        if len(df.columns) == 0:
-            raise ValueError("Dataframe has no columns")
-
-        ls_sub_mbps_cols = []
-        for col in df.columns:
-            if "sub_" in col and "_mbps" in col:
-                ls_sub_mbps_cols.append(col)
-
-        return ls_sub_mbps_cols
-
     def gather_experiments(self, s_raw_datadir: str = "") -> List[Experiment]:
         """
         1. Get list of csv paths.
