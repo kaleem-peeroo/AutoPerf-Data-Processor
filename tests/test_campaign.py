@@ -299,12 +299,13 @@ class TestCampaign:
             os.remove(s_ds_matching_path)
 
     def test_write_dataset(self):
+        s_output_path = "./tests/output/test_write_dataset.parquet"
         o_c = Campaign(
             {
                 "name": "test campaign with csv",
                 "exp_folders": "./tests/data/test_campaign_with_csv",
                 "ap_config": "",
-                "dataset_path": "./tests/output/test_write_dataset.parquet",
+                "dataset_path": s_output_path,
             }
         )
 
@@ -317,7 +318,8 @@ class TestCampaign:
         )
         o_c.write_dataset()
 
-        assert os.path.exists("./tests/output/test_write_dataset.parquet")
+        assert os.path.exists(s_output_path)
+        os.remove(s_output_path)
 
     def test_get_sub_mbps_cols(self):
         o_c = Campaign(LD_DATASETS[0])
