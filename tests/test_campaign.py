@@ -629,31 +629,6 @@ class TestCampaign:
         assert len(s_exp_name) > 0
         assert s_exp_name == "120SEC_100B_1PUB_1SUB_REL_MC_0DUR_100LC"
 
-    def test_follows_experiment_name_format(self):
-        o_c = Campaign(LD_DATASETS[0])
-
-        ls_normal_cases = [
-            # INFO: Normal case - most up to date format
-            "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC",
-            # INFO: REL instead of BE
-            "600SEC_100B_15PUB_15SUB_REL_MC_3DUR_100LC",
-            # INFO: UC instead of MC
-            "600SEC_100B_15PUB_15SUB_BE_UC_3DUR_100LC",
-            # INFO: 0DUR instead of 3DUR
-            "600SEC_100B_15PUB_15SUB_BE_MC_0DUR_100LC",
-            # INFO: With .csv at end
-            "600SEC_100B_15PUB_15SUB_BE_MC_3DUR_100LC.csv",
-        ]
-
-        for s_exp_name in ls_normal_cases:
-            b_follows_format = o_c.follows_experiment_name_format(s_exp_name)
-            assert isinstance(b_follows_format, bool)
-            assert b_follows_format is True, f"Failed for {s_exp_name}"
-
-        # INFO: Error Case - file path to valid file
-        s_exp_name = "./tests/data/test_campaign_with_dirs_small/300SEC_1B_1P_3S_BE_MC_0DUR_100LC/pub_0.csv"
-        assert o_c.follows_experiment_name_format(s_exp_name) is False
-
     def test_get_experiment_name_from_fpath(self):
         o_c = Campaign(LD_DATASETS[0])
 

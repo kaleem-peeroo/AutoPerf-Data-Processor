@@ -258,44 +258,6 @@ class Campaign:
 
         return False
 
-    def follows_experiment_name_format(self, s_filename: str = "") -> bool:
-        """
-        Checks if filename follows following format:
-        *{int}SEC_{int}B_{int}P_{int}S_{REL/BE}_{MC/UC}_{int}DUR_{int}LC*
-        """
-
-        if s_filename == "":
-            raise Exception("No filename provided")
-
-        if "." in s_filename:
-            s_filename = s_filename.split(".")[0]
-
-        ls_parts = s_filename.upper().split("_")
-        ld_end_matches = [
-            {"values": ["SEC"]},
-            {"values": ["B"]},
-            {"values": ["PUB"]},
-            {"values": ["SUB"]},
-            {"values": ["REL", "BE"]},
-            {"values": ["MC", "UC"]},
-            {"values": ["DUR"]},
-            {"values": ["LC"]},
-        ]
-
-        for i, part in enumerate(ls_parts):
-            ls_end_matches = ld_end_matches[i]["values"]
-
-            b_match = False
-            for s_end_match in ls_end_matches:
-                if part.endswith(s_end_match):
-                    b_match = True
-                    break
-
-            if not b_match:
-                return False
-
-        return True
-
     def recursively_get_fpaths(self, s_exp_entry: str = "") -> List[str]:
         if s_exp_entry == "":
             raise Exception("No experiment entry provided")
